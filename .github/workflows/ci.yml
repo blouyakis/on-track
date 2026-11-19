@@ -43,6 +43,9 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: npm ci
+      # Next.js generates global types such as LayoutProps into .next/types,
+      # which a clean checkout does not have.
+      - run: npx next typegen
       - run: npx tsc --noEmit
 
   test:

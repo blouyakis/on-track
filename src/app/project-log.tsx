@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { isDemoSignInEnabled } from "@/app/demo-sign-in";
 import { DemoSignIn } from "@/components/demo-sign-in";
 import { EntryForm } from "@/components/entry-form";
@@ -13,6 +14,10 @@ const mutedClass = "text-sm text-zinc-600 dark:text-zinc-400";
 // Reads the session cookie, so it must render inside <Suspense> and is never
 // cached: the data is per user and has to be fresh after each new entry.
 export async function ProjectLog() {
+  // Request time only: the Supabase client reads the clock to check whether
+  // the session has expired, which must not run during a prerender.
+  await connection();
+
   const supabase = await createClient();
   const {
     data: { user },

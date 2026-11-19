@@ -21,15 +21,20 @@ const errorClass = "text-sm font-normal text-red-700 dark:text-red-400";
 export function EntryForm() {
   const [type, setType] = useState("");
 
+  // The server action is passed straight through so the form still posts
+  // before JavaScript has loaded.
   const [state, formAction, pending] = useActionState(
-    async (previous: EntryFormState, formData: FormData) => {
-      const next = await createEntry(previous, formData);
-      // The type is controlled, so clear it by hand once the entry is saved.
-      if (next.status === "success") setType("");
-      return next;
-    },
+    createEntry,
     initialEntryFormState,
   );
+
+  // React resets the uncontrolled fields after the action. The type is
+  // controlled, so clear it here when a new success result arrives.
+  const [handledState, setHandledState] = useState<EntryFormState>(state);
+  if (state !== handledState) {
+    setHandledState(state);
+    if (state.status === "success") setType("");
+  }
 
   const showMeetingFields = isEntryType(type) && isMeetingStyleType(type);
   const { fieldErrors, values } = state;

@@ -42,8 +42,8 @@ Nobody can see a project they do not belong to.
 
 ### Entries
 - Fields: date, hours, type, details, optional link.
-- Types: Work, Meeting, Async update, Planning, Other.
-- Meeting entries add: attendees, decisions made, action items.
+- Types: Work, Admin, Meeting, Check-in, Standup, Async update, Planning, Sprint planning, Review, Retrospective, Other. Each of the eleven is its own separate type; none are combined or treated as aliases of another.
+- Meeting, Check-in, Standup, Planning, Sprint planning, Review, and Retrospective entries add: attendees, decisions made, action items.
 - A Contributor can edit or delete only their own entries.
 
 ### Project log

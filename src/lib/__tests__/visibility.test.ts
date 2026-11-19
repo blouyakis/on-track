@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import {
   canModifyEntry,
   canReadProject,
+  visibleEntries,
   type Entry,
   type Membership,
 } from '@/lib/visibility'
@@ -53,5 +54,29 @@ describe('canModifyEntry', () => {
   test('an author cannot edit or delete an entry in a project they are not a member of', () => {
     const otherProjectEntry: Entry = { id: 'e2', projectId: 'p2', authorId: 'alice' }
     expect(canModifyEntry('alice', otherProjectEntry, contributors)).toBe(false)
+  })
+})
+
+describe('overseer access', () => {
+  const entries: Entry[] = [
+    { id: 'e1', projectId: 'p1', authorId: 'alice' },
+    { id: 'e2', projectId: 'p1', authorId: 'alice' },
+    { id: 'e3', projectId: 'p2', authorId: 'bob' },
+  ]
+
+  test('the overseer can read every entry in their project, and only that project', () => {
+    expect(visibleEntries('olivia', 'p1', entries, memberships)).toEqual([
+      entries[0],
+      entries[1],
+    ])
+  })
+
+  test("the overseer cannot edit or delete a contributor's entry", () => {
+    expect(canModifyEntry('olivia', entries[0], memberships)).toBe(false)
+  })
+
+  test('the overseer cannot edit or delete an entry even when listed as its author', () => {
+    const overseerEntry: Entry = { id: 'e4', projectId: 'p1', authorId: 'olivia' }
+    expect(canModifyEntry('olivia', overseerEntry, memberships)).toBe(false)
   })
 })

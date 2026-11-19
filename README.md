@@ -18,7 +18,7 @@ Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Supabase (Postgr
 ```bash
 npm install
 npx supabase start     # starts the local Supabase stack and prints its URL and keys
-npx supabase db reset  # applies the migrations in supabase/migrations/
+npx supabase db reset  # applies the migrations, then loads supabase/seed.sql
 ```
 
 Create `.env.local` in the repo root (see the next section), then:
@@ -28,6 +28,14 @@ npm run dev            # http://localhost:3000
 ```
 
 Stop the local stack with `npx supabase stop`.
+
+### Demo sign-in (temporary)
+
+Real sign-up and sign-in are not built yet. Until they are, the home page shows a **Continue as demo contributor** button when you are signed out. It signs in the demo user that `supabase/seed.sql` creates, a contributor on "Demo Project", so the form and the project log work under the real Row Level Security rules.
+
+- The demo user exists only in a locally seeded database. If the button reports an error, run `npx supabase db reset`.
+- The button is off in production builds unless `ALLOW_DEMO_SIGN_IN=true` is set. Do not set it on a deployment that holds real data.
+- The session lasts about an hour, then the button appears again.
 
 ## Environment variables
 

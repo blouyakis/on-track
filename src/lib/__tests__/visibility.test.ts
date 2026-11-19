@@ -110,3 +110,30 @@ describe('non-member access', () => {
     expect(visibleEntries('bob', 'p1', entries, memberships)).toEqual([])
   })
 })
+
+describe('contributor and cross-project access', () => {
+  const team: Membership[] = [
+    ...memberships,
+    { userId: 'carol', projectId: 'p1', role: 'contributor' },
+  ]
+  const entries: Entry[] = [
+    { id: 'e1', projectId: 'p1', authorId: 'alice' },
+    { id: 'e2', projectId: 'p1', authorId: 'carol' },
+    { id: 'e3', projectId: 'p2', authorId: 'bob' },
+  ]
+
+  test("a contributor can read every entry in their project, including teammates'", () => {
+    expect(visibleEntries('alice', 'p1', entries, team)).toEqual([
+      entries[0],
+      entries[1],
+    ])
+  })
+
+  test("an overseer gets no entries from a project they don't oversee", () => {
+    expect(visibleEntries('olivia', 'p2', entries, team)).toEqual([])
+  })
+
+  test("an overseer cannot edit or delete an entry in a project they don't oversee", () => {
+    expect(canModifyEntry('olivia', entries[2], team)).toBe(false)
+  })
+})

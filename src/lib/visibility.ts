@@ -12,6 +12,11 @@ export type Entry = {
   authorId: string
 }
 
+export type Project = {
+  id: string
+  name: string
+}
+
 // The user's role in the project, or null when they are not a member.
 function roleIn(
   userId: string,
@@ -49,5 +54,14 @@ export function visibleEntries(
   entries: Entry[],
   memberships: Membership[],
 ): Entry[] {
+  if (!canReadProject(userId, projectId, memberships)) return []
   return entries.filter((e) => e.projectId === projectId)
+}
+
+export function visibleProject(
+  userId: string,
+  project: Project,
+  memberships: Membership[],
+): Project | null {
+  return canReadProject(userId, project.id, memberships) ? project : null
 }

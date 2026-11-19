@@ -1,0 +1,68 @@
+ ▐▛███▛█   Claude Code v2.1.327
+▝▜██████▀  Fable 5.2 · Claude Max
+ ▝▝   ▝▝   ~/Desktop/Northeastern/CS6983/on-track/on-track
+
+  Fable 5.2 is here for your longest and toughest coding tasks. It draws down usage faster than Opus 5.5. Switch with /model.
+  1 more notice hidden
+
+❯ /export docs/hw4/permissions-session.txt                                      
+  ⎿  Conversation exported to /Users/barbaralouyakis/Desktop/Northeastern/CS6983
+     /on-track/on-track/docs/hw4/permissions-session.txt
+
+❯ List the permission rules currently loaded for this project, grouped by       
+  allow, ask and deny, and say which settings file each comes from.             
+
+  Ran 1 shell command · 1 failed (ctrl+o to expand)
+
+⏺ All the permission rules loaded for this project come from one file:
+  .claude/settings.json (project settings, currently untracked in git).
+
+  Allow (runs without a prompt)
+  - Bash(npm test)
+  - Bash(npm test *)
+  - Bash(npm run test)
+  - Bash(npm run lint)
+  - Bash(npm run build)
+  - Bash(npx vitest run *)
+  - Bash(npx tsc --noEmit)
+  - Bash(git status)
+  - Bash(git diff)
+  - Bash(git diff *)
+  - Bash(git log *)
+
+  Ask (always prompts)
+  - Bash(git commit *)
+  - Bash(git push *)
+  - Bash(npm install *)
+
+  Deny (blocked)
+  - Read(./.env)
+  - Read(./.env.*)
+  - Bash(git push --force *)
+  - Bash(rm -rf *)
+
+  The other settings files contribute nothing:
+
+  ┌─────────────────────────────────────────────────────┬───────────────────┐
+  │                        File                         │      Status       │
+  ├─────────────────────────────────────────────────────┼───────────────────┤
+  │ .claude/settings.local.json (project, local)        │ does not exist    │
+  ├─────────────────────────────────────────────────────┼───────────────────┤
+  │ ~/.claude/settings.json (user)                      │ exists, has no    │
+  │                                                     │ permissions key   │
+  ├─────────────────────────────────────────────────────┼───────────────────┤
+  │ ~/.claude/settings.local.json                       │ does not exist    │
+  ├─────────────────────────────────────────────────────┼───────────────────┤
+  │ /Library/Application                                │ does not exist    │
+  │ Support/ClaudeCode/managed-settings.json (managed)  │                   │
+  └─────────────────────────────────────────────────────┴───────────────────┘
+
+  This is read from the files on disk, so it won't show rules passed by CLI
+  flags or approved for this session only; /permissions shows the live merged
+  view.
+
+✻ Worked for 12s · done 7:18 PM
+
+❯ /export docs/hw4/permissions-session.txt                                      
+  ⎿  Couldn't export conversation: the file already exists · run /export to
+     overwrite it

@@ -1,0 +1,638 @@
+ ▐▛███▛█   Claude Code v2.1.328
+▝▜██████▀  Fable 5.2 · Claude Max
+ ▝▝   ▝▝   ~/Desktop/Northeastern/CS6983/on-track/on-track
+
+▎ [✻] [✻] [✻] · Share Claude Code and earn $10 in usage credits · /passes
+
+⏺ The pure-logic milestone is reached, and this is the point the plan set for
+  /compact. That is a command only you can run, so I'm pausing here.
+
+  Where things stand
+
+  Six commits on feature/3-entry-form-log, with 45 tests passing and lint and
+  type check clean:
+
+  ┌──────────────────────────────┬──────────────────────────────────────────┐
+  │            Commit            │                  Phase                   │
+  ├──────────────────────────────┼──────────────────────────────────────────┤
+  │ 494b452 docs: add approved   │ Explore and Plan (saved as               │
+  │ plan                         │ docs/hw4/entry-form-log-plan.md)         │
+  ├──────────────────────────────┼──────────────────────────────────────────┤
+  │ 73d7f81 chore: seed a demo   │                                          │
+  │ project, contributor and     │ Implement                                │
+  │ entries                      │                                          │
+  ├──────────────────────────────┼──────────────────────────────────────────┤
+  │ c0da093 test: failing tests  │                                          │
+  │ for entry types and required │ Red                                      │
+  │  fields                      │                                          │
+  ├──────────────────────────────┼──────────────────────────────────────────┤
+  │ 9d2d562 feat: add entry      │                                          │
+  │ types and required-field     │ Green                                    │
+  │ check                        │                                          │
+  ├──────────────────────────────┼──────────────────────────────────────────┤
+  │ 4011dc2 test: failing tests  │ Red                                      │
+  │ for newest-first ordering    │                                          │
+  ├──────────────────────────────┼──────────────────────────────────────────┤
+  │ 47ea9d4 feat: sort entries   │ Green                                    │
+  │ newest first                 │                                          │
+  └──────────────────────────────┴──────────────────────────────────────────┘
+
+  The seed has only been dry-run in a rolled-back transaction, where it applied
+  cleanly. Signing in as the seeded user is not tested yet.
+
+  Your next step
+
+  Run this now:
+
+  /compact Keep: issue #3 on branch feature/3-entry-form-log; approved plan at 
+  docs/hw4/entry-form-log-plan.md; decisions = dev sign-in for data access, home
+  page / as the route; commits 1-6 done (plan, seed, entry types, required 
+  fields, sort); remaining = failing tests for createEntry action and EntryForm,
+  then the form, action and project log page, README demo sign-in note, db 
+  reset and manual verification, session log commit.
+
+  Then tell me to continue. Use claude --continue once at any point after that
+  to cover the resume requirement.
+
+  What I'll do when you say continue
+
+  1. Write and commit the failing tests for the createEntry action and the entry
+     form.
+  2. Build the action, form, log list and home page, then commit.
+  3. Run npx supabase db reset to load the seed. Your local database is
+     currently empty (0 users, projects and entries), so the reset loses
+     nothing; you'll still get the permission prompt for it.
+  4. Verify sign-in, the form and the log in the running app, and run npm run 
+     build.
+
+✻ Worked for 3m 14s · done 10:08 PM
+
+❯ /compact Keep: issue #3 on branch feature/3-entry-form-log; approved plan at  
+docs/hw4/entry-form-log-plan.md; decisions = dev sign-in for data access, home  
+page / as the route; commits 1-6 done (plan, seed, entry types, required        
+fields, sort); remaining = failing tests for createEntry action and EntryForm,  
+then the form, action and project log page, README demo sign-in note, db reset  
+and manual verification, session log commit.                                    
+  ⎿  Compacted (ctrl+o to see full summary)
+  ⎿  Read src/lib/__tests__/sort-entries.test.ts (55 lines)
+  ⎿  Read src/lib/entry-required-fields.ts (36 lines)
+  ⎿  Read src/lib/entry-types.ts (54 lines)
+  ⎿  Read src/lib/__tests__/entry-required-fields.test.ts (55 lines)
+  ⎿  Read src/lib/__tests__/entry-types.test.ts (77 lines)
+  ⎿  Plan file referenced (~/.claude/plans/frolicking-snacking-patterson.md)
+
+❯ continue                                                                      
+
+⏺ Write(src/app/__tests__/actions.test.ts)
+  ⎿  Wrote 210 lines to src/app/__tests__/actions.test.ts
+      1 import { beforeEach, describe, expect, test, vi } from 'vitest'
+      2 import { createEntry } from '@/app/actions'
+      3 import { initialEntryFormState } from '@/app/entry-form-state'
+      4 import { createClient } from '@/utils/supabase/server'
+      5 
+      6 // The database layer is mocked at the boundary: the action only 
+        ever sees
+      7 // this fake Supabase client.
+      8 vi.mock('@/utils/supabase/server', () => ({ createClient: vi.fn()
+         }))
+     … +202 lines (ctrl+o to expand)
+
+⏺ Write(src/components/__tests__/entry-form.test.tsx)
+  ⎿  Wrote 93 lines to src/components/__tests__/entry-form.test.tsx
+      1 import { cleanup, fireEvent, render, screen } from '@testing-libr
+        ary/react'
+      2 import { afterEach, describe, expect, test, vi } from 'vitest'
+      3 import { EntryForm } from '@/components/entry-form'
+      4 import { ENTRY_TYPE_LABELS } from '@/lib/entry-types'
+      5 
+      6 // The server action is replaced: these tests cover what the form
+         renders.
+      7 vi.mock('@/app/actions', () => ({ createEntry: vi.fn() }))
+      8 
+     … +85 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Both new files fail for the expected reason: the action and form modules don't
+  exist yet. The type check fails for the same reason, as in the earlier red
+  commits.
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+⏺ Failing tests are committed (1ae81a2). Now writing the action, form, log list
+  and home page to turn them green.
+
+⏺ Write(src/app/entry-form-state.ts)
+  ⎿  Wrote 33 lines to src/app/entry-form-state.ts
+       1 import type { RequiredEntryField } from "@/lib/entry-required-fi
+         elds";
+       2 
+       3 // What the create-entry action returns to the form. It lives ou
+         tside
+       4 // actions.ts because a "use server" file may only export async 
+         functions.
+       5 
+       6 export type EntryFormValues = {
+       7   date: string;
+     … +26 lines (ctrl+o to expand)
+
+⏺ Write(src/app/demo-sign-in.ts)
+  ⎿  Wrote 16 lines to src/app/demo-sign-in.ts
+       1 // TEMPORARY, until the authentication feature lands.
+       2 //
+       3 // These credentials belong to the demo contributor created by
+       4 // supabase/seed.sql. They exist only in a locally seeded databa
+         se and are not
+       5 // secrets of any real system.
+       6 export const DEMO_CONTRIBUTOR_EMAIL = "demo.contributor@ontrack.
+         local";
+       7 export const DEMO_CONTRIBUTOR_PASSWORD = "ontrack-local-demo";
+       8 
+     … +8 lines (ctrl+o to expand)
+
+⏺ Write(src/app/actions.ts)
+  ⎿  Wrote 139 lines to src/app/actions.ts
+       1 "use server";
+       2 
+       3 import { refresh } from "next/cache";
+       4 import {
+       5   DEMO_CONTRIBUTOR_EMAIL,
+       6   DEMO_CONTRIBUTOR_PASSWORD,
+       7   isDemoSignInEnabled,
+       8 } from "@/app/demo-sign-in";
+       9 import type {
+      10   DemoSignInState,
+     … +129 lines (ctrl+o to expand)
+
+⏺ Write(src/components/entry-form.tsx)
+  ⎿  Wrote 164 lines to src/components/entry-form.tsx
+       1 "use client";
+       2 
+       3 import { useActionState, useState } from "react";
+       4 import { createEntry } from "@/app/actions";
+       5 import {
+       6   initialEntryFormState,
+       7   type EntryFormState,
+       8 } from "@/app/entry-form-state";
+       9 import {
+      10   ENTRY_TYPES,
+     … +154 lines (ctrl+o to expand)
+
+⏺ Write(src/components/entry-list.tsx)
+  ⎿  Wrote 116 lines to src/components/entry-list.tsx
+       1 import { ENTRY_TYPE_LABELS, isEntryType } from "@/lib/entry-type
+         s";
+       2 
+       3 export type EntryRow = {
+       4   id: string;
+       5   author_id: string;
+       6   entry_date: string;
+       7   hours: number;
+       8   type: string;
+       9   details: string;
+     … +107 lines (ctrl+o to expand)
+
+⏺ Write(src/components/demo-sign-in.tsx)
+  ⎿  Wrote 28 lines to src/components/demo-sign-in.tsx
+       1 "use client";
+       2 
+       3 import { useActionState } from "react";
+       4 import { signInAsDemoContributor } from "@/app/actions";
+       5 import { initialDemoSignInState } from "@/app/entry-form-state";
+       6 
+       7 // TEMPORARY, until the authentication feature lands.
+       8 export function DemoSignIn() {
+       9   const [state, formAction, pending] = useActionState(
+      10     signInAsDemoContributor,
+     … +18 lines (ctrl+o to expand)
+
+⏺ Write(src/app/project-log.tsx)
+  ⎿  Wrote 92 lines to src/app/project-log.tsx
+      1 import { isDemoSignInEnabled } from "@/app/demo-sign-in";
+      2 import { DemoSignIn } from "@/components/demo-sign-in";
+      3 import { EntryForm } from "@/components/entry-form";
+      4 import { EntryList, type EntryRow } from "@/components/entry-list
+        ";
+      5 import { sortNewestFirst } from "@/lib/sort-entries";
+      6 import { createClient } from "@/utils/supabase/server";
+      7 
+      8 type MembershipRow = { project_id: string; role: string };
+      9 type ProjectRow = { name: string };
+     … +83 lines (ctrl+o to expand)
+
+⏺ Write(src/app/page.tsx)
+  ⎿  Added 20 lines, removed 64 lines
+       1 -import Image from "next/image";                                
+       1 +import { Suspense } from "react";                              
+       2 +import { ProjectLog } from "@/app/project-log";                
+       3 
+       4 +// The shell is static. Everything that depends on who is signe
+         +d in streams in                                                
+       5 +// through the Suspense boundary.                              
+       6  export default function Home() {
+       7    return (
+       5 -    <div className="flex flex-col flex-1 items-center justify-c
+         -enter bg-zinc-50 font-sans dark:bg-black">                     
+       6 -      <main className="flex flex-1 w-full max-w-3xl flex-col it
+         -ems-center justify-between py-32 px-16 bg-white dark:bg-black s
+         -m:items-start">                                                
+       7 -        <Image                                                 
+       8 -          className="dark:invert h-5 w-[100px]"                
+       9 -          src="/next.svg"                                      
+      10 -          alt="Next.js logo"                                   
+      11 -          width={100}                                          
+      12 -          height={20}                                          
+      13 -          priority                                             
+      14 -        />                                                     
+      15 -        <div className="flex flex-col items-center gap-6 text-c
+         -enter sm:items-start sm:text-left">                            
+      16 -          <h1 className="max-w-xs text-3xl font-semibold leadin
+         -g-10 tracking-tight text-black dark:text-zinc-50">             
+      17 -            To get started, edit the{" "}                      
+      18 -            <code className="rounded bg-black/[.06] px-1.5 py-0
+         -.5 font-mono text-[0.9em] dark:bg-white/[.08]">                
+      19 -              page.tsx                                         
+      20 -            </code>{" "}                                       
+      21 -            file.                                              
+      22 -          </h1>                                                
+      23 -          <p className="max-w-md text-lg leading-8 text-zinc-60
+         -0 dark:text-zinc-400">                                         
+      24 -            Looking for a starting point or more instructions? 
+         -Head over to{" "}                                              
+      25 -            <a                                                 
+      26 -              href="https://vercel.com/templates?framework=next
+         -.js&utm_source=create-next-app&utm_medium=appdir-template-tw&ut
+         -m_campaign=create-next-app"                                    
+      27 -              className="font-medium text-zinc-950 dark:text-zi
+         -nc-50"                                                         
+      28 -            >                                                  
+      29 -              Templates                                        
+      30 -            </a>{" "}                                          
+      31 -            or the{" "}                                        
+      32 -            <a                                                 
+      33 -              href="https://nextjs.org/learn?utm_source=create-
+         -next-app&utm_medium=appdir-template-tw&utm_campaign=create-next
+         --app"                                                          
+      34 -              className="font-medium text-zinc-950 dark:text-zi
+         -nc-50"                                                         
+      35 -            >                                                  
+      36 -              Learning                                         
+      37 -            </a>{" "}                                          
+      38 -            center.                                            
+      39 -          </p>                                                 
+      40 -        </div>                                                 
+      41 -        <div className="flex flex-col gap-4 text-base font-medi
+         -um sm:flex-row">                                               
+      42 -          <a                                                   
+      43 -            className="flex h-12 w-full items-center justify-ce
+         -nter gap-2 rounded-full bg-foreground px-5 text-background tran
+         -sition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158
+         -px]"                                                           
+      44 -            href="https://vercel.com/new?utm_source=create-next
+         --app&utm_medium=appdir-template-tw&utm_campaign=create-next-app
+         -"                                                              
+      45 -            target="_blank"                                    
+      46 -            rel="noopener noreferrer"                          
+      47 -          >                                                    
+      48 -            <Image                                             
+      49 -              className="dark:invert h-[14px] w-4"             
+      50 -              src="/vercel.svg"                                
+      51 -              alt="Vercel logomark"                            
+      52 -              width={16}                                       
+      53 -              height={14}                                      
+      54 -            />                                                 
+      55 -            Deploy Now                                         
+      56 -          </a>                                                 
+      57 -          <a                                                   
+      58 -            className="flex h-12 w-full items-center justify-ce
+         -nter rounded-full border border-solid border-black/[.08] px-5 t
+         -ransition-colors hover:border-transparent hover:bg-black/[.04] 
+         -dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]" 
+      59 -            href="https://nextjs.org/docs?utm_source=create-nex
+         -t-app&utm_medium=appdir-template-tw&utm_campaign=create-next-ap
+         -p"                                                             
+      60 -            target="_blank"                                    
+      61 -            rel="noopener noreferrer"                          
+      62 -          >                                                    
+      63 -            Documentation                                      
+      64 -          </a>                                                 
+      65 -        </div>                                                 
+      66 -      </main>                                                  
+      67 -    </div>                                                     
+       8 +    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-
+         +col gap-8 px-4 py-10 sm:px-6">                                 
+       9 +      <header className="flex flex-col gap-1">                 
+      10 +        <h1 className="text-3xl font-semibold tracking-tight">O
+         +nTrack</h1>                                                    
+      11 +        <p className="text-sm text-zinc-600 dark:text-zinc-400"
+         +>                                                              
+      12 +          A shared contribution log for teams.                 
+      13 +        </p>                                                   
+      14 +      </header>                                                
+      15 +                                                               
+      16 +      <Suspense                                                
+      17 +        fallback={                                             
+      18 +          <p className="text-sm text-zinc-600 dark:text-zinc-40
+         +0">Loading…</p>                                                
+      19 +        }                                                      
+      20 +      >                                                        
+      21 +        <ProjectLog />                                         
+      22 +      </Suspense>                                              
+      23 +    </main>                                                    
+      24    );
+      25  }
+
+⏺ Update(src/app/layout.tsx)
+  ⎿  Added 2 lines, removed 2 lines
+      13  });
+      14 
+      15  export const metadata: Metadata = {
+      16 -  title: "Create Next App",                                    
+      17 -  description: "Generated by create next app",                 
+      16 +  title: "OnTrack",                                            
+      17 +  description: "A shared contribution log for teams.",         
+      18  };
+      19 
+      20  export default function RootLayout({ children }: LayoutProps<"/
+          ">) {
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The committed test's fake client ends the membership query at maybeSingle(),
+  so the action can't chain a typing helper after it. I'll leave the test alone
+  and narrow the result in code instead.
+
+⏺ Update(src/app/actions.ts)
+  ⎿  Added 3 lines, removed 3 lines
+      85    //    here. Nothing about either is read from the form. (One 
+          project per
+      86    //    user for now; choosing between projects comes with the 
+          projects
+      87    //    feature.)
+      88 -  const { data: membership } = await supabase                  
+      88 +  const { data } = await supabase                              
+      89      .from("memberships")
+      90      .select("project_id, role")
+      91      .eq("user_id", user.id)
+      92      .eq("role", "contributor")
+      93      .limit(1)
+      94 -    .maybeSingle()                                             
+      95 -    .overrideTypes<MembershipRow, { merge: false }>();         
+      94 +    .maybeSingle();                                            
+      95 +  const membership = toMembership(data);                       
+      96    if (!membership || membership.role !== "contributor") {
+      97      return failure("Only contributors on a project can add entr
+          ies.");
+      98    }
+
+⏺ Update(src/app/actions.ts)
+  ⎿  Added 10 lines
+      17 
+      18  type MembershipRow = { project_id: string; role: string };
+      19 
+      20 +// The Supabase client is not typed against the schema yet, so 
+         +the row is                                                     
+      21 +// checked here instead of being trusted.                      
+      22 +function toMembership(row: unknown): MembershipRow | null {    
+      23 +  if (typeof row !== "object" || row === null) return null;    
+      24 +  const { project_id, role } = row as Record<string, unknown>; 
+      25 +  return typeof project_id === "string" && typeof role === "str
+         +ing"                                                           
+      26 +    ? { project_id, role }                                     
+      27 +    : null;                                                    
+      28 +}                                                              
+      29 +                                                               
+      30  function text(formData: FormData, name: string): string {
+      31    const value = formData.get(name);
+      32    return typeof value === "string" ? value : "";
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Update(README.md)
+  ⎿  Added 1 line, removed 1 line
+      18  ```bash
+      19  npm install
+      20  npx supabase start     # starts the local Supabase stack and pr
+          ints its URL and keys
+      21 -npx supabase db reset  # applies the migrations in supabase/mig
+         -rations/                                                       
+      21 +npx supabase db reset  # applies the migrations, then loads sup
+         +abase/seed.sql                                                 
+      22  ```
+      23 
+      24  Create `.env.local` in the repo root (see the next section), th
+          en:
+
+⏺ Update(README.md)
+  ⎿  Added 8 lines
+      29 
+      30  Stop the local stack with `npx supabase stop`.
+      31 
+      32 +### Demo sign-in (temporary)                                   
+      33 +                                                               
+      34 +Real sign-up and sign-in are not built yet. Until they are, the
+         + home page shows a **Continue as demo contributor** button when
+         + you are signed out. It signs in the demo user that `supabase/s
+         +eed.sql` creates, a contributor on "Demo Project", so the form 
+         +and the project log work under the real Row Level Security rule
+         +s.                                                             
+      35 +                                                               
+      36 +- The demo user exists only in a locally seeded database. If th
+         +e button reports an error, run `npx supabase db reset`.        
+      37 +- The button is off in production builds unless `ALLOW_DEMO_SIG
+         +N_IN=true` is set. Do not set it on a deployment that holds rea
+         +l data.                                                        
+      38 +- The session lasts about an hour, then the button appears agai
+         +n.                                                             
+      39 +                                                               
+      40  ## Environment variables
+      41 
+      42  Put these in `.env.local`. The file is ignored by git; never co
+          mmit it.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Code is committed and the build passes. Next is loading the seed with npx 
+  supabase db reset, which you okayed by continuing; I'll first confirm the
+  local database is still empty.
+
+  Made 1 scratchpad edit +122, ran 4 shell commands (ctrl+o to expand)
+
+⏺ Sign-in and logging work end to end now. The entry post failed only because I
+  wrapped the server action in a client function, which drops the no-JavaScript
+  fallback; passing the action straight through fixes it. · summary
+
+⏺ Update(src/components/entry-form.tsx)
+  ⎿  Added 11 lines, removed 6 lines
+      21  export function EntryForm() {
+      22    const [type, setType] = useState("");
+      23 
+      24 +  // The server action is passed straight through so the form s
+         +till posts                                                     
+      25 +  // before JavaScript has loaded.                             
+      26    const [state, formAction, pending] = useActionState(
+      25 -    async (previous: EntryFormState, formData: FormData) => {  
+      26 -      const next = await createEntry(previous, formData);      
+      27 -      // The type is controlled, so clear it by hand once the e
+         -ntry is saved.                                                 
+      28 -      if (next.status === "success") setType("");              
+      29 -      return next;                                             
+      30 -    },                                                         
+      27 +    createEntry,                                               
+      28      initialEntryFormState,
+      29    );
+      30 
+      31 +  // React resets the uncontrolled fields after the action. The
+         + type is                                                       
+      32 +  // controlled, so clear it here when a new success result arr
+         +ives.                                                          
+      33 +  const [handledState, setHandledState] = useState<EntryFormSta
+         +te>(state);                                                    
+      34 +  if (state !== handledState) {                                
+      35 +    setHandledState(state);                                    
+      36 +    if (state.status === "success") setType("");               
+      37 +  }                                                            
+      38 +                                                               
+      39    const showMeetingFields = isEntryType(type) && isMeetingStyle
+          Type(type);
+      40    const { fieldErrors, values } = state;
+      41 
+
+  Searched for 3 patterns, ran 2 shell commands (ctrl+o to expand)
+
+⏺ Update(src/app/project-log.tsx)
+  ⎿  Added 4 lines
+      13  // Reads the session cookie, so it must render inside <Suspense
+          > and is never
+      14  // cached: the data is per user and has to be fresh after each 
+          new entry.
+      15  export async function ProjectLog() {
+      16 +  // Request time only: the Supabase client reads the clock to 
+         +check whether                                                  
+      17 +  // the session has expired, which must not run during a prere
+         +nder.                                                          
+      18 +  await connection();                                          
+      19 +                                                               
+      20    const supabase = await createClient();
+      21    const {
+      22      data: { user },
+
+⏺ Update(src/app/project-log.tsx)
+  ⎿  Added 1 line
+      1 +import { connection } from "next/server";                       
+      2  import { isDemoSignInEnabled } from "@/app/demo-sign-in";
+      3  import { DemoSignIn } from "@/components/demo-sign-in";
+      4  import { EntryForm } from "@/components/entry-form";
+
+  Made 2 scratchpad edits +124, read 1 file, ran 3 shell commands (ctrl+o to expand)
+
+⏺ Checking the hydrated-browser path of the action; my hand-built request sent
+  the fields in the wrong order, fixing that probe now.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+⏺ The form, the action and the project log are built and committed, and they
+  work against the seeded local database. Nothing has been clicked through in a
+  real browser, so that part is yours to check.
+
+  What was verified
+
+  I drove the running app with a script that posts the forms the way a browser
+  does before JavaScript loads. npm test (61 tests), lint, type check and npm 
+  run build all pass.
+
+  ┌─────────────────────────────────────────────────────────────────┬────────┐
+  │                              Check                              │ Result │
+  ├─────────────────────────────────────────────────────────────────┼────────┤
+  │ Signed out: only the sign-in button, no project name or entries │ Pass   │
+  ├─────────────────────────────────────────────────────────────────┼────────┤
+  │ Demo sign-in sets a session; "Demo Project" and the form appear │ Pass   │
+  ├─────────────────────────────────────────────────────────────────┼────────┤
+  │ Seeded entries listed newest first (Nov 14, 12, 10)             │ Pass   │
+  ├─────────────────────────────────────────────────────────────────┼────────┤
+  │ Valid meeting entry saves and appears at the top                │ Pass   │
+  ├─────────────────────────────────────────────────────────────────┼────────┤
+  │ Forged project_id and author_id in the form are ignored         │ Pass   │
+  │ (confirmed in the database)                                     │        │
+  ├─────────────────────────────────────────────────────────────────┼────────┤
+  │ Work entry sent with attendees: the meeting field is not saved  │ Pass   │
+  ├─────────────────────────────────────────────────────────────────┼────────┤
+  │ Blank details: server returns "Details are required." and saves │ Pass   │
+  │  nothing                                                        │        │
+  └─────────────────────────────────────────────────────────────────┴────────┘
+
+  Not verified:
+  - The form in a hydrated browser. The meeting-field toggle is covered by
+    component tests, but the error display, the "Saving…" state and the form
+    clearing after a save have not been seen in a browser.
+  - The session log and PR are still to do.
+
+  Things you should know
+
+  - One open problem: if a form is submitted before JavaScript has loaded and
+    the server rejects it, the page section fails to re-render with a Next.js
+    error that describes itself as "a bug in Next.js". Nothing is saved, and a
+    reload recovers. The normal path with JavaScript loaded did not raise this
+    error.
+  - Two fixes came out of verification (commit 9746ffa): the form now passes the
+    server action straight through so it posts without JavaScript, and the log
+    awaits connection() so Next.js stops flagging a clock read during
+    prerendering.
+  - I ran npx supabase db reset after confirming the local database was empty.
+    It now holds the seed data only; I removed my test entries.
+  - Small additions beyond the plan:
+    - Each log row is marked "You" or "Teammate".
+    - A link is only clickable if it starts with http:// or https://.
+    - Non-numeric hours get a field error.
+    - In production with demo sign-in off, the signed-out page says sign-in is
+      not available instead of showing a dead button.
+
+  Commits since the compact
+
+  ┌──────────────────────────────────────────────────────────────────┬───────┐
+  │                              Commit                              │ Phase │
+  ├──────────────────────────────────────────────────────────────────┼───────┤
+  │ 1ae81a2 test: failing tests for the create-entry action and      │ Red   │
+  │ entry form                                                       │       │
+  ├──────────────────────────────────────────────────────────────────┼───────┤
+  │ 3ea0695 feat: entry form, create-entry action and project log    │ Green │
+  │ page                                                             │       │
+  ├──────────────────────────────────────────────────────────────────┼───────┤
+  │ f285ce6 docs: demo sign-in note in the README                    │ Docs  │
+  ├──────────────────────────────────────────────────────────────────┼───────┤
+  │ 9746ffa fix: form before hydration, log at request time          │ Fix   │
+  └──────────────────────────────────────────────────────────────────┴───────┘
+
+  Your next steps
+
+  1. Open http://localhost:3000 (the dev server is still running in this
+     session) and try: sign in, pick Meeting then Work, save an entry, and
+     submit one with a bad value such as 99 hours.
+  2. Quit and resume once with claude --continue, then export the session log.
+     Tell me where the export is and I'll commit it to docs/hw4/.
+  3. Tell me when you want the PR opened. It would target chore/2-supabase-setup
+     unless PR #6 has merged by then.
+
+✻ Sautéed for 6m 14s · done 10:56 PM
+
+※ recap: Issue #3's entry form and project log are built, committed and verified by script against the seeded local database. Next, click through the form at http://localhost:3000, then resume once with claude --continue and export the session log.
+
+⏺ Background shell command didn't finish before the previous session ended
+
+❯ I quit and resumed this session with claude --continue. No action needed,     
+  this is a note for the session log.                                           
+
+⏺ Noted: the session was resumed with claude --continue, so the log now shows
+  /clear, /compact and --continue.
+
+  One consequence of the restart: the dev server I had running stopped with the
+  previous process. Run npm run dev yourself before clicking through
+  http://localhost:3000.
+
+  Still open:
+  1. Your browser check of the form: sign in, toggle Meeting and Work, save an
+     entry, submit a bad value such as 99 hours.
+  2. The session log: export it and tell me the path, and I'll commit it to
+     docs/hw4/.
+  3. The PR, when you say so.
+
+✻ Cogitated for 2s · done 11:10 PM

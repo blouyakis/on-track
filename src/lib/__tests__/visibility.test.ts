@@ -3,8 +3,10 @@ import {
   canModifyEntry,
   canReadProject,
   visibleEntries,
+  visibleProject,
   type Entry,
   type Membership,
+  type Project,
 } from '@/lib/visibility'
 
 const memberships: Membership[] = [
@@ -78,5 +80,33 @@ describe('overseer access', () => {
   test('the overseer cannot edit or delete an entry even when listed as its author', () => {
     const overseerEntry: Entry = { id: 'e4', projectId: 'p1', authorId: 'olivia' }
     expect(canModifyEntry('olivia', overseerEntry, memberships)).toBe(false)
+  })
+})
+
+describe('non-member access', () => {
+  const project: Project = { id: 'p1', name: 'Secret project' }
+  const entries: Entry[] = [
+    { id: 'e1', projectId: 'p1', authorId: 'alice' },
+    { id: 'e3', projectId: 'p2', authorId: 'bob' },
+  ]
+
+  test('a member gets the project, including its name', () => {
+    expect(visibleProject('alice', project, memberships)).toEqual(project)
+  })
+
+  test('a user with no memberships does not get the project or its name', () => {
+    expect(visibleProject('stranger', project, memberships)).toBeNull()
+  })
+
+  test('a member of another project does not get the project or its name', () => {
+    expect(visibleProject('bob', project, memberships)).toBeNull()
+  })
+
+  test('a user with no memberships gets no entries from the project', () => {
+    expect(visibleEntries('stranger', 'p1', entries, memberships)).toEqual([])
+  })
+
+  test('a member of another project gets no entries from the project', () => {
+    expect(visibleEntries('bob', 'p1', entries, memberships)).toEqual([])
   })
 })

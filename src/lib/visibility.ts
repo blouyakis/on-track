@@ -6,20 +6,30 @@ export type Membership = {
   role: Role
 }
 
+export type Entry = {
+  id: string
+  projectId: string
+  authorId: string
+}
+
+// The user's role in the project, or null when they are not a member.
+function roleIn(
+  userId: string,
+  projectId: string,
+  memberships: Membership[],
+): Role | null {
+  const membership = memberships.find(
+    (m) => m.userId === userId && m.projectId === projectId,
+  )
+  return membership?.role ?? null
+}
+
 export function canReadProject(
   userId: string,
   projectId: string,
   memberships: Membership[],
 ): boolean {
-  return memberships.some(
-    (m) => m.userId === userId && m.projectId === projectId,
-  )
-}
-
-export type Entry = {
-  id: string
-  projectId: string
-  authorId: string
+  return roleIn(userId, projectId, memberships) !== null
 }
 
 export function canModifyEntry(
@@ -29,12 +39,7 @@ export function canModifyEntry(
 ): boolean {
   return (
     entry.authorId === userId &&
-    memberships.some(
-      (m) =>
-        m.userId === userId &&
-        m.projectId === entry.projectId &&
-        m.role === 'contributor',
-    )
+    roleIn(userId, entry.projectId, memberships) === 'contributor'
   )
 }
 

@@ -18,6 +18,8 @@ export type Project = {
 }
 
 // The user's role in the project, or null when they are not a member.
+// Assumes at most one membership per user and project, which the database
+// enforces with the memberships primary key (project_id, user_id).
 function roleIn(
   userId: string,
   projectId: string,

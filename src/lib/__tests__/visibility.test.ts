@@ -137,3 +137,17 @@ describe('contributor and cross-project access', () => {
     expect(canModifyEntry('olivia', entries[2], team)).toBe(false)
   })
 })
+
+describe('a user with different roles in different projects', () => {
+  const dualRole: Membership[] = [
+    { userId: 'dana', projectId: 'p1', role: 'contributor' },
+    { userId: 'dana', projectId: 'p2', role: 'overseer' },
+  ]
+
+  test('can edit their entry where they are a contributor, but not where they are the overseer', () => {
+    const p1Entry: Entry = { id: 'e1', projectId: 'p1', authorId: 'dana' }
+    const p2Entry: Entry = { id: 'e2', projectId: 'p2', authorId: 'dana' }
+    expect(canModifyEntry('dana', p1Entry, dualRole)).toBe(true)
+    expect(canModifyEntry('dana', p2Entry, dualRole)).toBe(false)
+  })
+})

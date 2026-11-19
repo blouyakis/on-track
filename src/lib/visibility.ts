@@ -50,20 +50,23 @@ export function canModifyEntry(
   )
 }
 
-export function visibleEntries(
+// Generic so callers keep their full row type (date, hours, type, ...).
+export function visibleEntries<E extends Entry>(
   userId: string,
   projectId: string,
-  entries: Entry[],
+  entries: E[],
   memberships: Membership[],
-): Entry[] {
+): E[] {
   if (!canReadProject(userId, projectId, memberships)) return []
   return entries.filter((e) => e.projectId === projectId)
 }
 
-export function visibleProject(
+// Returns the caller's object as is, so any extra fields pass through to
+// members. Strip private fields (such as an invite code) before calling.
+export function visibleProject<P extends Project>(
   userId: string,
-  project: Project,
+  project: P,
   memberships: Membership[],
-): Project | null {
+): P | null {
   return canReadProject(userId, project.id, memberships) ? project : null
 }

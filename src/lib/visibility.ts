@@ -15,3 +15,20 @@ export function canReadProject(
     (m) => m.userId === userId && m.projectId === projectId,
   )
 }
+
+export type Entry = {
+  id: string
+  projectId: string
+  authorId: string
+}
+
+export function canModifyEntry(
+  userId: string,
+  entry: Entry,
+  memberships: Membership[],
+): boolean {
+  return (
+    entry.authorId === userId &&
+    canReadProject(userId, entry.projectId, memberships)
+  )
+}

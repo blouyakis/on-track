@@ -29,6 +29,20 @@ export function canModifyEntry(
 ): boolean {
   return (
     entry.authorId === userId &&
-    canReadProject(userId, entry.projectId, memberships)
+    memberships.some(
+      (m) =>
+        m.userId === userId &&
+        m.projectId === entry.projectId &&
+        m.role === 'contributor',
+    )
   )
+}
+
+export function visibleEntries(
+  userId: string,
+  projectId: string,
+  entries: Entry[],
+  memberships: Membership[],
+): Entry[] {
+  return entries.filter((e) => e.projectId === projectId)
 }

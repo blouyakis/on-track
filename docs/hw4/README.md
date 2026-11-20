@@ -4,15 +4,6 @@ OnTrack (CS6983 Project 3) · Barbara (Bobbi) Louyakis, Ziye Huang
 
 Evidence for HW4, produced while building OnTrack.
 
-## Git history
-
-The commit history of each feature shows the workflow:
-
-- **Part 2, Explore → Plan → Implement → Commit (issue #3):**
-  [PR #10 commits](https://github.com/blouyakis/on-track/pull/10/commits)
-- **Part 3, TDD red → green → refactor (issue #4):**
-  [PR #9 commits](https://github.com/blouyakis/on-track/pull/9/commits)
-
 ## Part 1: Claude Code project setup
 
 - [`/CLAUDE.md`](../../CLAUDE.md): project context, tech stack, architecture
@@ -32,6 +23,9 @@ The commit history of each feature shows the workflow:
 
 ## Part 2: Explore → Plan → Implement → Commit (issue #3, PR #10)
 
+- [PR #10 commits](https://github.com/blouyakis/on-track/pull/10/commits):
+  the git history of the feature, from the approved plan through the
+  implementation commits to the session log.
 - [`entry-form-log-session-annotated.md`](entry-form-log-session-annotated.md):
   annotated walk through the session, phase by phase, including `/clear`,
   `/compact` and `claude --continue`.
@@ -45,6 +39,9 @@ The commit history of each feature shows the workflow:
 
 ## Part 3: TDD (issue #4, PR #9)
 
+- [PR #9 commits](https://github.com/blouyakis/on-track/pull/9/commits):
+  the git history of the feature, with a `test:` (red) commit before each
+  `feat:` (green) commit, and `refactor:` commits where there was cleanup.
 - [`visibility-tdd-session-annotated.md`](visibility-tdd-session-annotated.md):
   annotated red, green, refactor session for the visibility rules in
   [`src/lib/visibility.ts`](../../src/lib/visibility.ts), with the failing

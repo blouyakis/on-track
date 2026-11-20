@@ -248,18 +248,12 @@ Claude's own report afterwards:
 | Work entry sent with attendees: the meeting field is not saved | Pass |
 | Blank details: server returns "Details are required." and saves nothing | Pass |
 
-> **NOTE:** Both bugs came from code written in the first few turns after
-> `/compact`. The first wrapped the server action in a client function, even
-> though the plan said to use the `useActionState(createEntry, …)` pattern
-> from the bundled `forms.md`. The second was a prerendering problem in the
-> Cache Components area (the log read the session without first marking
-> itself request-time with `connection()`), which is the topic of the
-> caching docs read during Explore. Both areas were covered in part 1,
-> before the compact. We cannot prove the
-> summary caused this, but it matches what we both noticed in other
-> sessions: in the first five or six turns after a compact, the output
-> quality drops and details from earlier in the session are lost or wrong.
-> The reflection discusses this.
+> **NOTE:** Neither bug was caught by the unit or component tests; both
+> showed up only when the app ran against the real local database. The
+> first wrapped the server action in a client function, although the plan
+> said to use the `useActionState(createEntry, …)` pattern from the bundled
+> `forms.md`. The second was a prerendering problem in the Cache Components
+> area. The fixes were small and stayed inside the approved design.
 
 > **NOTE:** Verification is part of Implement, not something done after it.
 > The checks above include the PRD's security rules: data comes from a

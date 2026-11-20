@@ -80,49 +80,64 @@ plan in `docs/hw4/`, the GitHub issue's acceptance criteria, or a short
 "context from the previous session" list. These are the same sources a new
 session would read anyway, so clearing loses nothing important.
 
-### `/compact` helped, but quality dropped afterwards
+### Files are the memory, not the conversation
 
-We also tried `/compact`. In the issue #3 session we ran it at a milestone
-chosen in advance (all pure logic green) and gave it an explicit "Keep" list
-with the issue, branch, decisions, finished commits and remaining work.
-That kept the session going, and the next commits followed the plan.
+`/clear` only works if nothing important lives *only* in the conversation.
+We moved that information into files that any new session reads:
 
-However, in the **five or six turns after a compact, the quality of the
-output dropped**, and some wrong details appeared. In the issue #3 session,
-both bugs fixed in `9746ffa` came from code written right after the compact.
-One wrapped the server action in a client function, although the plan said
-to pass it straight to `useActionState`. The other was a prerendering
-problem in exactly the area of the Next.js docs read before the compact. We
-cannot prove the summary caused these bugs, but it matches what we saw in
-other sessions too: a summary keeps the decisions but loses the details
-behind them. Our conclusion is that `/clear`, with the plan and decisions
-saved in files, is more reliable than `/compact`. If we do compact, we check
-the next few turns more closely.
+- **CLAUDE.md with `@import`.** This is the context that survives every
+  `/clear`. The PRD is imported, so its "Rules the logic must enforce" are in
+  every session. We first generated CLAUDE.md with `/init`, then rewrote it to
+  add architecture decisions, TDD rules and do's and don'ts that `/init` could
+  not infer from the code. A rule we repeated in a prompt more than once was a
+  sign it belonged in CLAUDE.md.
+- **The approved plan, committed to the repo.** Saving the plan in
+  `docs/hw4/` meant the decisions from Plan mode (for example, dev sign-in
+  instead of bypassing RLS) did not depend on the conversation staying in
+  context.
+- **GitHub issues with acceptance criteria.** Each session started by reading
+  its issue, so the scope came from the issue, not from our memory of an
+  earlier chat.
 
-### Other things that helped
+### One task per session, with a focused first prompt
 
-- **`claude --continue`** was the right tool for resuming the *same* task
-  after quitting. It brought back the whole conversation and the list of
-  open items without a new prompt. It does not bring back background
-  processes: the dev server had stopped and needed to be started again.
-- **CLAUDE.md with `@import`** works as context that survives `/clear`. The
-  PRD's "Rules the logic must enforce" are imported into every session, so
-  even a cleared session knows the business rules and our conventions. We
-  first generated CLAUDE.md with `/init`, and then rewrote it to add
-  architecture decisions, TDD rules and do's and don'ts that `/init` could not
-  infer from the code.
-- **Permissions** reduced noise. Routine commands (tests, lint, type check,
-  `git diff`) run without prompts, so our attention goes to the prompts that
-  matter, such as `git commit` and `npm install`. Reading `.env` files is
-  denied: in the issue #3 session, Claude tried to read `.env.example` along
-  with other files, and the rule blocked it.
+We kept to one issue per session and one branch per issue. The first prompt
+did the scoping: it named the files and docs to explore, listed the open
+questions, and gave a short "context from the previous session" list
+instead of relying on old conversation. This kept Explore focused on what
+the task needed, rather than reading the whole repository.
+
+### Keep large material out of the context window
+
+Some inputs are too big to read directly. When Barbara rebuilt the first
+part of her session log from Claude Code's 2.7 MB transcript file, she told
+Claude not to read the file into context. Claude sampled its structure and
+wrote a small script to convert it instead. Long command output was handled
+the same way: we asked for the last few lines of a test run (`tail`), not
+the full output.
+
+### Resuming the same task: `claude --continue`
+
+`claude --continue` was the right tool for picking up the *same* task after
+quitting. It brought back the conversation and the list of open items
+without a new prompt. It does not bring back background processes: the dev
+server had stopped and had to be started again. For a *new* task we always
+used `/clear` instead.
+
+### Permissions reduce noise
+
+Routine commands (tests, lint, type check, `git diff`) run without prompts,
+so our attention goes to the prompts that matter, such as `git commit` and
+`npm install`. Reading `.env` files is denied: in the issue #3 session,
+Claude tried to read `.env.example` along with other files, and the rule
+blocked it, which also keeps secrets out of the context.
 
 ## 3. What we would do next time
 
 - Spend more time reviewing the plan than reviewing the code, since that is
   where most of our corrections happened.
-- Prefer `/clear` with a saved plan file over `/compact`. If we do compact,
-  test the next few changes more carefully.
+- Keep using `/clear` for every new task, and write anything worth keeping
+  into CLAUDE.md, the plan file or the issue before clearing.
 - Ask for verification and for an explicit "not verified" list in every
   plan.
 
@@ -131,7 +146,7 @@ the next few turns more closely.
 - [`visibility-tdd-session-annotated.md`](visibility-tdd-session-annotated.md):
   Part 3, TDD for the visibility rules (Ziye).
 - [`entry-form-log-session-annotated.md`](entry-form-log-session-annotated.md):
-  Part 2, Explore → Plan → Implement → Commit for the entry form, including
-  `/clear`, `/compact` and `--continue` (Barbara's session).
+  Part 2, Explore → Plan → Implement → Commit for the entry form (Barbara's
+  session).
 
 The full index of evidence is in [`README.md`](README.md).

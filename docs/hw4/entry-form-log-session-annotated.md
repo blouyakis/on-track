@@ -85,9 +85,11 @@ Context from the previous session:
 > Reading these docs before planning is what put `<Suspense>` around
 > cookie-reading components and `refresh()` after a mutation into the plan.
 
-> **NOTE:** A compound `cat` command that included `.env.example` was
-> denied. The log does not record which rule caused the denial. Claude then
-> read the files it needed one at a time with Read.
+> **NOTE:** A compound `cat` command was denied. It listed several files,
+> including `.env.example`, which does not exist in the repo (the
+> `2>/dev/null` hides missing-file errors). The log does not record why the
+> command was denied. Claude then read the files it needed one at a time
+> with Read.
 
 > **NOTE:** What Explore found, as recorded in the plan: the migration revokes
 > all access from `anon`, so a signed-out request can read and write nothing.

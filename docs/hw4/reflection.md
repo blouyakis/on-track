@@ -31,10 +31,11 @@ much easier, because most decisions have already been made.
   seeded demo user because it keeps every database rule in force. The
   approved plan was committed first (`494b452`), so the history shows the
   plan before the code.
-- **Issue #4 (visibility rules, Part 3).** The plan surfaced that the
-  visibility functions should match the RLS policies in a pull request that
-  had not been merged yet (PR #6). We aligned the two before writing tests,
-  instead of discovering the mismatch in review.
+- **Issue #4 (visibility rules, Part 3).** While reviewing the plan, we
+  asked whether it depended on the unmerged PR #6. That surfaced that the
+  visibility functions should match the RLS policies in PR #6, so we aligned
+  the two before writing tests, instead of discovering the mismatch in
+  review.
 
 Explore has to be thorough, because a plan is only as good as what it is
 based on. Our project runs Next.js 16.4, whose caching and data fetching
@@ -97,8 +98,7 @@ Long command output was handled the same way: we asked for the last few
 lines of a test run, not the full output. Permissions helped too. Routine
 commands run without prompts, so our attention went to the prompts that
 mattered, and reading `.env` files is denied, which keeps secrets out of the
-context. In the issue #3 session, that rule blocked an attempt to read
-`.env.example`.
+context.
 
 ## Annotated session logs
 

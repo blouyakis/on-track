@@ -85,10 +85,9 @@ Context from the previous session:
 > Reading these docs before planning is what put `<Suspense>` around
 > cookie-reading components and `refresh()` after a mutation into the plan.
 
-> **NOTE:** The denied call is the permission setup from Part 1 at work. The
-> command tried to `cat` `.env.example` together with other files, and the
-> project rules deny reads of `.env.*`. Claude switched to reading the safe
-> files one at a time with Read.
+> **NOTE:** A compound `cat` command that included `.env.example` was
+> denied. The log does not record which rule caused the denial. Claude then
+> read the files it needed one at a time with Read.
 
 > **NOTE:** What Explore found, as recorded in the plan: the migration revokes
 > all access from `anon`, so a signed-out request can read and write nothing.
@@ -146,7 +145,9 @@ Context from the previous session:
 [21:21:47]  TOOL  Bash  npm test
         ->  Error: Failed to resolve import ... (all three new test files)
 [21:21:54]  CLAUDE  Red: all three test files fail because the modules don't
-                    exist yet, which is the expected reason.
+                    exist yet, which is the expected reason. Committing the
+                    first failing pair (types and required fields), then
+                    implementing.
   *** GIT COMMIT 3: c0da093  test: add failing tests for entry types and required fields
   *** GIT COMMIT 4: 9d2d562  feat: add entry types and required-field check
                              (39 tests pass, lint and type check clean)
@@ -193,14 +194,18 @@ From part 2, right after compacting:
 ❯ continue
 ```
 
-> **NOTE:** `/compact` ran at the milestone the plan had chosen (pure logic
-> green), not when the context happened to fill up. The "Keep" list holds the
+> **NOTE:** `/compact` ran at the pure-logic milestone, after commit 6
+> (`47ea9d4`), not when the context happened to fill up. The plan had placed
+> it after commit 4; it ran two commits later, once the sort work was also
+> done. The "Keep" list holds the
 > things a summary might lose: the issue, the branch, the two decisions, what
 > was done, and what was left.
 
 > **NOTE:** The approved plan was also saved as a file in the repo, so it
-> did not depend on the summary. After compacting, Claude re-read the plan
-> and the files it had just written.
+> did not depend on the summary. The `Read …` and `Plan file referenced`
+> lines are added by `/compact` itself: it automatically re-attached the
+> recently written files and the plan file (the copy under
+> `~/.claude/plans`, not the repo file).
 
 ## 5. After `/compact`: the rest of the implementation
 
@@ -294,6 +299,7 @@ Claude's own report afterwards:
 | `f285ce6` docs: explain the temporary demo sign-in in the README | Implement (docs) |
 | `9746ffa` fix: keep the entry form working before hydration and render the log at request time | Verify + fix |
 | `d96a904` docs: add Part 2 session logs and context management evidence for HW4 | Commit evidence |
+| `6d2e8e1` chore: ignore local Claude Code settings | Chore |
 | PR #10, reviewed and merged | Commit (to `main`) |
 
 ## Where we steered the AI
@@ -303,7 +309,8 @@ Claude's own report afterwards:
 - Required approval of the plan before any code was written.
 - Chose dev sign-in over the options that bypass or weaken RLS.
 - Approved the plan only after reading its risks section.
-- Picked the `/compact` point in advance, and wrote an explicit "Keep" list.
+- Ran `/compact` at the pure-logic milestone (two commits later than the
+  plan said), with an explicit "Keep" list.
 - Approved a plan whose verification step ran against the real local
   database, and got a clear list of what was not verified.
 - Resumed with `claude --continue` instead of re-explaining the task.

@@ -61,3 +61,14 @@ npx tsc --noEmit     # type check
 ## Database
 
 The schema lives in `supabase/migrations/`. Add a change with `npx supabase migration new <name>`, then run `npx supabase db reset` to rebuild the local database from all migrations.
+
+## Known issues
+
+### Rejected entry posted before JavaScript loads shows a Next.js error in `next dev` ([#11](https://github.com/blouyakis/on-track/issues/11))
+
+If the entry form is submitted before the page has hydrated (or with JavaScript off) and the server rejects the entry, `next dev` shows `InvariantError: Received an underlying cookies object that does not match either cookies or mutableCookies. This is a bug in Next.js.` Nothing is saved, and a reload recovers.
+
+- **Only in development.** A production build (`npm run build` then `npm start`) re-renders the form with the server's error message as expected.
+- **Cause (Next.js 16.4.6):** a form posted without JavaScript always re-renders the page, but Next.js leaves the request in its "action" phase when the action did not revalidate anything. `cookies()` then trips a dev-only check. A rejected `createEntry` returns early without calling `refresh()`, so it hits this path; a saved entry calls `refresh()` and does not.
+- **Upstream:** reported as [vercel/next.js#101000](https://github.com/vercel/next.js/issues/101000) and [#101002](https://github.com/vercel/next.js/issues/101002), both closed without a fix.
+- **Workaround:** none in the code. Test the no-JavaScript error path against a production build. Calling `refresh()` on rejected submissions would hide the error in dev, but it re-renders the page on every rejected submission, so we have not done it.

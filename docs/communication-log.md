@@ -11,7 +11,7 @@ Every meeting, standup and async update between us, in date order. It is the sam
 2. Fill in every field. Write "None" when a field does not apply, so it is clear it was not skipped.
 3. Commit it on the branch you are working on, or on a `docs/` branch if it stands alone. The log does not need its own issue.
 
-Log each standup here until OnTrack is deployed. After that, standups go in OnTrack itself as `standup` entries, and an export is saved in `docs/sprints/` at the end of each sprint. Meetings and other async updates stay in this file for the whole project.
+Each standup goes in two places: an entry in this log, and its own file in `docs/sprints/sprint-N/standups/`, named `YYYY-MM-DD-name.md` (for example `docs/sprints/sprint-1/standups/2026-11-25-ziye.md`). One file per person per standup keeps us from getting merge conflicts. Once OnTrack is deployed, standups are also logged in OnTrack itself as `standup` entries, and an export is saved in `docs/sprints/` at the end of each sprint.
 
 ### Fields
 
@@ -140,6 +140,15 @@ Project information only. Leave out anything personal, such as schedules, availa
 - **Time (ET):** 16:40–16:42
 - **Format:** Async (Slack)
 - **Topics discussed:** Ziye's review of the board and her answers to the open questions from entry 10: assignments, the bonus tasks, new dependencies, the second skill, where standups live, and the API key for #27; submitting HW4.
-- **Decisions made:** The assignments stand, and Ziye takes #14 after #25. The new dependencies are approved. Standups are kept in the repo. Both of us submit HW4 on Canvas separately, in case group submissions do not sync. Proposed by Ziye, for Barbara to confirm: commit to #46 (fast-check) and #47 (Stryker), with #46 after #31 and #32, and cut #48 first if time gets short; build #48 as the project digest, taken by whoever has room; `@vitest/coverage-v8` as the coverage provider; pdfmake for the PDF reports, because the document is a plain object that a pure function in `src/lib/` can build and unit-test without rendering; `/create-pr` as the second skill, to enforce the branch name, the pre-commit checks and the AI disclosure; one standup file per person per standup, for example `docs/sprints/sprint-1/standups/2026-11-25-ziye.md`, to avoid merge conflicts.
-- **Action items (owner):** Both: submit HW4 on Canvas. Barbara: reply to Ziye's proposals; save the Nov 21 session log as HW5 evidence. Ziye: start Sprint 1 on Nov 23; ask Barbara for the API key when she reaches #27.
-- **Notes:** Completed: Ziye approved and merged PR #13 and reviewed the board. HW4 is complete on GitHub. Ziye offered to take #46, and #48 if she has time. Open: the standup file layout differs from the plan in #19 and #30, which puts standups in this log until OnTrack is deployed.
+- **Decisions made:** The assignments stand, and Ziye takes #14 after #25. The new dependencies are approved. Both of us submit HW4 on Canvas separately, in case group submissions do not sync. Ziye proposed the following and Barbara agreed after the thread. Bonus: we commit to #46 (fast-check) and #47 (Stryker), with #46 after #31 and #32, and #48 is the first to cut if time gets short. #48 is the project digest, built by whoever has room. The coverage provider is `@vitest/coverage-v8`. The PDF library is pdfmake, because the document is a plain object that a pure function in `src/lib/` can build and unit-test without rendering. The second skill is `/create-pr`, which enforces the branch name, the pre-commit checks and the AI disclosure. Standups stay in the repo, in two places: an entry in this log, and one file per person per standup in `docs/sprints/sprint-N/standups/` (for example `docs/sprints/sprint-1/standups/2026-11-25-ziye.md`), which avoids merge conflicts.
+- **Action items (owner):** Both: submit HW4 on Canvas. Barbara: update the issues and the work plan with these decisions; save the Nov 21 session log as HW5 evidence. Ziye: start Sprint 1 on Nov 23; ask Barbara for the API key when she reaches #27.
+- **Notes:** Completed: Ziye approved and merged PR #13 and reviewed the board. HW4 is complete on GitHub. Ziye offered to take #46, and #48 if she has time.
+
+### 12 · 2026-11-21 · Async update
+
+- **Time (ET):** 16:44
+- **Format:** Async (Slack)
+- **Topics discussed:** The communication log in PR #49 and its ten entries; Barbara's question about having AI update the log automatically, with a `/log` skill as one option; which skill counts as the second skill for #37; submitting HW4.
+- **Decisions made:** The log stays in the repo. Both of us submit HW4 on Canvas (confirmed). Ziye proposed building both `/create-pr` and `/log`, since they solve different problems, and Barbara agreed after the thread: either one can count as the second skill and the other is a tool for us. Ziye builds `/log` (#50) and Barbara keeps `/create-pr` (#37).
+- **Action items (owner):** Ziye: review PR #49 and check her side of each entry. Ziye: open an issue for `/log` (done, #50). Both: submit HW4 on Canvas.
+- **Notes:** Completed: PR #49 opened by Barbara with the log and entries 1 to 10 (https://github.com/blouyakis/on-track/pull/49); entry 11 added to the same PR; the bonus tasks added to the work plan.

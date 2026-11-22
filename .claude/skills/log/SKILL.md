@@ -38,9 +38,9 @@ Read `docs/communication-log.md` in full. It is the source of truth for the form
 ## Step 2: Parse the thread
 
 1. **Speakers.** Map each Slack display name to Barbara or Ziye. If a name could be either, or is someone else, ask.
-2. **Dates.** Slack pastes use date dividers ("Friday, November 21st"), "Today" or "Yesterday". "Today" and "Yesterday" are relative to the day the thread was copied, which you do not know; ask for that date unless the user already gave it. A thread with only clock times and no date at all also needs a question.
+2. **Dates.** Slack pastes use date dividers ("Friday, November 21st"), "Today" or "Yesterday". Work out "Today" and "Yesterday" from the current date in your environment, but the thread may have been copied on an earlier day, so state the dates you worked out (for example "Today = 2026-11-21, Yesterday = 2026-11-20") and ask the user to confirm them along with the other questions below. A thread with only clock times and no date at all needs a question; do not assume today.
 3. **Time zone.** Slack shows times in the reader's local time zone, and the paste does not say which one. Unless the user has said in this session which time zone the paste is in, ask once before converting. The log uses Eastern Time (ET) in 24-hour format, for example `16:40`.
-4. **Gaps.** Collect every open question from this step and ask them together in one message. Do not draft entries until they are answered.
+4. **Gaps.** Collect every open question from this step, including the dates to confirm, and ask them together in one message. Do not draft entries until they are answered.
 
 ## Step 3: Group messages into entries
 
@@ -49,8 +49,20 @@ Group the way the existing entries do:
 - One entry is one continuous exchange about one purpose. A new entry starts when the conversation changes purpose (for example a review thread, then later a planning question), or resumes after a long gap on a new topic.
 - Replies inside one Slack thread belong to the same entry, even when they span hours.
 - **Time (ET):** one message gets its start time (`22:12`); an exchange gets a range (`14:02–16:19`, en dash); a range across midnight names both days (`22:58 (Nov 18) – 01:27 (Nov 19)`). Add PT only when it helps.
-- **Type:** pick one allowed type from the log. Planning means deciding what to do and who does it; Review means reviewing a PR or document; Async update means reporting status or news; Standup means a standup post; Other when nothing fits.
-- **Format:** `Async (Slack)` for a Slack thread.
+- **Type:** pick one allowed type from the log. If two fit, pick the one that matches the main purpose and mention the other in Topics discussed.
+  - **Meeting:** a scheduled discussion with an agenda that is not one of the more specific types below.
+  - **Check-in:** a short, unscheduled "where are we" exchange about progress or a question, without a full standup's completed / next / blockers.
+  - **Standup:** a standup post: what someone completed, what is next, and any blockers.
+  - **Async update:** reporting status or news (something was done, opened, merged or found) that the other person reads; questions and short replies may follow.
+  - **Planning:** deciding what to do, who does it, or in what order, outside a sprint planning session.
+  - **Sprint planning:** planning a specific sprint: its goal, which issues it pulls in, and who owns each.
+  - **Review:** reviewing a PR, document or board, including review comments and the fixes made for them.
+  - **Retrospective:** looking back at a finished sprint or deliverable: what went well, what did not, what to change.
+  - **Other:** anything that fits none of these.
+- **Format:**
+  - `Async (Slack)` for messages in a Slack channel or DM.
+  - `Sync (video)` for a Slack huddle or call (voice or video). A paste usually shows only that a huddle started and ended, not what was said, so do not invent its topics or decisions: take them from messages written about it, and ask the user for anything missing. If messages in the same thread before or after the huddle form their own exchange, give them a separate `Async (Slack)` entry.
+  - `Sync (in person)` or `Async (GitHub)` only when the thread says the exchange happened that way.
 - Put the new entries in date and time order, numbered consecutively from last number + 1.
 
 ## Step 4: Fill the fields
@@ -84,6 +96,7 @@ gh issue view N --repo blouyakis/on-track --json number,title,state,url
 A standup is a post that reports what someone completed, what they will do next and any blockers.
 
 - **One entry per person.** If both people posted a standup in the thread, write one log entry for each, in the order they posted.
+- **Standup mixed with discussion.** The standup entry holds the standup post and short replies about it (an acknowledgement, a clarifying question and its answer). If replies turn into a discussion of something else, or lead to a decision, that discussion is its own entry with its own type (for example Planning or Review), numbered after the standup entry, with a time range starting at the first reply that changed the subject. The standup file contains only the standup entry, never the discussion. If you are unsure where the standup ends and the discussion begins, show your split in the preview and ask.
 - **Fields:** what was completed and any blocker go in Notes; what is next goes in Action items. Topics discussed summarizes the standup in a few words.
 - **Sprint.** Work out the sprint from the standup's date. Use the dates in a sprint planning note in `docs/sprints/` if one exists; otherwise use the dates recorded in the log (entry 10): Sprint 1 runs 2026-11-23 to 2026-12-06 and Sprint 2 runs 2026-12-07 to 2026-12-15. If the date falls outside every sprint, ask.
 - **File.** For each person, also write `docs/sprints/sprint-N/standups/YYYY-MM-DD-name.md`, where `name` is `ziye` or `barbara`. Check whether it already exists (`ls`). If it does, do not overwrite it or write a second version; show the user and ask what to do.

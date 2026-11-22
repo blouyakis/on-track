@@ -15,6 +15,8 @@ export default defineConfig({
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/**/__tests__/**"],
       reporter: ["text", "html", "lcov"],
+      // Write the report even when a test fails, so CI can upload it.
+      reportOnFailure: true,
       // The 70% threshold is added in #39.
     },
   },

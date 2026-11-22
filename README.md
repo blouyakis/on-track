@@ -54,8 +54,11 @@ Both are safe to expose to the browser. Access to data is controlled by Row Leve
 npm run dev          # development server
 npm run build        # production build
 npm test             # unit tests (Vitest)
+npm run test:coverage # unit tests with a coverage report in coverage/
 npm run lint         # ESLint
-npx tsc --noEmit     # type check
+npm run format       # format the code with Prettier
+npm run format:check # check formatting without changing files (CI runs this)
+npm run typecheck    # type check
 ```
 
 ## Database

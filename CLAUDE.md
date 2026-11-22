@@ -27,9 +27,12 @@ The product spec is imported above from `docs/PRD.md`. Treat its "Rules the logi
 npm run dev          # next dev at http://localhost:3000
 npm run build        # production build
 npm run lint         # eslint (flat config, eslint-config-next core-web-vitals + typescript)
-npx tsc --noEmit     # type check (no npm script for this)
+npm run typecheck    # next typegen, then tsc --noEmit
+npm run format       # prettier --write . (fix formatting)
+npm run format:check # prettier --check . (what CI runs)
 npm test             # vitest run (single pass)
 npm run test:watch   # vitest in watch mode
+npm run test:coverage # vitest run --coverage (text table + HTML report in coverage/)
 npx vitest run src/lib/__tests__/sanity.test.ts   # one file
 npx vitest run -t "test runner works"             # one test by name
 ```
@@ -83,7 +86,7 @@ This repo runs Next.js 16.4 with `cacheComponents: true` and `partialPrefetching
 - **Component tests** (React Testing Library) cover forms and conditional rendering by role.
 - **End-to-end tests** (Playwright) cover one full path per role.
 - **Coverage target:** 70% or higher overall, and close to 100% for `src/lib/`.
-- Run `npm test`, `npm run lint`, and `npx tsc --noEmit` before every commit.
+- Run `npm test`, `npm run lint`, `npm run format:check`, and `npm run typecheck` before every commit.
 
 ## Do
 

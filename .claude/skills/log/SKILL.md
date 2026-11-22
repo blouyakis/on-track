@@ -40,7 +40,8 @@ Read `docs/communication-log.md` in full. It is the source of truth for the form
 1. **Speakers.** Map each Slack display name to Barbara or Ziye. If a name could be either, or is someone else, ask.
 2. **Dates.** Slack pastes use date dividers ("Friday, November 21st"), "Today" or "Yesterday". Work out "Today" and "Yesterday" from the current date in your environment, but the thread may have been copied on an earlier day, so state the dates you worked out (for example "Today = 2026-11-21, Yesterday = 2026-11-20") and ask the user to confirm them along with the other questions below. A thread with only clock times and no date at all needs a question; do not assume today.
 3. **Time zone.** Slack shows times in the reader's local time zone, and the paste does not say which one. Unless the user has said in this session which time zone the paste is in, ask once before converting. The log uses Eastern Time (ET) in 24-hour format, for example `16:40`.
-4. **Gaps.** Collect every open question from this step, including the dates to confirm, and ask them together in one message. Do not draft entries until they are answered.
+4. **Overlap with existing entries.** Compare the thread with the last few entries in the log. If part of it is already logged (same date, overlapping time, or the same decisions, action items or completed work), name the entry and the overlapping part. Ask as a separate question, not as a warning in the draft, how to handle it: log only what is new and point to the existing entry for the rest (recommend this), skip the overlapping messages entirely, or log them in full anyway. Existing entries are never edited, whatever the answer.
+5. **Gaps.** Collect every open question from this step, including the dates to confirm and any overlap, and ask them together in one message. Do not draft entries until they are answered.
 
 ## Step 3: Group messages into entries
 
@@ -68,6 +69,8 @@ Group the way the existing entries do:
 ## Step 4: Fill the fields
 
 Fill every field from the template. Write `None` when a field does not apply, and `None; informational` when nothing was decided.
+
+**Record only what is new.** Do not repeat decisions, action items or completed work that an existing entry already records, even if the thread restates or confirms them. Point to that entry in one short sentence instead, for example "Barbara's agreement to Ziye's proposals is already recorded in entry 11." If everything in a field is already recorded, write `None; informational` (Decisions made) or `None` (other fields) and add that pointer. Keep each field as short as the existing entries' fields.
 
 - **Topics discussed:** a semicolon-separated list of what the exchange was about.
 - **Decisions made:** only what both people agreed. When one person proposed and the other agreed, say so: "Ziye proposed X, and Barbara agreed." If the agreement came later, outside the pasted thread, do not record it as decided; ask the user whether it was agreed.
@@ -125,7 +128,7 @@ In the preview, list what kind of content you left out (for example "one message
 ## Step 8: Check order and duplicates
 
 - If any new entry is dated earlier than the last existing entry, warn the user. It still gets the next number and goes at the end; never move or renumber existing entries to fix the order.
-- If the thread looks already logged (same date, overlapping time and topics as an existing entry), say which entry it overlaps and ask before adding anything. Do not edit the existing entry.
+- Re-check the drafts against the existing entries. If an overlap you did not raise in step 2 shows up now, stop and ask about it before showing the draft, the same way step 2 does. Do not edit the existing entry.
 
 ## Step 9: Show for approval
 
@@ -143,6 +146,6 @@ Then ask: "Write these files?" Wait for an explicit yes. If the user asks for ch
 
 After approval:
 
-1. Append the new entries to the end of `docs/communication-log.md`, after a blank line following the last entry. Change nothing else in the file.
-2. Create each standup file (creating `docs/sprints/sprint-N/standups/` if needed). Re-check that the file does not exist immediately before writing.
+1. Append the new entries to the end of `docs/communication-log.md`, after a blank line following the last entry, with the Edit tool: use the last existing entry's final line as the anchor and add the new entries after it. Do not write files through the shell (`cat >>`, `echo >>`, `tee`, `sed -i` or similar), so the user's permission settings still get a chance to confirm the write. Change nothing else in the file.
+2. Create each standup file with the Write tool (creating `docs/sprints/sprint-N/standups/` if needed). Re-check that the file does not exist immediately before writing.
 3. Run `git status` and show it. Do not stage or commit. Tell the user the files are ready to review and commit on their branch.

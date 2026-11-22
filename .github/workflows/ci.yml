@@ -33,6 +33,7 @@ jobs:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm run lint
+      - run: npm run format:check
 
   typecheck:
     needs: install

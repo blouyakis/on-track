@@ -41,7 +41,7 @@ Read `docs/communication-log.md` in full. It is the source of truth for the form
 2. **Dates.** Slack pastes use date dividers ("Friday, November 21st"), "Today" or "Yesterday". Work out "Today" and "Yesterday" from the current date in your environment, but the thread may have been copied on an earlier day, so state the dates you worked out (for example "Today = 2026-11-21, Yesterday = 2026-11-20") and ask the user to confirm them along with the other questions below. A thread with only clock times and no date at all needs a question; do not assume today.
 3. **Time zone.** Slack shows times in the reader's local time zone, and the paste does not say which one. Unless the user has said in this session which time zone the paste is in, ask once before converting. The log uses Eastern Time (ET) in 24-hour format, for example `16:40`.
 4. **Overlap with existing entries.** Compare the thread with the last few entries in the log. If part of it is already logged (same date, overlapping time, or the same decisions, action items or completed work), name the overlapping parts and, for each one, the entry that actually records it. Check each claim against that entry's text as it is in the file now: an entry may cover a thread's time range but point to an earlier entry for part of its content, and then the earlier entry is the one to name (for example "entries 11–13 cover this thread: the decisions are in entries 11 and 12, the release link in entry 13"). Ask as a separate question, not as a warning in the draft, how to handle it: log only what is new and point to the existing entries for the rest (recommend this), skip the overlapping messages entirely, or log them in full anyway. If nothing in the thread is new, recommend skipping instead, since "only what is new" would be an empty entry. Existing entries are never edited, whatever the answer.
-5. **Gaps.** Collect every open question from this step, including the dates to confirm and any overlap, and ask them together in one message. Do not draft entries until they are answered.
+5. **Gaps.** Collect every open question from this step, including the dates to confirm, any overlap, and whether an unlabeled post is a standup (see step 6), and ask them together in one message. Do not draft entries until they are answered.
 
 ## Step 3: Group messages into entries
 
@@ -96,7 +96,13 @@ gh issue view N --repo blouyakis/on-track --json number,title,state,url
 
 ## Step 6: Standups
 
-A standup is a post that reports what someone completed, what they will do next and any blockers.
+**Deciding whether a post is a standup.** Never decide this on your own unless the author labeled it:
+
+- **Labeled:** the author calls the post a standup (for example it starts with "Standup" or "Async standup"). Treat it as a standup without asking.
+- **Looks like one:** the post reports what its author completed and what they will do next, with or without blockers, but is not labeled. Ask the user, in the step 2 questions, whether it is a standup. Name the post by author and time (for example "Is Barbara's 1:53 PM message a standup?") and say briefly why it looks like one. If the user says no, log it as a normal entry with its own type, usually Async update.
+- **Anything else** is not a standup, and you do not ask.
+
+The answer matters because each standup also gets its own file and counts toward the standups each of us owes per sprint. If the post's date falls outside every sprint (see Sprint below), say so in the same question, because it would have no sprint folder to go in.
 
 - **One entry per person.** If both people posted a standup in the thread, write one log entry for each, in the order they posted.
 - **Standup mixed with discussion.** The standup entry holds the standup post and short replies about it (an acknowledgement, a clarifying question and its answer). If replies turn into a discussion of something else, or lead to a decision, that discussion is its own entry with its own type (for example Planning or Review), numbered after the standup entry, with a time range starting at the first reply that changed the subject. The standup file contains only the standup entry, never the discussion. If you are unsure where the standup ends and the discussion begins, show your split in the preview and ask.

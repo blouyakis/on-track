@@ -41,10 +41,10 @@ Real sign-up and sign-in are not built yet. Until they are, the home page shows 
 
 Put these in `.env.local`. The file is ignored by git; never commit it.
 
-| Variable | Value |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | The API URL printed by `npx supabase start` (or `npx supabase status`) |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | The publishable key printed by the same command |
+| Variable                               | Value                                                                  |
+| -------------------------------------- | ---------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | The API URL printed by `npx supabase start` (or `npx supabase status`) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | The publishable key printed by the same command                        |
 
 Both are safe to expose to the browser. Access to data is controlled by Row Level Security in the database, not by keeping these values secret.
 

@@ -51,12 +51,14 @@ This repo runs Next.js 16.4 with `cacheComponents: true` and `partialPrefetching
 ## Structure and conventions
 
 ### Layout
+
 - `src/app/` is the App Router root. `@/*` maps to `src/*` (tsconfig and vitest both resolve it).
 - `src/lib/` holds framework-free logic; tests live beside it in `__tests__/`.
 - `docs/` holds the PRD and homework evidence.
 - Layout note: `<html>` is `h-full` and `<body>` is `min-h-full flex flex-col`, so page roots should use `flex-1` to fill the viewport.
 
 ### Code
+
 - TypeScript strict mode. No `any`; use `unknown` and narrow it.
 - Named exports for everything in `src/lib/`. Default exports only where Next.js requires them (pages, layouts).
 - Functions in `src/lib/` return a result value for expected failures (for example a list of validation errors) and do not throw for them.
@@ -64,6 +66,7 @@ This repo runs Next.js 16.4 with `cacheComponents: true` and `partialPrefetching
 - File names are kebab-case; React components are PascalCase.
 
 ### Git
+
 - One branch per GitHub issue, named `<type>/<issue-number>-short-description`, the same format as Project 2. Types: `feature`, `fix`, `docs`, `chore`, `test`. Examples: `feature/7-log-entries`, `docs/3-claude-md`.
 - Conventional Commit prefixes: `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`.
 - Every change reaches `main` through a pull request reviewed by the other partner.

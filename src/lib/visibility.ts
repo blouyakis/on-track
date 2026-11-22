@@ -1,21 +1,21 @@
-export type Role = 'contributor' | 'overseer'
+export type Role = "contributor" | "overseer";
 
 export type Membership = {
-  userId: string
-  projectId: string
-  role: Role
-}
+  userId: string;
+  projectId: string;
+  role: Role;
+};
 
 export type Entry = {
-  id: string
-  projectId: string
-  authorId: string
-}
+  id: string;
+  projectId: string;
+  authorId: string;
+};
 
 export type Project = {
-  id: string
-  name: string
-}
+  id: string;
+  name: string;
+};
 
 // The user's role in the project, or null when they are not a member.
 // Assumes at most one membership per user and project, which the database
@@ -27,8 +27,8 @@ function roleIn(
 ): Role | null {
   const membership = memberships.find(
     (m) => m.userId === userId && m.projectId === projectId,
-  )
-  return membership?.role ?? null
+  );
+  return membership?.role ?? null;
 }
 
 export function canReadProject(
@@ -36,7 +36,7 @@ export function canReadProject(
   projectId: string,
   memberships: Membership[],
 ): boolean {
-  return roleIn(userId, projectId, memberships) !== null
+  return roleIn(userId, projectId, memberships) !== null;
 }
 
 export function canModifyEntry(
@@ -46,8 +46,8 @@ export function canModifyEntry(
 ): boolean {
   return (
     entry.authorId === userId &&
-    roleIn(userId, entry.projectId, memberships) === 'contributor'
-  )
+    roleIn(userId, entry.projectId, memberships) === "contributor"
+  );
 }
 
 // Generic so callers keep their full row type (date, hours, type, ...).
@@ -57,8 +57,8 @@ export function visibleEntries<E extends Entry>(
   entries: E[],
   memberships: Membership[],
 ): E[] {
-  if (!canReadProject(userId, projectId, memberships)) return []
-  return entries.filter((e) => e.projectId === projectId)
+  if (!canReadProject(userId, projectId, memberships)) return [];
+  return entries.filter((e) => e.projectId === projectId);
 }
 
 // Returns the caller's object as is, so any extra fields pass through to
@@ -68,5 +68,5 @@ export function visibleProject<P extends Project>(
   project: P,
   memberships: Membership[],
 ): P | null {
-  return canReadProject(userId, project.id, memberships) ? project : null
+  return canReadProject(userId, project.id, memberships) ? project : null;
 }

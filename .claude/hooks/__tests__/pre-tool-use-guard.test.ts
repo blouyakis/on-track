@@ -385,3 +385,24 @@ describe("second review: case-insensitive file names (macOS)", () => {
     expect(stderr).toContain("must not be edited by hand");
   });
 });
+
+describe("second review: more shell writes", () => {
+  test.each([
+    "echo x >| AGENTS.md",
+    "sed --in-place s/a/b/ AGENTS.md",
+    "sed -i.bak s/a/b/ package-lock.json",
+    "cp -t node_modules/next /tmp/patch.js",
+    "cp --target-directory=node_modules/next /tmp/patch.js",
+    "install -t node_modules/next /tmp/patch.js",
+  ])("%s is blocked", (command) => {
+    const { code, stderr } = runGuard("Bash", { command });
+    expect(code).toBe(2);
+    expect(stderr).toContain("must not be edited by hand");
+  });
+
+  test("cp -t with a normal destination is allowed", () => {
+    expect(
+      runGuard("Bash", { command: "cp -t /tmp AGENTS.md package-lock.json" }),
+    ).toEqual({ code: 0, stderr: "" });
+  });
+});

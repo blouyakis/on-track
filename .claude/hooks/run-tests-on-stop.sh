@@ -3,7 +3,9 @@
 #
 # - If Claude is already continuing because of this hook (stop_hook_active),
 #   exit 0 so it can stop. This prevents an endless loop when tests stay red.
-# - If the working tree has no changes outside docs/, skip the run.
+# - If the working tree has no changes outside docs/, skip the run. Code
+#   committed during the turn is not re-tested; CLAUDE.md requires the four
+#   checks before every commit, and CI runs the tests on every PR.
 # - Tests pass: exit 0 silently. Tests fail: exit 2 with the end of the
 #   output on stderr, which blocks the stop once and feeds the failure back.
 set -u

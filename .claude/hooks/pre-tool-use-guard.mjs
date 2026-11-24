@@ -2,13 +2,20 @@
 // PreToolUse hook: block the actions CLAUDE.md forbids, before they run.
 //
 // 1. Reading or printing .env* files (except .env.example), through a file
-//    tool or a shell command.
+//    tool or a shell command, including shell globs such as .env*.
 // 2. Editing AGENTS.md, package-lock.json, or anything in node_modules/.
 // 3. git push to main, and any force push.
 //
 // Blocking exits 2 with the reason on stderr, which Claude reads. Everything
-// else exits 0. This is string matching, so it is a guard rail, not a
-// sandbox: the permission deny rules in settings.json stay as a second layer.
+// else exits 0. An unexpected error inside the checks also exits 2 (fail
+// closed); only unparseable stdin is let through.
+//
+// Known limits: this is string matching, so it is a guard rail, not a
+// sandbox. It does not see through quoting tricks, variables, command
+// substitution, eval, scripts that read files themselves, git aliases, or a
+// `cd` earlier in the same command (paths and the branch check use the
+// hook's cwd, or the directory given with git -C). The permission deny rules
+// in settings.json stay as a second layer.
 
 import { execFileSync } from "node:child_process";
 import path from "node:path";

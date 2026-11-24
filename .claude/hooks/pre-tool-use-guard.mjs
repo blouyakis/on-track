@@ -23,10 +23,51 @@ const FILE_TOOLS = new Set([
 ]);
 const EDIT_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit"]);
 
-/** True for .env and .env.<anything>, except .env.example. */
+// Env file names a glob is tested against.
+const ENV_CANDIDATES = [
+  ".env",
+  ".env.local",
+  ".env.development",
+  ".env.development.local",
+  ".env.production",
+  ".env.production.local",
+  ".env.test",
+  ".env.test.local",
+];
+
+/** Convert a shell glob to an anchored regular expression. */
+function globToRegExp(glob) {
+  let source = "";
+  for (let i = 0; i < glob.length; i++) {
+    const char = glob[i];
+    if (char === "*") source += "[^/]*";
+    else if (char === "?") source += "[^/]";
+    else if (char === "[") {
+      const end = glob.indexOf("]", i + 1);
+      if (end === -1) source += "\\[";
+      else {
+        source += "[" + glob.slice(i + 1, end).replace(/^!/, "^") + "]";
+        i = end;
+      }
+    } else source += char.replace(/[.+^${}()|\\]/g, "\\$&");
+  }
+  return new RegExp("^" + source + "$");
+}
+
+/**
+ * True for .env and .env.<anything> except .env.example, and for a glob
+ * (such as .env* or .en?) that would match one of them.
+ */
 export function isEnvFile(name) {
   const base = path.basename(name);
-  return /^\.env(\..+)?$/.test(base) && base !== ".env.example";
+  if (base === ".env.example") return false;
+  if (/^\.env(\..+)?$/.test(base)) return true;
+  if (/[*?[]/.test(base) && base.startsWith(".")) {
+    // An invalid glob such as [z-a] throws here; main() then fails closed.
+    const pattern = globToRegExp(base);
+    return ENV_CANDIDATES.some((candidate) => pattern.test(candidate));
+  }
+  return false;
 }
 
 /** True for AGENTS.md or package-lock.json at the root, or anything in node_modules/. */

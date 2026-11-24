@@ -94,8 +94,10 @@ function checkFileTool(toolName, toolInput, cwd, projectDir) {
   return null;
 }
 
-/** Shell commands that write to the file named in their arguments. */
-const WRITING_COMMANDS = /^(tee|rm|mv|cp|install|ln|truncate|touch|chmod)$/;
+// Commands that change every file they name.
+const WRITES_ALL_ARGS = /^(tee|rm|mv|truncate|touch|chmod)$/;
+// Commands whose last argument is the destination; the others are only read.
+const WRITES_LAST_ARG = /^(cp|ln|install)$/;
 
 /** Resolve a shell path argument to a path relative to the project. */
 function projectRelative(word, cwd, projectDir) {
@@ -113,16 +115,16 @@ function checkProtectedWrites(segment, cwd, projectDir) {
   }
   const words = dropAssignments(shellWords(segment));
   const command = words[0] === undefined ? "" : path.basename(words[0]);
+  const operands = words.slice(1).filter((word) => !word.startsWith("-"));
   const inPlace =
     (command === "sed" || command === "perl") &&
     words.some((word) => /^-[a-zA-Z]*i/.test(word));
-  if (inPlace || WRITING_COMMANDS.test(command)) {
-    const target = words
-      .slice(1)
-      .find((word) => !word.startsWith("-") && isProtected(word));
-    if (target !== undefined) return protectedReason(target);
-  }
-  return null;
+
+  let targets = [];
+  if (inPlace || WRITES_ALL_ARGS.test(command)) targets = operands;
+  else if (WRITES_LAST_ARG.test(command)) targets = operands.slice(-1);
+  const target = targets.find(isProtected);
+  return target === undefined ? null : protectedReason(target);
 }
 
 function currentBranch(cwd) {

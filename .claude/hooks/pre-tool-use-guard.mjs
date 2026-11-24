@@ -97,21 +97,29 @@ function checkFileTool(toolName, toolInput, cwd, projectDir) {
 /** Shell commands that write to the file named in their arguments. */
 const WRITING_COMMANDS = /^(tee|rm|mv|cp|install|ln|truncate|touch|chmod)$/;
 
-function checkProtectedWrites(segment) {
+/** Resolve a shell path argument to a path relative to the project. */
+function projectRelative(word, cwd, projectDir) {
+  const expanded = word.replace(/\$\{?CLAUDE_PROJECT_DIR\}?/g, projectDir);
+  return path.relative(projectDir, path.resolve(cwd, expanded));
+}
+
+function checkProtectedWrites(segment, cwd, projectDir) {
+  const isProtected = (word) =>
+    isProtectedFile(projectRelative(word, cwd, projectDir));
+
   // Redirection into a protected file: echo x > AGENTS.md, cat >> package-lock.json.
   for (const match of segment.matchAll(/>>?\s*["']?([^\s"'|;&]+)/g)) {
-    if (isProtectedFile(match[1])) return protectedReason(match[1]);
+    if (isProtected(match[1])) return protectedReason(match[1]);
   }
-  const words = shellWords(segment);
-  const command = words[0];
-  if (command === undefined) return null;
+  const words = dropAssignments(shellWords(segment));
+  const command = words[0] === undefined ? "" : path.basename(words[0]);
   const inPlace =
     (command === "sed" || command === "perl") &&
     words.some((word) => /^-[a-zA-Z]*i/.test(word));
   if (inPlace || WRITING_COMMANDS.test(command)) {
     const target = words
       .slice(1)
-      .find((word) => !word.startsWith("-") && isProtectedFile(word));
+      .find((word) => !word.startsWith("-") && isProtected(word));
     if (target !== undefined) return protectedReason(target);
   }
   return null;
@@ -193,7 +201,7 @@ function checkGitPush(segment, cwd) {
   return null;
 }
 
-function checkBash(command, cwd) {
+function checkBash(command, cwd, projectDir) {
   for (const word of shellWords(command)) {
     // Also look inside --flag=value and VAR=value words.
     for (const part of word.split("=")) {
@@ -201,7 +209,9 @@ function checkBash(command, cwd) {
     }
   }
   for (const segment of shellSegments(command)) {
-    const reason = checkProtectedWrites(segment) ?? checkGitPush(segment, cwd);
+    const reason =
+      checkProtectedWrites(segment, cwd, projectDir) ??
+      checkGitPush(segment, cwd);
     if (reason !== null) return reason;
   }
   return null;
@@ -216,7 +226,7 @@ export function guard(input, projectDir) {
   if (FILE_TOOLS.has(toolName))
     return checkFileTool(toolName, toolInput, cwd, projectDir);
   if (toolName === "Bash" && typeof toolInput.command === "string") {
-    return checkBash(toolInput.command, cwd);
+    return checkBash(toolInput.command, cwd, projectDir);
   }
   return null;
 }

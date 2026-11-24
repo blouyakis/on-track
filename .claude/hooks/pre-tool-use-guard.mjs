@@ -249,6 +249,15 @@ const GLOBAL_OPTIONS_WITH_VALUE = new Set([
   "--config-env",
 ]);
 
+// git push options that take a separate value, which is not a refspec.
+const PUSH_OPTIONS_WITH_VALUE = new Set([
+  "-o",
+  "--push-option",
+  "--repo",
+  "--receive-pack",
+  "--exec",
+]);
+
 function checkGitPush(segment, cwd) {
   const words = dropAssignments(shellWords(segment));
   if (words.length === 0 || path.basename(words[0]) !== "git") return null;
@@ -274,18 +283,27 @@ function checkGitPush(segment, cwd) {
       "CLAUDE.md forbids force-pushing or rewriting published history. Push a new commit instead."
     );
   }
+  // The words that are not options or option values: the remote, then refspecs.
+  const refspecs = [];
+  for (let i = 0; i < args.length; i++) {
+    if (PUSH_OPTIONS_WITH_VALUE.has(args[i])) i++;
+    else if (!args[i].startsWith("-")) refspecs.push(args[i]);
+  }
   const toMain =
-    // --all pushes every local branch, main included.
+    // --all and --branches push every local branch, main included.
     args.includes("--all") ||
-    args.some(
-      (arg) =>
-        arg === "main" ||
-        arg.endsWith(":main") ||
-        arg.endsWith("refs/heads/main"),
+    args.includes("--branches") ||
+    refspecs.some(
+      (ref) =>
+        ref === "main" ||
+        ref.endsWith(":main") ||
+        ref.endsWith("refs/heads/main") ||
+        // ":" pushes every matching branch; a wildcard can match main.
+        ref === ":" ||
+        ref.includes("*"),
     );
   // Without a refspec (git push, git push origin), or with HEAD or @, git
   // pushes the current branch.
-  const refspecs = args.filter((arg) => !arg.startsWith("-"));
   const pushesCurrent =
     refspecs.length <= 1 ||
     refspecs.slice(1).some((ref) => ref === "HEAD" || ref === "@");

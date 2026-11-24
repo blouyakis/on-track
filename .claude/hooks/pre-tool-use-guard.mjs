@@ -287,7 +287,15 @@ async function main() {
     process.exit(0);
   }
   const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
-  const reason = guard(input, projectDir);
+  let reason;
+  try {
+    reason = guard(input, projectDir);
+  } catch (error) {
+    // Fail closed: an unexpected error blocks the call.
+    reason =
+      "Blocked by the OnTrack guard hook: the guard itself failed, so the call was blocked to be safe. " +
+      `Error: ${error instanceof Error ? error.message : String(error)}`;
+  }
   if (reason !== null) {
     process.stderr.write(reason + "\n");
     process.exit(2);

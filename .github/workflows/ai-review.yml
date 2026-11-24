@@ -21,7 +21,8 @@ jobs:
   review:
     if: >-
       (github.event_name == 'pull_request' &&
-       github.event.pull_request.draft == false) ||
+       github.event.pull_request.draft == false &&
+       github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.event_name == 'issue_comment' &&
        github.event.issue.pull_request &&
        startsWith(github.event.comment.body, '@claude review') &&
@@ -60,6 +61,12 @@ jobs:
             docs/PRD.md first. The checked-out tree may be the base branch, so
             get the changes with `gh pr diff` and the description with
             `gh pr view`. Review only what this PR changes.
+            Before reviewing, read earlier review comments with
+            `gh pr view --comments`. Do not repeat a finding that is already
+            posted and still applies.
+            If the PR changes CLAUDE.md or docs/PRD.md, review against the
+            current versions and add a `question (non-blocking)` comment that
+            flags the rule change for human review.
 
             ## Review dimensions (Google Engineering Practices)
             Check the change for each of these:
@@ -120,6 +127,8 @@ jobs:
             - Then post one summary comment with `gh pr comment` that groups
               the findings by the review dimensions above and the CLAUDE.md
               checklist, blocking findings first. Keep each finding's label.
+              If earlier review comments exist, list which of their findings
+              this PR has now fixed.
             - Report only real problems you can point to in the diff, plus
               at most one `praise` when something is done well. If you find
               no problems, say so plainly. Do not push commits or change files.

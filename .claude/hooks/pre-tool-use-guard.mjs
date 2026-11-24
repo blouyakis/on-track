@@ -146,10 +146,15 @@ const GLOBAL_OPTIONS_WITH_VALUE = new Set([
 function checkGitPush(segment, cwd) {
   const words = dropAssignments(shellWords(segment));
   if (words.length === 0 || path.basename(words[0]) !== "git") return null;
-  // Skip the global options before the subcommand.
+  // Walk the global options before the subcommand, remembering git -C <dir>.
+  let repoDir = cwd;
   let index = 1;
   while (index < words.length && words[index].startsWith("-")) {
-    index += GLOBAL_OPTIONS_WITH_VALUE.has(words[index]) ? 2 : 1;
+    const option = words[index];
+    if (option === "-C" && index + 1 < words.length) {
+      repoDir = path.resolve(repoDir, words[index + 1]);
+    }
+    index += GLOBAL_OPTIONS_WITH_VALUE.has(option) ? 2 : 1;
   }
   if (words[index] !== "push") return null;
   const args = words.slice(index + 1);
@@ -178,7 +183,7 @@ function checkGitPush(segment, cwd) {
   const pushesCurrent =
     refspecs.length <= 1 ||
     refspecs.slice(1).some((ref) => ref === "HEAD" || ref === "@");
-  const currentOnMain = pushesCurrent && currentBranch(cwd) === "main";
+  const currentOnMain = pushesCurrent && currentBranch(repoDir) === "main";
   if (toMain || currentOnMain) {
     return (
       "Blocked by the OnTrack guard hook: pushing to main is not allowed. " +

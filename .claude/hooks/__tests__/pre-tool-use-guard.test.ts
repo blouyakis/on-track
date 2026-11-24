@@ -372,3 +372,16 @@ describe("second review: refspecs and push options", () => {
     ).toEqual({ code: 0, stderr: "" });
   });
 });
+
+describe("second review: case-insensitive file names (macOS)", () => {
+  test.each([
+    ["Write", { file_path: inProject("agents.md") }],
+    ["Edit", { file_path: inProject("Package-Lock.json") }],
+    ["Edit", { file_path: inProject("Node_Modules/next/dist/index.js") }],
+    ["Bash", { command: "rm Agents.MD" }],
+  ])("%s %o is blocked", (tool, input) => {
+    const { code, stderr } = runGuard(tool, input);
+    expect(code).toBe(2);
+    expect(stderr).toContain("must not be edited by hand");
+  });
+});

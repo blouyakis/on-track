@@ -7,8 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -25,9 +29,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "jsdom": "^31.0.1",
+    "prettier": "3.10.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "vitest": "^5.1.1"

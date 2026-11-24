@@ -13,11 +13,7 @@
       "Bash(git diff *)",
       "Bash(git log *)"
     ],
-    "ask": [
-      "Bash(git commit *)",
-      "Bash(git push *)",
-      "Bash(npm install *)"
-    ],
+    "ask": ["Bash(git commit *)", "Bash(git push *)", "Bash(npm install *)"],
     "deny": [
       "Read(./.env)",
       "Read(./.env.*)",

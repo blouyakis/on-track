@@ -41,10 +41,10 @@ Real sign-up and sign-in are not built yet. Until they are, the home page shows 
 
 Put these in `.env.local`. The file is ignored by git; never commit it.
 
-| Variable | Value |
-| --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | The API URL printed by `npx supabase start` (or `npx supabase status`) |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | The publishable key printed by the same command |
+| Variable                               | Value                                                                  |
+| -------------------------------------- | ---------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | The API URL printed by `npx supabase start` (or `npx supabase status`) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | The publishable key printed by the same command                        |
 
 Both are safe to expose to the browser. Access to data is controlled by Row Level Security in the database, not by keeping these values secret.
 
@@ -54,8 +54,11 @@ Both are safe to expose to the browser. Access to data is controlled by Row Leve
 npm run dev          # development server
 npm run build        # production build
 npm test             # unit tests (Vitest)
+npm run test:coverage # unit tests with a coverage report in coverage/
 npm run lint         # ESLint
-npx tsc --noEmit     # type check
+npm run format       # format the code with Prettier
+npm run format:check # check formatting without changing files (CI runs this)
+npm run typecheck    # type check
 ```
 
 ## Database

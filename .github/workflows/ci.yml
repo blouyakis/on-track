@@ -33,6 +33,7 @@ jobs:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm run lint
+      - run: npm run format:check
 
   typecheck:
     needs: install
@@ -43,10 +44,9 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: npm ci
-      # Next.js generates global types such as LayoutProps into .next/types,
-      # which a clean checkout does not have.
-      - run: npx next typegen
-      - run: npx tsc --noEmit
+      # The script runs `next typegen` first: Next.js generates global types
+      # such as LayoutProps into .next/types, which a clean checkout lacks.
+      - run: npm run typecheck
 
   test:
     needs: install
@@ -57,7 +57,14 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: npm ci
-      - run: npm test
+      # Prints the coverage table in the job log and writes the full report.
+      - run: npm run test:coverage
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
 
   build:
     needs: install

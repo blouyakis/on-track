@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { describe, expect, test } from "vitest";
 import {
   canModifyEntry,
   canReadProject,
@@ -7,147 +7,157 @@ import {
   type Entry,
   type Membership,
   type Project,
-} from '@/lib/visibility'
+} from "@/lib/visibility";
 
 const memberships: Membership[] = [
-  { userId: 'alice', projectId: 'p1', role: 'contributor' },
-  { userId: 'olivia', projectId: 'p1', role: 'overseer' },
-  { userId: 'bob', projectId: 'p2', role: 'contributor' },
-]
+  { userId: "alice", projectId: "p1", role: "contributor" },
+  { userId: "olivia", projectId: "p1", role: "overseer" },
+  { userId: "bob", projectId: "p2", role: "contributor" },
+];
 
-describe('canReadProject', () => {
-  test('a contributor of the project can read it', () => {
-    expect(canReadProject('alice', 'p1', memberships)).toBe(true)
-  })
+describe("canReadProject", () => {
+  test("a contributor of the project can read it", () => {
+    expect(canReadProject("alice", "p1", memberships)).toBe(true);
+  });
 
-  test('the overseer of the project can read it', () => {
-    expect(canReadProject('olivia', 'p1', memberships)).toBe(true)
-  })
+  test("the overseer of the project can read it", () => {
+    expect(canReadProject("olivia", "p1", memberships)).toBe(true);
+  });
 
-  test('a member of a different project cannot read it', () => {
-    expect(canReadProject('bob', 'p1', memberships)).toBe(false)
-  })
+  test("a member of a different project cannot read it", () => {
+    expect(canReadProject("bob", "p1", memberships)).toBe(false);
+  });
 
-  test('a user with no memberships cannot read it', () => {
-    expect(canReadProject('stranger', 'p1', memberships)).toBe(false)
-  })
-})
+  test("a user with no memberships cannot read it", () => {
+    expect(canReadProject("stranger", "p1", memberships)).toBe(false);
+  });
+});
 
-describe('canModifyEntry', () => {
+describe("canModifyEntry", () => {
   const contributors: Membership[] = [
     ...memberships,
-    { userId: 'carol', projectId: 'p1', role: 'contributor' },
-  ]
-  const aliceEntry: Entry = { id: 'e1', projectId: 'p1', authorId: 'alice' }
+    { userId: "carol", projectId: "p1", role: "contributor" },
+  ];
+  const aliceEntry: Entry = { id: "e1", projectId: "p1", authorId: "alice" };
 
-  test('a contributor can edit or delete an entry they created', () => {
-    expect(canModifyEntry('alice', aliceEntry, contributors)).toBe(true)
-  })
+  test("a contributor can edit or delete an entry they created", () => {
+    expect(canModifyEntry("alice", aliceEntry, contributors)).toBe(true);
+  });
 
   test("a contributor cannot edit or delete a teammate's entry", () => {
-    expect(canModifyEntry('carol', aliceEntry, contributors)).toBe(false)
-  })
+    expect(canModifyEntry("carol", aliceEntry, contributors)).toBe(false);
+  });
 
-  test('an author who is no longer a member cannot edit or delete their entry', () => {
-    const withoutAlice = contributors.filter((m) => m.userId !== 'alice')
-    expect(canModifyEntry('alice', aliceEntry, withoutAlice)).toBe(false)
-  })
+  test("an author who is no longer a member cannot edit or delete their entry", () => {
+    const withoutAlice = contributors.filter((m) => m.userId !== "alice");
+    expect(canModifyEntry("alice", aliceEntry, withoutAlice)).toBe(false);
+  });
 
-  test('an author cannot edit or delete an entry in a project they are not a member of', () => {
-    const otherProjectEntry: Entry = { id: 'e2', projectId: 'p2', authorId: 'alice' }
-    expect(canModifyEntry('alice', otherProjectEntry, contributors)).toBe(false)
-  })
-})
+  test("an author cannot edit or delete an entry in a project they are not a member of", () => {
+    const otherProjectEntry: Entry = {
+      id: "e2",
+      projectId: "p2",
+      authorId: "alice",
+    };
+    expect(canModifyEntry("alice", otherProjectEntry, contributors)).toBe(
+      false,
+    );
+  });
+});
 
-describe('overseer access', () => {
+describe("overseer access", () => {
   const entries: Entry[] = [
-    { id: 'e1', projectId: 'p1', authorId: 'alice' },
-    { id: 'e2', projectId: 'p1', authorId: 'alice' },
-    { id: 'e3', projectId: 'p2', authorId: 'bob' },
-  ]
+    { id: "e1", projectId: "p1", authorId: "alice" },
+    { id: "e2", projectId: "p1", authorId: "alice" },
+    { id: "e3", projectId: "p2", authorId: "bob" },
+  ];
 
-  test('the overseer can read every entry in their project, and only that project', () => {
-    expect(visibleEntries('olivia', 'p1', entries, memberships)).toEqual([
+  test("the overseer can read every entry in their project, and only that project", () => {
+    expect(visibleEntries("olivia", "p1", entries, memberships)).toEqual([
       entries[0],
       entries[1],
-    ])
-  })
+    ]);
+  });
 
   test("the overseer cannot edit or delete a contributor's entry", () => {
-    expect(canModifyEntry('olivia', entries[0], memberships)).toBe(false)
-  })
+    expect(canModifyEntry("olivia", entries[0], memberships)).toBe(false);
+  });
 
-  test('the overseer cannot edit or delete an entry even when listed as its author', () => {
-    const overseerEntry: Entry = { id: 'e4', projectId: 'p1', authorId: 'olivia' }
-    expect(canModifyEntry('olivia', overseerEntry, memberships)).toBe(false)
-  })
-})
+  test("the overseer cannot edit or delete an entry even when listed as its author", () => {
+    const overseerEntry: Entry = {
+      id: "e4",
+      projectId: "p1",
+      authorId: "olivia",
+    };
+    expect(canModifyEntry("olivia", overseerEntry, memberships)).toBe(false);
+  });
+});
 
-describe('non-member access', () => {
-  const project: Project = { id: 'p1', name: 'Secret project' }
+describe("non-member access", () => {
+  const project: Project = { id: "p1", name: "Secret project" };
   const entries: Entry[] = [
-    { id: 'e1', projectId: 'p1', authorId: 'alice' },
-    { id: 'e3', projectId: 'p2', authorId: 'bob' },
-  ]
+    { id: "e1", projectId: "p1", authorId: "alice" },
+    { id: "e3", projectId: "p2", authorId: "bob" },
+  ];
 
-  test('a member gets the project, including its name', () => {
-    expect(visibleProject('alice', project, memberships)).toEqual(project)
-  })
+  test("a member gets the project, including its name", () => {
+    expect(visibleProject("alice", project, memberships)).toEqual(project);
+  });
 
-  test('a user with no memberships does not get the project or its name', () => {
-    expect(visibleProject('stranger', project, memberships)).toBeNull()
-  })
+  test("a user with no memberships does not get the project or its name", () => {
+    expect(visibleProject("stranger", project, memberships)).toBeNull();
+  });
 
-  test('a member of another project does not get the project or its name', () => {
-    expect(visibleProject('bob', project, memberships)).toBeNull()
-  })
+  test("a member of another project does not get the project or its name", () => {
+    expect(visibleProject("bob", project, memberships)).toBeNull();
+  });
 
-  test('a user with no memberships gets no entries from the project', () => {
-    expect(visibleEntries('stranger', 'p1', entries, memberships)).toEqual([])
-  })
+  test("a user with no memberships gets no entries from the project", () => {
+    expect(visibleEntries("stranger", "p1", entries, memberships)).toEqual([]);
+  });
 
-  test('a member of another project gets no entries from the project', () => {
-    expect(visibleEntries('bob', 'p1', entries, memberships)).toEqual([])
-  })
-})
+  test("a member of another project gets no entries from the project", () => {
+    expect(visibleEntries("bob", "p1", entries, memberships)).toEqual([]);
+  });
+});
 
-describe('contributor and cross-project access', () => {
+describe("contributor and cross-project access", () => {
   const team: Membership[] = [
     ...memberships,
-    { userId: 'carol', projectId: 'p1', role: 'contributor' },
-  ]
+    { userId: "carol", projectId: "p1", role: "contributor" },
+  ];
   const entries: Entry[] = [
-    { id: 'e1', projectId: 'p1', authorId: 'alice' },
-    { id: 'e2', projectId: 'p1', authorId: 'carol' },
-    { id: 'e3', projectId: 'p2', authorId: 'bob' },
-  ]
+    { id: "e1", projectId: "p1", authorId: "alice" },
+    { id: "e2", projectId: "p1", authorId: "carol" },
+    { id: "e3", projectId: "p2", authorId: "bob" },
+  ];
 
   test("a contributor can read every entry in their project, including teammates'", () => {
-    expect(visibleEntries('alice', 'p1', entries, team)).toEqual([
+    expect(visibleEntries("alice", "p1", entries, team)).toEqual([
       entries[0],
       entries[1],
-    ])
-  })
+    ]);
+  });
 
   test("an overseer gets no entries from a project they don't oversee", () => {
-    expect(visibleEntries('olivia', 'p2', entries, team)).toEqual([])
-  })
+    expect(visibleEntries("olivia", "p2", entries, team)).toEqual([]);
+  });
 
   test("an overseer cannot edit or delete an entry in a project they don't oversee", () => {
-    expect(canModifyEntry('olivia', entries[2], team)).toBe(false)
-  })
-})
+    expect(canModifyEntry("olivia", entries[2], team)).toBe(false);
+  });
+});
 
-describe('a user with different roles in different projects', () => {
+describe("a user with different roles in different projects", () => {
   const dualRole: Membership[] = [
-    { userId: 'dana', projectId: 'p1', role: 'contributor' },
-    { userId: 'dana', projectId: 'p2', role: 'overseer' },
-  ]
+    { userId: "dana", projectId: "p1", role: "contributor" },
+    { userId: "dana", projectId: "p2", role: "overseer" },
+  ];
 
-  test('can edit their entry where they are a contributor, but not where they are the overseer', () => {
-    const p1Entry: Entry = { id: 'e1', projectId: 'p1', authorId: 'dana' }
-    const p2Entry: Entry = { id: 'e2', projectId: 'p2', authorId: 'dana' }
-    expect(canModifyEntry('dana', p1Entry, dualRole)).toBe(true)
-    expect(canModifyEntry('dana', p2Entry, dualRole)).toBe(false)
-  })
-})
+  test("can edit their entry where they are a contributor, but not where they are the overseer", () => {
+    const p1Entry: Entry = { id: "e1", projectId: "p1", authorId: "dana" };
+    const p2Entry: Entry = { id: "e2", projectId: "p2", authorId: "dana" };
+    expect(canModifyEntry("dana", p1Entry, dualRole)).toBe(true);
+    expect(canModifyEntry("dana", p2Entry, dualRole)).toBe(false);
+  });
+});

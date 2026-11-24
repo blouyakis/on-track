@@ -141,9 +141,16 @@ export async function createEntry(
   if (error) {
     // Details stay in the server log; the user gets a generic message.
     console.error("Saving an entry failed:", error.message);
-    return failure("The entry could not be saved. Check the fields and try again.");
+    return failure(
+      "The entry could not be saved. Check the fields and try again.",
+    );
   }
 
   refresh();
-  return { status: "success", message: "Entry added.", fieldErrors: {}, values: null };
+  return {
+    status: "success",
+    message: "Entry added.",
+    fieldErrors: {},
+    values: null,
+  };
 }

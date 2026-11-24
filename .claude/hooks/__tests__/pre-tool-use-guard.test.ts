@@ -290,3 +290,39 @@ describe("second review: brace expansion", () => {
     expect(runGuard(tool, input)).toEqual({ code: 0, stderr: "" });
   });
 });
+
+describe("second review: wrapper commands", () => {
+  test.each([
+    "time git push --force origin x",
+    "env git push -f origin x",
+    "nohup git push --force origin x",
+    "command git push --force origin x",
+    "env -u PAGER GIT_TRACE=1 git push --force origin x",
+  ])("force push behind a wrapper: %s", (command) => {
+    const { code, stderr } = runGuard("Bash", { command });
+    expect(code).toBe(2);
+    expect(stderr).toContain("force pushes are not allowed");
+  });
+
+  test.each([
+    "{ git push origin main; }",
+    "echo origin | xargs git push --dry-run origin main",
+  ])("push to main behind a wrapper: %s", (command) => {
+    const { code, stderr } = runGuard("Bash", { command });
+    expect(code).toBe(2);
+    expect(stderr).toContain("pushing to main is not allowed");
+  });
+
+  test("a protected-file write behind a wrapper is blocked", () => {
+    const { code, stderr } = runGuard("Bash", { command: "env rm AGENTS.md" });
+    expect(code).toBe(2);
+    expect(stderr).toContain("must not be edited by hand");
+  });
+
+  test("time npm test is allowed", () => {
+    expect(runGuard("Bash", { command: "time npm test" })).toEqual({
+      code: 0,
+      stderr: "",
+    });
+  });
+});

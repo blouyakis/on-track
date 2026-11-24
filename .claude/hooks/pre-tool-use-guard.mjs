@@ -209,6 +209,24 @@ function projectRelative(word, cwd, projectDir) {
   return path.relative(projectDir, path.resolve(cwd, expanded));
 }
 
+/**
+ * The files a sed -i or perl -i command edits: its operands without the
+ * script, which is the value of -e (or -pe, --expression) or, with no -e,
+ * the first operand.
+ */
+function inPlaceFiles(args) {
+  const files = [];
+  let hasScriptOption = false;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (/^-[a-zA-Z]*e$/.test(arg) || arg === "--expression") {
+      hasScriptOption = true;
+      i++;
+    } else if (!arg.startsWith("-")) files.push(arg);
+  }
+  return hasScriptOption ? files : files.slice(1);
+}
+
 function checkProtectedWrites(segment, cwd, projectDir) {
   const isProtected = (word) =>
     isProtectedFile(projectRelative(word, cwd, projectDir));
@@ -227,7 +245,8 @@ function checkProtectedWrites(segment, cwd, projectDir) {
     );
 
   let targets = [];
-  if (inPlace || WRITES_ALL_ARGS.test(command)) targets = operands;
+  if (inPlace) targets = inPlaceFiles(words.slice(1));
+  else if (WRITES_ALL_ARGS.test(command)) targets = operands;
   else if (WRITES_LAST_ARG.test(command)) {
     // cp -t <dir> and --target-directory=<dir> name the destination first.
     const flagIndex = words.indexOf("-t");

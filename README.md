@@ -63,10 +63,10 @@ npm run typecheck    # type check
 
 ## CI
 
-GitHub Actions runs two workflows on pull requests.
+GitHub Actions runs two workflows.
 
 - **`ci.yml`** runs on every pull request and every push to `main`: lint and format check, type check, tests with coverage, build, and `npm audit`.
-- **`ai-review.yml`** has Claude review the pull request and post its findings as PR comments (inline comments plus one summary). It runs when a pull request is opened, reopened, or marked ready for review; drafts are skipped. To review again after new pushes, comment `@claude review` on the pull request. Only the repo owner, members, and collaborators can trigger it, and a new run cancels one still in progress for the same pull request. The comment trigger only works once the workflow is on `main`.
+- **`ai-review.yml`** has Claude review the pull request and post its findings as PR comments (inline comments plus one summary). It runs when a pull request is opened, reopened, or marked ready for review; drafts are skipped. To review again after new pushes, post a comment on the pull request that starts with `@claude review`. Only the repo owner, members, and collaborators can trigger it, and a new run cancels one still in progress for the same pull request. The comment trigger only works once the workflow is on `main`. Pull requests from forks are not reviewed, so open them from a branch in this repo.
 
 The AI review needs an `ANTHROPIC_API_KEY` repository secret (Settings → Secrets and variables → Actions), which the repo owner adds. The key is never stored in the repo.
 

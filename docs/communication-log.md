@@ -161,3 +161,39 @@ Project information only. Leave out anything personal, such as schedules, availa
 - **Decisions made:** Barbara proposed that we both submit the `hw4-submission` release link on Canvas, and Ziye agreed. Barbara's agreement to Ziye's proposals, the two skills and the standup rule are already recorded in entries 11 and 12.
 - **Action items (owner):** Ziye: review and merge PR #52 and check entries 11 and 12 (done, #52). Ziye: make `/log` write the per-person standup file (#50). Both: submit https://github.com/blouyakis/on-track/releases/tag/hw4-submission on Canvas (Ziye done).
 - **Notes:** Completed: the decisions recorded on #46, #47, #48, #26, #34 and #37; Barbara's duplicate `/log` issue closed; #19 and #30 updated with the standup rule, and a comment left on #50 about the per-person file; the `hw4-submission` release made as a fixed snapshot of the repo with links to all four deliverables, so Sprint 1 changes do not affect grading. PR #52 (https://github.com/blouyakis/on-track/pull/52) holds the last log commit, made after Ziye merged PR #49 at 16:47; Ziye approved and merged it at 23:42 and confirmed entries 11 and 12 describe her side accurately. Barbara held off on new log entries until #52 was merged.
+
+### 14 · 2026-11-22 · Review
+
+- **Time (ET):** 01:10 (Nov 22) – 00:45 (Nov 24)
+- **Format:** Async (Slack)
+- **Topics discussed:** Ziye's PR #53 (Prettier and the coverage report in CI, issue #26) and PR #54 (the `/log` skill, issue #50); how many entries one pasted thread becomes; how `/log` decides that a post is a standup; Barbara's review of both PRs; the new npm scripts missing from the Claude Code allow list.
+- **Decisions made:** Ziye proposed that `/log` groups by exchange, not by message (one conversation about one topic is one entry), and Barbara agreed. Ziye proposed that a post labeled as a standup is treated as one, and that `/log` asks first about an unlabeled post that looks like one; Barbara agreed.
+- **Action items (owner):** Barbara: run `/log` on this thread and tell Ziye about anything it should handle better, as input for a v2. Ziye: allow `npm run typecheck`, `npm run format:check` and `npm run test:coverage` in `.claude/settings.json` (#55). Ziye: pull `main` before starting anything new (done).
+- **Notes:** Completed: PR #53 opened by Ziye (https://github.com/blouyakis/on-track/pull/53), adding Prettier, `format:check` in the CI lint job, and `test:coverage` with the report uploaded by CI; there is no threshold yet, since #39 adds the 70% gate, and the whole repo was reformatted once in its own commit with no behavior changes. PR #54 opened by Ziye (https://github.com/blouyakis/on-track/pull/54) with the `/log` skill. Ziye tested the standup flow on the Nov 21 thread (2 Standup entries, 1 Review entry and two files in `docs/sprints/sprint-1/standups/`), then reverted all of it, since Sprint 1 had not started and Barbara's message was not meant as a standup; the session log is `docs/skills/log/third-run-session.txt`. Barbara approved and merged both PRs on Nov 23 (19:02 and 19:03), which closed #26 and #50, and confirmed that entry 13 describes Barbara's side accurately. Ziye opened #55 for the allow list, leaving `npm run format` out because the #24 hook will format files on edit.
+
+### 15 · 2026-11-24 · Standup
+
+- **Time (ET):** 03:30
+- **Format:** Async (Slack)
+- **Topics discussed:** Ziye's standup: three PRs opened, for the hooks (#24), the allow list (#55) and the AI review in CI (#27); three questions for Barbara, on the API key for PR #56, the definition of C.L.E.A.R., and the guard hook in PR #57.
+- **Decisions made:** None; informational. Barbara's answers are in entry 16.
+- **Action items (owner):** Ziye: mark PR #56 ready for review once the API key is in, so its first AI review can run. Barbara: review PR #57 and PR #58, look through PR #56, and answer the three questions (done; see entry 16).
+- **Notes:** Completed: PR #57 opened for #24 (https://github.com/blouyakis/on-track/pull/57), with Claude Code hooks that format on edit and run the tests on Stop, plus a PreToolUse guard that blocks what CLAUDE.md forbids (reading `.env` files, hand-editing `AGENTS.md` or `package-lock.json`, pushing to `main`, force pushes); PR #58 opened for #55 (https://github.com/blouyakis/on-track/pull/58), allowing the new npm scripts in the Claude Code settings; PR #56 opened as a draft for #27, the AI review on pull requests in CI (https://github.com/blouyakis/on-track/pull/56). CI is green on all three. Blocker: PR #56 needs an API key before it can run, and adding the secret needs repo-owner access; the steps are in the PR. Ziye offered to split the cost evenly if Barbara's key is used, or to set up a key. Until the course's definition of C.L.E.A.R. is found, the AI review uses Google's Engineering Practices plus Conventional Comments.
+
+### 16 · 2026-11-24 · Review
+
+- **Time (ET):** 16:45
+- **Format:** Async (Slack)
+- **Topics discussed:** Barbara's reviews of PR #56, PR #57 and PR #58; how PR #57 should be merged; the guard hook; the API key for the AI review; where C.L.E.A.R. is defined; the Sprint 1 planning note in PR #59.
+- **Decisions made:** The guard hook in PR #57 stays as the default: Ziye proposed it and Barbara agreed. The API key: Barbara agreed to Ziye's offer in entry 15 to split the cost evenly; Barbara creates an Anthropic key with a spend limit and adds it as the `ANTHROPIC_API_KEY` secret, so the key is never sent between us.
+- **Action items (owner):** Barbara: create the key and add the secret, then tell Ziye. Ziye marking PR #56 ready after that is already recorded in entry 15. Barbara: word around the guard's env-file block in #20 and #28. Ziye: merge PR #57 with a merge commit, not a squash. Ziye: review PR #59 and change anything in the goal or the order of work that does not match Ziye's understanding. Both: whoever finds the C.L.E.A.R. definition first posts it on #27.
+- **Notes:** Completed: Barbara approved PR #58 and PR #57, and left a comment review on PR #56 without approving, only because the workflow has not run yet; PR #59 opened by Barbara with the Sprint 1 planning note (https://github.com/blouyakis/on-track/pull/59). Still open, waiting on Ziye: Barbara asked for the merge commit on PR #57 so the test-then-fix commit pairs stay in the history as TDD evidence, and proposed the C.L.E.A.R. item above. Neither of us has found the definition; Barbara expects it in the Week 12 material, and the Project 3 page asks for it by name in PR reviews, so #29 and #38 need it. The guard blocks any command that names an env file, including commit messages and PR bodies. The goal and the order of work in PR #59 are a draft. Risk from the note: #20 removes the demo sign-in that the E2E tests in #25 and #14 use.
+
+### 17 · 2026-11-24 · Standup
+
+- **Time (ET):** 16:45
+- **Format:** Async (Slack)
+- **Topics discussed:** Barbara's standup: Sprint 1 started on the board, the reviewed PRs and the Sprint 1 planning note; next, the API key and `/add-feature`.
+- **Decisions made:** None; informational.
+- **Action items (owner):** Barbara: add the API key secret for PR #56; write `/add-feature` v1 (#15), then use it on authentication (#20).
+- **Notes:** Completed: Sprint 1 started on the board, with Barbara's Sprint 1 issues in Sprint ToDo and #19 open again after it closed by itself when PR #49 merged; PR #56, PR #57 and PR #58 reviewed, with #57 and #58 approved; PR #59 opened with the Sprint 1 planning note. The merge of PR #53 and PR #54 is already recorded in entry 14. Blockers: none.

@@ -87,14 +87,19 @@ export function isEnvFile(name) {
   return false;
 }
 
-/** True for AGENTS.md or package-lock.json at the root, or anything in node_modules/. */
+/**
+ * True for AGENTS.md or package-lock.json at the root, or anything in
+ * node_modules/. Compared without case, because the default macOS disk
+ * treats agents.md and AGENTS.md as the same file.
+ */
 export function isProtectedFile(relativePath) {
   const normalized = relativePath
     .split(path.sep)
     .join("/")
-    .replace(/^\.\//, "");
+    .replace(/^\.\//, "")
+    .toLowerCase();
   return (
-    normalized === "AGENTS.md" ||
+    normalized === "agents.md" ||
     normalized === "package-lock.json" ||
     normalized.split("/").includes("node_modules")
   );

@@ -427,3 +427,26 @@ describe("second review: more shell writes", () => {
     ).toEqual({ code: 0, stderr: "" });
   });
 });
+
+describe("second review: every name that starts with .env", () => {
+  test.each([
+    ["Bash", { command: "cat .envrc" }],
+    ["Bash", { command: "cat .env-local" }],
+    ["Read", { file_path: inProject(".env_backup") }],
+    ["Read", { file_path: inProject(".env.example.bak") }],
+    // A glob is tested against known env names, .envrc included.
+    ["Bash", { command: "cat .e?vrc" }],
+  ])("%s %o is blocked", (tool, input) => {
+    const { code, stderr } = runGuard(tool, input);
+    expect(code).toBe(2);
+    expect(stderr).toContain("secrets file (.env*)");
+  });
+
+  test.each([
+    ["Read", { file_path: inProject(".env.example") }],
+    ["Bash", { command: "node -e 'console.log(process.env.HOME)'" }],
+    ["Bash", { command: "ls .eslintrc.json .gitignore" }],
+  ])("%s %o is allowed", (tool, input) => {
+    expect(runGuard(tool, input)).toEqual({ code: 0, stderr: "" });
+  });
+});

@@ -61,6 +61,15 @@ npm run format:check # check formatting without changing files (CI runs this)
 npm run typecheck    # type check
 ```
 
+## CI
+
+GitHub Actions runs two workflows on pull requests.
+
+- **`ci.yml`** runs on every pull request and every push to `main`: lint and format check, type check, tests with coverage, build, and `npm audit`.
+- **`ai-review.yml`** has Claude review the pull request and post its findings as PR comments (inline comments plus one summary). It runs when a pull request is opened, reopened, or marked ready for review; drafts are skipped. To review again after new pushes, comment `@claude review` on the pull request. Only the repo owner, members, and collaborators can trigger it, and a new run cancels one still in progress for the same pull request. The comment trigger only works once the workflow is on `main`.
+
+The AI review needs an `ANTHROPIC_API_KEY` repository secret (Settings → Secrets and variables → Actions), which the repo owner adds. The key is never stored in the repo.
+
 ## Database
 
 The schema lives in `supabase/migrations/`. Add a change with `npx supabase migration new <name>`, then run `npx supabase db reset` to rebuild the local database from all migrations.

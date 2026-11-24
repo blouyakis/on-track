@@ -1,0 +1,107 @@
+name: AI review
+
+# Claude reviews a pull request and posts its findings as PR comments.
+# - Runs automatically when a non-draft PR is opened, reopened, or marked
+#   ready for review. Pushes to an open PR do not start a new review.
+# - Runs again when a repo owner, member, or collaborator comments a line that
+#   starts with "@claude review" on the PR. Comment events always use the
+#   workflow file on the default branch, so this trigger works after merge.
+# - The Anthropic API key comes only from the ANTHROPIC_API_KEY secret.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: >-
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.draft == false) ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       startsWith(github.event.comment.body, '@claude review') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@eb56b6666facdbd501035f4a0269d8caee2e7a8b # v1.0.289
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: >-
+            --model claude-sonnet-5-5
+            --max-turns 15
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+          # TODO before this PR opens: fill in what each C.L.E.A.R. letter
+          # stands for from the course material, in the block marked
+          # "C.L.E.A.R. REVIEW" below. The CLAUDE.md checklist does not depend on it.
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+
+            You are reviewing a pull request for OnTrack. Read CLAUDE.md and
+            docs/PRD.md first. The checked-out tree may be the base branch, so
+            get the changes with `gh pr diff` and the description with
+            `gh pr view`. Review only what this PR changes.
+
+            ## C.L.E.A.R. REVIEW
+            Organize the review under these five headings:
+            - C: TODO (definition from the course material)
+            - L: TODO (definition from the course material)
+            - E: TODO (definition from the course material)
+            - A: TODO (definition from the course material)
+            - R: TODO (definition from the course material)
+            ## END C.L.E.A.R. REVIEW
+
+            ## CLAUDE.md checklist
+            Check the change against these project rules and flag each break:
+            - Business rules in src/lib/ are pure functions with no React,
+              Next.js, or Supabase imports, and they return result values
+              for expected failures instead of throwing.
+            - src/lib/ code has tests written first (a `test:` commit before
+              the `feat:` commit), and no test was changed or deleted just to
+              make it pass.
+            - Roles are per project (`contributor`, `overseer`) and never
+              stored on the user. Role and project IDs from the client are
+              not trusted; membership is looked up on the server.
+            - Access is enforced in server code and in Row Level Security.
+              No data, including a project's name, reaches a user without a
+              membership in that project.
+            - Input is validated on the server with the src/lib/ functions,
+              following the PRD's "Rules the logic must enforce".
+            - Entry types and role names match the PRD exactly.
+            - TypeScript strict: no `any`. Named exports in src/lib/.
+              Kebab-case file names, PascalCase components. Server
+              Components unless state, effects, or browser APIs need
+              "use client".
+            - Nothing from the PRD's out-of-scope list (task lists, timers,
+              notifications, GitHub import, file uploads).
+            - No secrets, .env files, or keys in the diff. No hand edits to
+              AGENTS.md, package-lock.json, or node_modules/.
+            - Commits use Conventional Commit prefixes, and the PR
+              description states the AI disclosure (percent AI-generated,
+              tool used, human review applied).
+
+            ## How to post
+            - Use the inline comment tool for issues tied to specific lines.
+              Each one says what is wrong, why it matters, and a fix.
+            - Then post one summary comment with `gh pr comment` that groups
+              findings under the C.L.E.A.R. headings and the CLAUDE.md
+              checklist, most severe first.
+            - Report only real problems you can point to in the diff. If you
+              find none, say so plainly. Do not push commits or change files.

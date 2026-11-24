@@ -121,10 +121,13 @@ function shellWords(command) {
 
 /** Split a shell command into simple segments on && || ; | & and newlines. */
 function shellSegments(command) {
-  return command
-    .split(/&&|\|\||[;|&\n]/)
-    .map((segment) => segment.trim())
-    .filter(Boolean);
+  return (
+    command
+      // A | right after > is the >| redirection, not a pipe.
+      .split(/&&|\|\||(?<!>)\||[;&\n]/)
+      .map((segment) => segment.trim())
+      .filter(Boolean)
+  );
 }
 
 // Commands that run another command, with their options that take a value.
@@ -210,8 +213,8 @@ function checkProtectedWrites(segment, cwd, projectDir) {
   const isProtected = (word) =>
     isProtectedFile(projectRelative(word, cwd, projectDir));
 
-  // Redirection into a protected file: echo x > AGENTS.md, cat >> package-lock.json.
-  for (const match of segment.matchAll(/>>?\s*["']?([^\s"'|;&]+)/g)) {
+  // Redirection into a protected file: echo x > AGENTS.md, >> and >| too.
+  for (const match of segment.matchAll(/>>?\|?\s*["']?([^\s"'|;&]+)/g)) {
     if (isProtected(match[1])) return protectedReason(match[1]);
   }
   const words = dropAssignments(shellWords(segment));
@@ -219,11 +222,24 @@ function checkProtectedWrites(segment, cwd, projectDir) {
   const operands = words.slice(1).filter((word) => !word.startsWith("-"));
   const inPlace =
     (command === "sed" || command === "perl") &&
-    words.some((word) => /^-[a-zA-Z]*i/.test(word));
+    words.some(
+      (word) => /^-[a-zA-Z]*i/.test(word) || word.startsWith("--in-place"),
+    );
 
   let targets = [];
   if (inPlace || WRITES_ALL_ARGS.test(command)) targets = operands;
-  else if (WRITES_LAST_ARG.test(command)) targets = operands.slice(-1);
+  else if (WRITES_LAST_ARG.test(command)) {
+    // cp -t <dir> and --target-directory=<dir> name the destination first.
+    const flagIndex = words.indexOf("-t");
+    const longFlag = words.find((word) =>
+      word.startsWith("--target-directory="),
+    );
+    if (flagIndex !== -1 && flagIndex + 1 < words.length) {
+      targets = [words[flagIndex + 1]];
+    } else if (longFlag !== undefined) {
+      targets = [longFlag.slice("--target-directory=".length)];
+    } else targets = operands.slice(-1);
+  }
   const target = targets.find(isProtected);
   return target === undefined ? null : protectedReason(target);
 }

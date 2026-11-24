@@ -269,3 +269,22 @@ describe("second review: line continuations", () => {
     expect(stderr).toContain("pushing to main is not allowed");
   });
 });
+
+describe("second review: brace expansion", () => {
+  test.each([
+    ["Bash", { command: "cat .en{v,}" }],
+    ["Bash", { command: "cat {.env,README.md}" }],
+    ["Grep", { pattern: "KEY", path: inProject("."), glob: "{.env,x}" }],
+  ])("%s %o is blocked", (tool, input) => {
+    const { code, stderr } = runGuard(tool, input);
+    expect(code).toBe(2);
+    expect(stderr).toContain("secrets file (.env*)");
+  });
+
+  test.each([
+    ["Bash", { command: "ls src/{lib,app}" }],
+    ["Grep", { pattern: "x", path: inProject("src"), glob: "*.{ts,tsx}" }],
+  ])("%s %o is allowed", (tool, input) => {
+    expect(runGuard(tool, input)).toEqual({ code: 0, stderr: "" });
+  });
+});

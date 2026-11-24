@@ -40,6 +40,9 @@ const ENV_CANDIDATES = [
   ".env.production.local",
   ".env.test",
   ".env.test.local",
+  ".envrc",
+  ".env-local",
+  ".env_local",
 ];
 
 /** Convert a shell glob, including {a,b} braces, to an anchored regular expression. */
@@ -70,13 +73,14 @@ function globToRegExp(glob) {
 }
 
 /**
- * True for .env and .env.<anything> except .env.example, and for a glob
- * (such as .env* or .en?) that would match one of them.
+ * True for any name that starts with .env (.env.local, .envrc, .env-local)
+ * except .env.example, and for a glob (such as .en? or {.env,x}) that would
+ * match one of the known env names in ENV_CANDIDATES.
  */
 export function isEnvFile(name) {
   const base = path.basename(name);
   if (base === ".env.example") return false;
-  if (/^\.env(\..+)?$/.test(base)) return true;
+  if (base.startsWith(".env")) return true;
   // Only a glob that can start with a dot can match a dotfile.
   if (/[*?[{]/.test(base) && /^[.{[]/.test(base)) {
     // An invalid glob such as [z-a] throws here; main() then fails closed.

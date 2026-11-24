@@ -66,6 +66,8 @@ describe("blocks reading or printing .env files", () => {
     ["Bash", { command: "cat .env.local" }],
     ["Bash", { command: "source .env && npm run dev" }],
     ["Bash", { command: "grep SUPABASE ./.env.development" }],
+    // A name inside --flag=value.
+    ["Bash", { command: "node --env-file=.env.local server.js" }],
   ])("%s %o", (tool, input) => {
     const { code, stderr } = runGuard(tool, input);
     expect(code).toBe(2);
@@ -108,6 +110,11 @@ describe("blocks pushing to main and force pushes", () => {
     "git push origin HEAD:main",
     "git push origin feature:refs/heads/main",
     "npm test && git push origin main",
+    // Global options and env prefixes before the subcommand.
+    "git -c push.default=current push origin main",
+    "git --git-dir=.git push origin main",
+    "GIT_TRACE=1 git push origin main",
+    "sleep 1 & git push origin main",
   ])("push to main: %s", (command) => {
     const { code, stderr } = runGuard("Bash", { command }, featureRepo);
     expect(code).toBe(2);

@@ -202,6 +202,23 @@ describe("blocks pushing to main and force pushes", () => {
   });
 });
 
+describe("fails closed", () => {
+  test("an unexpected error inside the guard blocks the call", () => {
+    // [z-a] is an invalid character range, so building the glob throws.
+    const { code, stderr } = runGuard("Bash", { command: "cat .e[z-a]*" });
+    expect(code).toBe(2);
+    expect(stderr).toContain("the guard itself failed");
+  });
+
+  test("unparseable stdin is let through", () => {
+    const result = spawnSync("node", [script], {
+      input: "not json",
+      encoding: "utf8",
+    });
+    expect(result.status).toBe(0);
+  });
+});
+
 describe("lets normal actions through", () => {
   test.each([
     ["Read", { file_path: inProject(".env.example") }],

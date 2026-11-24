@@ -263,7 +263,9 @@ function checkGitPush(segment, cwd) {
   return null;
 }
 
-function checkBash(command, cwd, projectDir) {
+function checkBash(rawCommand, cwd, projectDir) {
+  // Join lines continued with a trailing backslash into one command.
+  const command = rawCommand.replace(/\\\r?\n/g, " ");
   for (const word of shellWords(command)) {
     // Also look inside --flag=value and VAR=value words.
     for (const part of word.split("=")) {

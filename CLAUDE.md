@@ -96,7 +96,7 @@ This repo runs Next.js 16.4 with `cacheComponents: true` and `partialPrefetching
 - **PostToolUse, format on edit** (`format-edited-file.sh`): after every Edit or Write, runs `prettier --write --ignore-unknown` on that one file. It skips files Prettier does not handle, files in `.prettierignore` (`AGENTS.md`, `package-lock.json`, `docs/`), and files outside the project. If Prettier fails, for example on a syntax error, Claude sees the error. It does not run `eslint --fix`, because autofixes can change behavior; `npm run lint` stays a pre-commit check.
 - **Stop, run the tests** (`run-tests-on-stop.sh`): when Claude finishes a turn, runs `vitest run` if anything outside `docs/` has changed. If tests fail, it blocks the stop once and feeds the failure back so Claude fixes it. When `stop_hook_active` is true, Claude is already continuing because of this hook, so the script lets it stop instead of looping. It only looks at uncommitted changes, so code committed during a turn is not re-tested; that is why the four checks run before every commit.
 
-Inspect them with `/hooks`. To turn them off for yourself, set `"disableAllHooks": true` in `.claude/settings.local.json`. Evidence of both hooks firing is in `docs/hooks/`.
+Inspect them with `/hooks`. To turn them off for yourself, set `"disableAllHooks": true` in `.claude/settings.local.json`. Evidence of all three hooks firing is in `docs/hooks/`.
 
 ## Do
 

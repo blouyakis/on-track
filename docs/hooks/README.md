@@ -51,7 +51,7 @@ The prompts never touch a real secret and never really push:
 3. **PostToolUse.** Paste this prompt:
 
    ```text
-   Use the Write tool to create src/lib/zz-hook-demo.ts with exactly this line, keeping the odd spacing: export const   demo = {a:1,b:2}
+   Use the Write tool to create src/zz-hook-demo.ts with exactly this line, keeping the odd spacing: export const   demo = {a:1,b:2}
    Then use the Read tool to read it back and quote what the file contains now.
    ```
 
@@ -89,7 +89,7 @@ The prompts never touch a real secret and never really push:
 7. Clean up the demo files and confirm that `AGENTS.md` is unchanged. Never commit the demo files.
 
    ```sh
-   rm src/lib/zz-hook-demo.ts src/lib/__tests__/zz-hook-demo.test.ts
+   rm src/zz-hook-demo.ts src/lib/__tests__/zz-hook-demo.test.ts
    git status --short
    ```
 

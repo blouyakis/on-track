@@ -400,6 +400,27 @@ describe("second review: more shell writes", () => {
     expect(stderr).toContain("must not be edited by hand");
   });
 
+  test.each([
+    "sed -i 's/node_modules/vendor/' .gitignore",
+    "sed -i '' -e 's/node_modules/vendor/' .gitignore",
+    "perl -pi -e 's/node_modules/vendor/' .gitignore",
+    "perl -i -pe 's/AGENTS.md/agents/' README.md",
+  ])(
+    "an in-place script that only mentions a protected name: %s",
+    (command) => {
+      expect(runGuard("Bash", { command })).toEqual({ code: 0, stderr: "" });
+    },
+  );
+
+  test.each([
+    "sed -i '' -e s/a/b/ package-lock.json",
+    "perl -pi -e 's/a/b/' AGENTS.md",
+  ])("an in-place edit of a protected file: %s", (command) => {
+    const { code, stderr } = runGuard("Bash", { command });
+    expect(code).toBe(2);
+    expect(stderr).toContain("must not be edited by hand");
+  });
+
   test("cp -t with a normal destination is allowed", () => {
     expect(
       runGuard("Bash", { command: "cp -t /tmp AGENTS.md package-lock.json" }),

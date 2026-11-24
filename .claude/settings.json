@@ -9,6 +9,7 @@
       "Bash(npm run typecheck)",
       "Bash(npm run format:check)",
       "Bash(npm run test:coverage)",
+      "Bash(npm run test:coverage *)",
       "Bash(npx vitest run *)",
       "Bash(npx tsc --noEmit)",
       "Bash(git status)",

@@ -163,16 +163,23 @@ function checkGitPush(segment, cwd) {
       "CLAUDE.md forbids force-pushing or rewriting published history. Push a new commit instead."
     );
   }
-  const toMain = args.some(
-    (arg) =>
-      arg === "main" ||
-      arg.endsWith(":main") ||
-      arg.endsWith("refs/heads/main"),
-  );
+  const toMain =
+    // --all pushes every local branch, main included.
+    args.includes("--all") ||
+    args.some(
+      (arg) =>
+        arg === "main" ||
+        arg.endsWith(":main") ||
+        arg.endsWith("refs/heads/main"),
+    );
+  // Without a refspec (git push, git push origin), or with HEAD or @, git
+  // pushes the current branch.
   const refspecs = args.filter((arg) => !arg.startsWith("-"));
-  // With no refspec (git push, git push origin), git pushes the current branch.
-  const bareOnMain = refspecs.length <= 1 && currentBranch(cwd) === "main";
-  if (toMain || bareOnMain) {
+  const pushesCurrent =
+    refspecs.length <= 1 ||
+    refspecs.slice(1).some((ref) => ref === "HEAD" || ref === "@");
+  const currentOnMain = pushesCurrent && currentBranch(cwd) === "main";
+  if (toMain || currentOnMain) {
     return (
       "Blocked by the OnTrack guard hook: pushing to main is not allowed. " +
       "Every change reaches main through a pull request. Push a feature branch and open a PR."

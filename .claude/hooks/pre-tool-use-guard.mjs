@@ -83,9 +83,18 @@ export function isProtectedFile(relativePath) {
   );
 }
 
+/** Remove sentence punctuation after a word, keeping words made only of dots. */
+function stripTrailing(word) {
+  const stripped = word.replace(/[.,:;]+$/, "");
+  return stripped === "" ? word : stripped;
+}
+
 /** Split a shell command into words on whitespace, quotes and operators (not on =). */
 function shellWords(command) {
-  return command.split(/[\s"'`<>|;&()]+/).filter(Boolean);
+  return command
+    .split(/[\s"'`<>|;&()]+/)
+    .map(stripTrailing)
+    .filter(Boolean);
 }
 
 /** Split a shell command into simple segments on && || ; | & and newlines. */

@@ -91,6 +91,9 @@ describe("blocks editing AGENTS.md, package-lock.json and node_modules/", () => 
       { command: `sed -i '' s/a/b/ "$CLAUDE_PROJECT_DIR/package-lock.json"` },
     ],
     ["Bash", { command: `GIT_PAGER=cat rm ${inProject("AGENTS.md")}` }],
+    // cp writes its destination; rm of the whole folder stays blocked.
+    ["Bash", { command: "cp /tmp/lock.json package-lock.json" }],
+    ["Bash", { command: "rm -rf node_modules" }],
   ])("%s %o", (tool, input) => {
     const { code, stderr } = runGuard(tool, input);
     expect(code).toBe(2);
@@ -206,6 +209,9 @@ describe("lets normal actions through", () => {
     ["Bash", { command: "cat .env.example" }],
     ["Bash", { command: "npm install --save-dev prettier" }],
     ["Glob", { pattern: "**/*.ts" }],
+    // cp, ln and install only read their sources.
+    ["Bash", { command: "cp package-lock.json /tmp/lock-backup.json" }],
+    ["Bash", { command: "ln -s AGENTS.md /tmp/agents-link.md" }],
   ])("%s %o", (tool, input) => {
     expect(runGuard(tool, input)).toEqual({ code: 0, stderr: "" });
   });

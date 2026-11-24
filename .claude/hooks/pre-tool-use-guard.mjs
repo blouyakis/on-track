@@ -122,14 +122,40 @@ function shellSegments(command) {
     .filter(Boolean);
 }
 
-/** Skip leading VAR=value assignments, as in GIT_TRACE=1 git push. */
+// Commands that run another command, with their options that take a value.
+const WRAPPERS = new Map([
+  ["env", new Set(["-u", "-C", "-S", "--unset", "--chdir"])],
+  ["time", new Set()],
+  ["command", new Set()],
+  ["builtin", new Set()],
+  ["nohup", new Set()],
+  ["exec", new Set(["-a"])],
+  ["sudo", new Set(["-u", "-g", "-C", "-D", "-h"])],
+  ["nice", new Set(["-n"])],
+  ["xargs", new Set(["-I", "-L", "-n", "-P", "-s", "-E", "-d"])],
+  ["{", new Set()],
+  ["!", new Set()],
+]);
+
+/**
+ * Skip what comes before the real command: VAR=value assignments, as in
+ * GIT_TRACE=1 git push, and wrappers such as env, time, nohup or xargs.
+ */
 function dropAssignments(words) {
   let index = 0;
-  while (
-    index < words.length &&
-    /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[index])
-  ) {
+  for (;;) {
+    while (
+      index < words.length &&
+      /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[index])
+    ) {
+      index++;
+    }
+    const valueOptions = WRAPPERS.get(words[index] ?? "");
+    if (valueOptions === undefined) break;
     index++;
+    while (index < words.length && words[index].startsWith("-")) {
+      index += valueOptions.has(words[index]) ? 2 : 1;
+    }
   }
   return words.slice(index);
 }

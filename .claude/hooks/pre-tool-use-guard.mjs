@@ -42,13 +42,21 @@ const ENV_CANDIDATES = [
   ".env.test.local",
 ];
 
-/** Convert a shell glob to an anchored regular expression. */
+/** Convert a shell glob, including {a,b} braces, to an anchored regular expression. */
 function globToRegExp(glob) {
   let source = "";
+  let braceDepth = 0;
   for (let i = 0; i < glob.length; i++) {
     const char = glob[i];
     if (char === "*") source += "[^/]*";
     else if (char === "?") source += "[^/]";
+    else if (char === "{" && glob.indexOf("}", i + 1) !== -1) {
+      source += "(?:";
+      braceDepth++;
+    } else if (char === "}" && braceDepth > 0) {
+      source += ")";
+      braceDepth--;
+    } else if (char === "," && braceDepth > 0) source += "|";
     else if (char === "[") {
       const end = glob.indexOf("]", i + 1);
       if (end === -1) source += "\\[";
@@ -69,8 +77,10 @@ export function isEnvFile(name) {
   const base = path.basename(name);
   if (base === ".env.example") return false;
   if (/^\.env(\..+)?$/.test(base)) return true;
-  if (/[*?[]/.test(base) && base.startsWith(".")) {
+  // Only a glob that can start with a dot can match a dotfile.
+  if (/[*?[{]/.test(base) && /^[.{[]/.test(base)) {
     // An invalid glob such as [z-a] throws here; main() then fails closed.
+    // An unclosed { is taken literally, so awk '{print $1}' still runs.
     const pattern = globToRegExp(base);
     return ENV_CANDIDATES.some((candidate) => pattern.test(candidate));
   }

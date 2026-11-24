@@ -283,6 +283,8 @@ describe("second review: brace expansion", () => {
 
   test.each([
     ["Bash", { command: "ls src/{lib,app}" }],
+    ["Bash", { command: "git log --format=x | awk '{print $1}'" }],
+    ["Bash", { command: `node -e 'console.log({a:1})'` }],
     ["Grep", { pattern: "x", path: inProject("src"), glob: "*.{ts,tsx}" }],
   ])("%s %o is allowed", (tool, input) => {
     expect(runGuard(tool, input)).toEqual({ code: 0, stderr: "" });

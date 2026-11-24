@@ -251,3 +251,21 @@ describe("lets normal actions through", () => {
     expect(runGuard(tool, input)).toEqual({ code: 0, stderr: "" });
   });
 });
+
+describe("second review: line continuations", () => {
+  test("a force push split with a trailing backslash is blocked", () => {
+    const { code, stderr } = runGuard("Bash", {
+      command: "git push \\\n  --force origin x",
+    });
+    expect(code).toBe(2);
+    expect(stderr).toContain("force pushes are not allowed");
+  });
+
+  test("a push to main split with a trailing backslash is blocked", () => {
+    const { code, stderr } = runGuard("Bash", {
+      command: "git push origin \\\n  main",
+    });
+    expect(code).toBe(2);
+    expect(stderr).toContain("pushing to main is not allowed");
+  });
+});

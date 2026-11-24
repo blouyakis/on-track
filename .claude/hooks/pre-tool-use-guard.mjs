@@ -2,20 +2,34 @@
 // PreToolUse hook: block the actions CLAUDE.md forbids, before they run.
 //
 // 1. Reading or printing .env* files (except .env.example), through a file
-//    tool or a shell command, including shell globs such as .env*.
-// 2. Editing AGENTS.md, package-lock.json, or anything in node_modules/.
-// 3. git push to main, and any force push.
+//    tool or a shell command, including globs and braces such as .en? or
+//    {.env,x}.
+// 2. Editing AGENTS.md, package-lock.json, or anything in node_modules/
+//    (compared without case), by file tool or by shell write.
+// 3. git push to main (also --all, --branches, ":" and wildcard refspecs,
+//    and HEAD or a bare push while on main), and any force push. Wrappers
+//    such as env, time, nohup or xargs and backslash line breaks are seen
+//    through.
 //
 // Blocking exits 2 with the reason on stderr, which Claude reads. Everything
 // else exits 0. An unexpected error inside the checks also exits 2 (fail
 // closed); only unparseable stdin is let through.
 //
 // Known limits: this is string matching, so it is a guard rail, not a
-// sandbox. It does not see through quoting tricks, variables, command
-// substitution, eval, scripts that read files themselves, git aliases, or a
-// `cd` earlier in the same command (paths and the branch check use the
-// hook's cwd, or the directory given with git -C). The permission deny rules
-// in settings.json stay as a second layer.
+// sandbox. It does not see through:
+// - quoting tricks, variables, command substitution, eval, or scripts that
+//   read or write files themselves (node, python, a .sh file);
+// - git aliases, or wrappers that are not in WRAPPERS;
+// - a `cd` earlier in the same command (paths and the branch check use the
+//   hook's cwd, or the directory given with git -C).
+// Globs are only tested against the known env names in ENV_CANDIDATES, not
+// against the files on disk.
+// Known false positives, which err toward blocking: any word that names an
+// env file is blocked even inside quotes, such as a commit message or
+// `cp .env.example .env.local`, and | ; & inside quotes still split a
+// command, so a quoted "| git push origin main" is treated as a push. Rephrase
+// the command when this happens.
+// The permission deny rules in settings.json stay as a second layer.
 
 import { execFileSync } from "node:child_process";
 import path from "node:path";

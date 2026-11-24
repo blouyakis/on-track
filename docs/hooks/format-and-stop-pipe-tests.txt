@@ -1,0 +1,92 @@
+Manual pipe tests of the hook scripts, 2026-11-23, macOS, v26.13.0. <repo> = the worktree path.
+
+=== format-edited-file.sh (PostToolUse) ===
+# 1. Badly formatted TypeScript file is formatted
+before:
+export const   x = {a:1,
+  b:2}
+$ echo '{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"<repo>/src/lib/zz-hook-scratch.ts"}}' | .claude/hooks/format-edited-file.sh
+exit=0
+
+after:
+export const x = { a: 1, b: 2 };
+
+# 2. Syntax error: Prettier fails, hook exits 2 so Claude sees the message
+$ echo '{"hook_event_name":"PostToolUse","tool_name":"Edit","tool_input":{"file_path":"<repo>/src/lib/zz-hook-scratch.ts"}}' | .claude/hooks/format-edited-file.sh
+--- stderr (what Claude sees) ---
+Prettier could not format <repo>/src/lib/zz-hook-scratch.ts:
+[error] src/lib/zz-hook-scratch.ts: SyntaxError: Variable declaration expected. (1:14)
+[error] > 1 | export const = ;
+[error]     |              ^
+[error]   2 |
+exit=2
+
+# 3. File type Prettier does not handle: skipped
+$ echo '{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"<repo>/zz-scratch.unknownext"}}' | .claude/hooks/format-edited-file.sh
+exit=0
+
+content unchanged: no  formatting
+
+# 4. File outside the project: skipped
+$ echo '{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"/etc/hosts"}}' | .claude/hooks/format-edited-file.sh
+exit=0
+
+# 5. File in .prettierignore (AGENTS.md): left untouched
+$ echo '{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":"<repo>/AGENTS.md"}}' | .claude/hooks/format-edited-file.sh
+exit=0
+
+git status AGENTS.md: '' (empty = unchanged)
+
+=== run-tests-on-stop.sh (Stop) ===
+# 6. Code changed, tests pass: silent, exit 0
+$ echo '{"hook_event_name":"Stop","stop_hook_active":false}' | .claude/hooks/run-tests-on-stop.sh
+exit=0
+
+# 7. A failing test: exit 2 blocks the stop and feeds the failure back
+$ echo '{"hook_event_name":"Stop","stop_hook_active":false}' | .claude/hooks/run-tests-on-stop.sh
+--- stderr (what Claude sees) ---
+Tests failed (npm test). Fix them before finishing, or explain why they fail.
+Last lines of the vitest output:
+
+ RUN  v5.1.1 <repo>
+
+ ❯ src/lib/__tests__/zz-hook-fail.test.ts (1 test | 1 failed) 6ms
+   × deliberately failing 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/__tests__/zz-hook-fail.test.ts > deliberately failing
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ src/lib/__tests__/zz-hook-fail.test.ts:2:48
+      1| import { test, expect } from "vitest";
+      2| test("deliberately failing", () => { expect(1).toBe(2); });
+       |                                                ^
+      3|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  1 failed | 81 passed (82)
+   Start at  21:58:29
+   Duration  566ms (environment 89%, import 5%, tests 3%, transform 2%, worker 1%)
+exit=2
+
+# 8. Same failing test, but stop_hook_active is true: allowed to stop (no loop)
+$ echo '{"hook_event_name":"Stop","stop_hook_active":true}' | .claude/hooks/run-tests-on-stop.sh
+exit=0
+
+# 9. Clean tree (no changes outside docs/): test run skipped
+git status --porcelain: ''
+exit=0 (took 0s, vitest not started)
+
+# 10. Only docs/ changed: test run skipped
+git status --porcelain: '?? docs/zz-scratch.md'
+exit=0

@@ -72,6 +72,9 @@ describe("blocks reading or printing .env files", () => {
     ["Bash", { command: "cat .env*" }],
     ["Bash", { command: "cat .en?" }],
     ["Bash", { command: "cat .env.[a-z]*" }],
+    // Grep through its glob parameter instead of path.
+    ["Grep", { pattern: "KEY", path: inProject("."), glob: ".env*" }],
+    ["Grep", { pattern: "KEY", path: inProject("."), glob: "**/.env.local" }],
   ])("%s %o", (tool, input) => {
     const { code, stderr } = runGuard(tool, input);
     expect(code).toBe(2);
@@ -213,6 +216,7 @@ describe("lets normal actions through", () => {
     ["Bash", { command: "cat .env.example" }],
     ["Bash", { command: "npm install --save-dev prettier" }],
     ["Glob", { pattern: "**/*.ts" }],
+    ["Grep", { pattern: "x", path: inProject("src"), glob: "*.ts" }],
     // cp, ln and install only read their sources.
     ["Bash", { command: "cp package-lock.json /tmp/lock-backup.json" }],
     ["Bash", { command: "ln -s AGENTS.md /tmp/agents-link.md" }],

@@ -42,17 +42,29 @@ export function isProtectedFile(relativePath) {
   );
 }
 
-/** Split a shell command into words, treating quotes and operators as separators. */
+/** Split a shell command into words on whitespace, quotes and operators (not on =). */
 function shellWords(command) {
-  return command.split(/[\s"'`=<>|;&()]+/).filter(Boolean);
+  return command.split(/[\s"'`<>|;&()]+/).filter(Boolean);
 }
 
-/** Split a shell command into simple segments on && || ; | and newlines. */
+/** Split a shell command into simple segments on && || ; | & and newlines. */
 function shellSegments(command) {
   return command
-    .split(/&&|\|\||[;|\n]/)
+    .split(/&&|\|\||[;|&\n]/)
     .map((segment) => segment.trim())
     .filter(Boolean);
+}
+
+/** Skip leading VAR=value assignments, as in GIT_TRACE=1 git push. */
+function dropAssignments(words) {
+  let index = 0;
+  while (
+    index < words.length &&
+    /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[index])
+  ) {
+    index++;
+  }
+  return words.slice(index);
 }
 
 function envReason(target) {
@@ -120,13 +132,24 @@ function currentBranch(cwd) {
 const FORCE_FLAGS =
   /^(-f|--force|--force-with-lease(=.*)?|--force-if-includes|--mirror|-[a-zA-Z]*f[a-zA-Z]*)$/;
 
+// git global options that take a separate value: git -C <dir>, git -c <k=v>.
+const GLOBAL_OPTIONS_WITH_VALUE = new Set([
+  "-C",
+  "-c",
+  "--git-dir",
+  "--work-tree",
+  "--namespace",
+  "--exec-path",
+  "--config-env",
+]);
+
 function checkGitPush(segment, cwd) {
-  const words = shellWords(segment);
-  if (words[0] !== "git") return null;
-  // Skip global options such as -C <dir> or -c key=value before the subcommand.
+  const words = dropAssignments(shellWords(segment));
+  if (words.length === 0 || path.basename(words[0]) !== "git") return null;
+  // Skip the global options before the subcommand.
   let index = 1;
   while (index < words.length && words[index].startsWith("-")) {
-    index += words[index] === "-C" || words[index] === "-c" ? 2 : 1;
+    index += GLOBAL_OPTIONS_WITH_VALUE.has(words[index]) ? 2 : 1;
   }
   if (words[index] !== "push") return null;
   const args = words.slice(index + 1);
@@ -160,7 +183,10 @@ function checkGitPush(segment, cwd) {
 
 function checkBash(command, cwd) {
   for (const word of shellWords(command)) {
-    if (isEnvFile(word)) return envReason(word);
+    // Also look inside --flag=value and VAR=value words.
+    for (const part of word.split("=")) {
+      if (isEnvFile(part)) return envReason(part);
+    }
   }
   for (const segment of shellSegments(command)) {
     const reason = checkProtectedWrites(segment) ?? checkGitPush(segment, cwd);

@@ -49,9 +49,9 @@ jobs:
             --model claude-sonnet-5-5
             --max-turns 30
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
-          # TODO before this PR opens: fill in what each C.L.E.A.R. letter
-          # stands for from the course material, in the block marked
-          # "C.L.E.A.R. REVIEW" below. The CLAUDE.md checklist does not depend on it.
+          # Review dimensions: Google Engineering Practices, "What to look for in
+          # a code review" (google.github.io/eng-practices/review/reviewer/looking-for.html).
+          # Comment labels: Conventional Comments (conventionalcomments.org).
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
@@ -61,14 +61,23 @@ jobs:
             get the changes with `gh pr diff` and the description with
             `gh pr view`. Review only what this PR changes.
 
-            ## C.L.E.A.R. REVIEW
-            Organize the review under these five headings:
-            - C: TODO (definition from the course material)
-            - L: TODO (definition from the course material)
-            - E: TODO (definition from the course material)
-            - A: TODO (definition from the course material)
-            - R: TODO (definition from the course material)
-            ## END C.L.E.A.R. REVIEW
+            ## Review dimensions (Google Engineering Practices)
+            Check the change for each of these:
+            - Design: the change makes sense as a whole, belongs here, and
+              fits the rest of the system.
+            - Functionality: it does what the author intends; look for edge
+              cases, race conditions, and bugs visible from reading the code.
+            - Complexity: no line, function, or component is harder to follow
+              than it needs to be; no over-engineering or features not needed now.
+            - Tests: the right unit, integration, or end-to-end tests exist,
+              are correct, and would fail if the code broke.
+            - Naming: names are clear and descriptive without being long.
+            - Comments: comments are clear and needed, and explain why rather
+              than what; stale comments and TODOs are cleaned up.
+            - Style: the code follows the project's conventions (CLAUDE.md,
+              ESLint, Prettier); personal preferences are only nitpicks.
+            - Documentation: README, CLAUDE.md, or other docs are updated when
+              the change alters how to build, test, run, or use the project.
 
             ## CLAUDE.md checklist
             Check the change against these project rules and flag each break:
@@ -100,10 +109,17 @@ jobs:
               tool used, human review applied).
 
             ## How to post
-            - Use the inline comment tool for issues tied to specific lines.
+            - Label every comment with Conventional Comments: start it with
+              `<label> (<blocking|non-blocking>): <subject>`, using one of
+              `issue`, `suggestion`, `nitpick`, `question`, or `praise`.
+              Examples: `issue (blocking): ...`, `nitpick (non-blocking): ...`.
+              `nitpick` and `praise` are always non-blocking. Mark a comment
+              blocking only if it must be fixed before merge.
+            - Use the inline comment tool for findings tied to specific lines.
               Each one says what is wrong, why it matters, and a fix.
             - Then post one summary comment with `gh pr comment` that groups
-              findings under the C.L.E.A.R. headings and the CLAUDE.md
-              checklist, most severe first.
-            - Report only real problems you can point to in the diff. If you
-              find none, say so plainly. Do not push commits or change files.
+              the findings by the review dimensions above and the CLAUDE.md
+              checklist, blocking findings first. Keep each finding's label.
+            - Report only real problems you can point to in the diff, plus
+              at most one `praise` when something is done well. If you find
+              no problems, say so plainly. Do not push commits or change files.

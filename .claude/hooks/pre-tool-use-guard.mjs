@@ -153,7 +153,7 @@ const WRAPPERS = new Map([
  * Skip what comes before the real command: VAR=value assignments, as in
  * GIT_TRACE=1 git push, and wrappers such as env, time, nohup or xargs.
  */
-function dropAssignments(words) {
+function skipCommandPrefix(words) {
   let index = 0;
   for (;;) {
     while (
@@ -239,7 +239,7 @@ function checkProtectedWrites(segment, cwd, projectDir) {
   for (const match of segment.matchAll(/>>?\|?\s*["']?([^\s"'|;&]+)/g)) {
     if (isProtected(match[1])) return protectedReason(match[1]);
   }
-  const words = dropAssignments(shellWords(segment));
+  const words = skipCommandPrefix(shellWords(segment));
   const command = words[0] === undefined ? "" : path.basename(words[0]);
   const operands = words.slice(1).filter((word) => !word.startsWith("-"));
   const inPlace =
@@ -303,7 +303,7 @@ const PUSH_OPTIONS_WITH_VALUE = new Set([
 ]);
 
 function checkGitPush(segment, cwd) {
-  const words = dropAssignments(shellWords(segment));
+  const words = skipCommandPrefix(shellWords(segment));
   if (words.length === 0 || path.basename(words[0]) !== "git") return null;
   // Walk the global options before the subcommand, remembering git -C <dir>.
   let repoDir = cwd;

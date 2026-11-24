@@ -326,3 +326,49 @@ describe("second review: wrapper commands", () => {
     });
   });
 });
+
+describe("second review: refspecs and push options", () => {
+  let mainRepo: string;
+  let featureRepo: string;
+
+  beforeAll(() => {
+    mainRepo = makeRepo("main");
+    featureRepo = makeRepo("chore/24-hooks");
+  });
+
+  afterAll(() => {
+    rmSync(mainRepo, { recursive: true, force: true });
+    rmSync(featureRepo, { recursive: true, force: true });
+  });
+
+  test.each([
+    "git push --branches",
+    "git push origin :",
+    "git push origin 'refs/heads/*:refs/heads/*'",
+  ])("pushes every branch, main included: %s", (command) => {
+    const { code, stderr } = runGuard("Bash", { command }, featureRepo);
+    expect(code).toBe(2);
+    expect(stderr).toContain("pushing to main is not allowed");
+  });
+
+  test.each([
+    "git push -o ci.skip origin",
+    "git push --push-option ci.skip origin",
+    "git push --repo origin",
+    "git push --receive-pack git-receive-pack origin",
+  ])("an option value is not a refspec while on main: %s", (command) => {
+    const { code, stderr } = runGuard("Bash", { command }, mainRepo);
+    expect(code).toBe(2);
+    expect(stderr).toContain("pushing to main is not allowed");
+  });
+
+  test("push options on a feature branch are allowed", () => {
+    expect(
+      runGuard(
+        "Bash",
+        { command: "git push -o ci.skip origin chore/24-hooks" },
+        featureRepo,
+      ),
+    ).toEqual({ code: 0, stderr: "" });
+  });
+});

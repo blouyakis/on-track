@@ -115,20 +115,25 @@ describe("blocks pushing to main and force pushes", () => {
     "git --git-dir=.git push origin main",
     "GIT_TRACE=1 git push origin main",
     "sleep 1 & git push origin main",
+    // --all pushes every branch, main included.
+    "git push --all origin",
   ])("push to main: %s", (command) => {
     const { code, stderr } = runGuard("Bash", { command }, featureRepo);
     expect(code).toBe(2);
     expect(stderr).toContain("pushing to main is not allowed");
   });
 
-  test.each(["git push", "git push origin"])(
-    "bare push while on main: %s",
-    (command) => {
-      const { code, stderr } = runGuard("Bash", { command }, mainRepo);
-      expect(code).toBe(2);
-      expect(stderr).toContain("pushing to main is not allowed");
-    },
-  );
+  test.each([
+    "git push",
+    "git push origin",
+    "git push origin HEAD",
+    "git push -u origin HEAD",
+    "git push origin @",
+  ])("push of the current branch while on main: %s", (command) => {
+    const { code, stderr } = runGuard("Bash", { command }, mainRepo);
+    expect(code).toBe(2);
+    expect(stderr).toContain("pushing to main is not allowed");
+  });
 
   test.each([
     "git push --force",
@@ -141,15 +146,17 @@ describe("blocks pushing to main and force pushes", () => {
     expect(stderr).toContain("force pushes are not allowed");
   });
 
-  test.each(["git push", "git push -u origin chore/24-hooks"])(
-    "allows a normal push of a feature branch: %s",
-    (command) => {
-      expect(runGuard("Bash", { command }, featureRepo)).toEqual({
-        code: 0,
-        stderr: "",
-      });
-    },
-  );
+  test.each([
+    "git push",
+    "git push -u origin chore/24-hooks",
+    "git push origin HEAD",
+    "git push --follow-tags origin chore/24-hooks",
+  ])("allows a normal push of a feature branch: %s", (command) => {
+    expect(runGuard("Bash", { command }, featureRepo)).toEqual({
+      code: 0,
+      stderr: "",
+    });
+  });
 });
 
 describe("lets normal actions through", () => {

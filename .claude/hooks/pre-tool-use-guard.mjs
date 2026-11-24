@@ -125,6 +125,9 @@ function protectedReason(target) {
 }
 
 function checkFileTool(toolName, toolInput, cwd, projectDir) {
+  if (typeof toolInput.glob === "string" && isEnvFile(toolInput.glob)) {
+    return envReason(toolInput.glob);
+  }
   const raw = toolInput.file_path ?? toolInput.notebook_path ?? toolInput.path;
   if (typeof raw !== "string" || raw === "") return null;
   if (isEnvFile(raw)) return envReason(raw);

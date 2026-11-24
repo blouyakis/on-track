@@ -68,6 +68,10 @@ describe("blocks reading or printing .env files", () => {
     ["Bash", { command: "grep SUPABASE ./.env.development" }],
     // A name inside --flag=value.
     ["Bash", { command: "node --env-file=.env.local server.js" }],
+    // Shell globs that expand to env files.
+    ["Bash", { command: "cat .env*" }],
+    ["Bash", { command: "cat .en?" }],
+    ["Bash", { command: "cat .env.[a-z]*" }],
   ])("%s %o", (tool, input) => {
     const { code, stderr } = runGuard(tool, input);
     expect(code).toBe(2);

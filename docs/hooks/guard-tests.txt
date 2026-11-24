@@ -3,45 +3,75 @@ Guard hook tests (npx vitest run .claude/hooks --reporter=verbose), 2026-11-23. 
 
  RUN  v5.1.1 <repo>
 
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Read { …(1) } 30ms
  ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Read { …(1) } 27ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Grep { pattern: 'KEY', …(1) } 27ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { command: 'cat .env.local' } 37ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { …(1) } 35ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { …(1) } 33ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Edit { …(1) } 31ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Write { …(1) } 31ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Edit { …(1) } 36ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 29ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { command: 'rm -r node_modules/vitest' } 27ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git push origin main 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git push origin HEAD:main 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git push origin feature:refs/heads/main 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: npm test && git push origin main 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > bare push while on main: git push 31ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > bare push while on main: git push origin 32ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push --force 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push -f origin chore/24-hooks 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push --force-with-lease origin chore/24-hooks 33ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push origin +chore/24-hooks 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > allows a normal push of a feature branch: git push 32ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > allows a normal push of a feature branch: git push -u origin chore/24-hooks 29ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Read { …(1) } 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Read { …(1) } 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Read { …(1) } 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Edit { …(1) } 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Write { …(1) } 25ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Grep { pattern: 'overseer', …(1) } 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { command: 'npm test' } 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { command: 'cat AGENTS.md' } 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { …(1) } 28ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { command: 'cat .env.example' } 26ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { …(1) } 27ms
- ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Glob { pattern: '**/*.ts' } 27ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Read { …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Grep { pattern: 'KEY', …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { command: 'cat .env.local' } 25ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { …(1) } 26ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { command: 'cat .env*' } 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { command: 'cat .en?' } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Bash { command: 'cat .env.[a-z]*' } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Grep { pattern: 'KEY', …(2) } 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks reading or printing .env files > Grep { pattern: 'KEY', …(2) } 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > the reason names the file without trailing sentence punctuation 47ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Edit { …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Write { …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Edit { …(1) } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { command: 'rm -r node_modules/vitest' } 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 25ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 25ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 30ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { …(1) } 33ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > Bash { command: 'rm -rf node_modules' } 31ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks editing AGENTS.md, package-lock.json and node_modules/ > a ../ path is resolved against the session's cwd 28ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git push origin main 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git push origin HEAD:main 25ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git push origin feature:refs/heads/main 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: npm test && git push origin main 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git -c push.default=current push origin main 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git --git-dir=.git push origin main 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: GIT_TRACE=1 git push origin main 25ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: sleep 1 & git push origin main 25ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push to main: git push --all origin 26ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push of the current branch while on main: git push 28ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push of the current branch while on main: git push origin 26ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push of the current branch while on main: git push origin HEAD 27ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push of the current branch while on main: git push -u origin HEAD 29ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > push of the current branch while on main: git push origin @ 30ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > git -C reads the branch of the repo it names 28ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > git -C allows a bare push of a feature repo from a main checkout 28ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push --force 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push -f origin chore/24-hooks 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push --force-with-lease origin chore/24-hooks 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > force push: git push origin +chore/24-hooks 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > allows a normal push of a feature branch: git push 27ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > allows a normal push of a feature branch: git push -u origin chore/24-hooks 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > allows a normal push of a feature branch: git push origin HEAD 26ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > blocks pushing to main and force pushes > allows a normal push of a feature branch: git push --follow-tags origin chore/24-hooks 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > fails closed > an unexpected error inside the guard blocks the call 25ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > fails closed > unparseable stdin is let through 27ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Read { …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Read { …(1) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Read { …(1) } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Edit { …(1) } 21ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Write { …(1) } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Grep { pattern: 'overseer', …(1) } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { command: 'npm test' } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { command: 'cat AGENTS.md' } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { …(1) } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { command: 'cat .env.example' } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { …(1) } 24ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Glob { pattern: '**/*.ts' } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Grep { pattern: 'x', …(2) } 23ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { …(1) } 22ms
+ ✓ .claude/hooks/__tests__/pre-tool-use-guard.test.ts > lets normal actions through > Bash { …(1) } 23ms
 
  Test Files  1 passed (1)
-      Tests  36 passed (36)
-   Start at  22:10:47
-   Duration  1.21s (tests 99%, import 1%)
+      Tests  66 passed (66)
+   Start at  22:47:21
+   Duration  1.77s (tests 99%)
 

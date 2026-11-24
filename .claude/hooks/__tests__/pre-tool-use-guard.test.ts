@@ -84,8 +84,25 @@ describe("blocks editing AGENTS.md, package-lock.json and node_modules/", () => 
     ["Bash", { command: "echo '# notes' >> AGENTS.md" }],
     ["Bash", { command: "sed -i '' 's/a/b/' package-lock.json" }],
     ["Bash", { command: "rm -r node_modules/vitest" }],
+    // Absolute and variable paths are resolved against the project.
+    ["Bash", { command: `echo x >> ${inProject("AGENTS.md")}` }],
+    [
+      "Bash",
+      { command: `sed -i '' s/a/b/ "$CLAUDE_PROJECT_DIR/package-lock.json"` },
+    ],
+    ["Bash", { command: `GIT_PAGER=cat rm ${inProject("AGENTS.md")}` }],
   ])("%s %o", (tool, input) => {
     const { code, stderr } = runGuard(tool, input);
+    expect(code).toBe(2);
+    expect(stderr).toContain("must not be edited by hand");
+  });
+
+  test("a ../ path is resolved against the session's cwd", () => {
+    const { code, stderr } = runGuard(
+      "Bash",
+      { command: "echo x > ../AGENTS.md" },
+      inProject("src"),
+    );
     expect(code).toBe(2);
     expect(stderr).toContain("must not be edited by hand");
   });

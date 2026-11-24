@@ -83,6 +83,16 @@ describe("blocks reading or printing .env files", () => {
   });
 });
 
+test("the reason names the file without trailing sentence punctuation", () => {
+  const { code, stderr } = runGuard("Bash", {
+    command: "grep KEY .env.local; echo done",
+  });
+  expect(code).toBe(2);
+  expect(stderr).toContain(": .env.local is a secrets file");
+  const sentence = runGuard("Bash", { command: "cat .env.local." });
+  expect(sentence.stderr).toContain(": .env.local is a secrets file");
+});
+
 describe("blocks editing AGENTS.md, package-lock.json and node_modules/", () => {
   test.each([
     ["Edit", { file_path: inProject("AGENTS.md") }],

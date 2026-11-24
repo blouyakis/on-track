@@ -30,14 +30,22 @@ function runGuard(toolName: string, toolInput: ToolInput, cwd = projectDir) {
 /** A throwaway git repo with one commit, checked out on the given branch. */
 function makeRepo(branch: string) {
   const dir = mkdtempSync(path.join(tmpdir(), "guard-test-"));
+  // Ignore the developer's own git config (signing, hooks, default branch).
+  const env = {
+    ...process.env,
+    GIT_CONFIG_GLOBAL: "/dev/null",
+    GIT_CONFIG_NOSYSTEM: "1",
+  };
   const git = (...args: string[]) =>
-    execFileSync("git", args, { cwd: dir, stdio: "ignore" });
+    execFileSync("git", args, { cwd: dir, stdio: "ignore", env });
   git("init", "-q", "-b", "main");
   git(
     "-c",
     "user.name=test",
     "-c",
     "user.email=test@example.com",
+    "-c",
+    "commit.gpgsign=false",
     "commit",
     "-q",
     "--allow-empty",

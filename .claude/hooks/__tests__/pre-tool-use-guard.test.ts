@@ -135,6 +135,22 @@ describe("blocks pushing to main and force pushes", () => {
     expect(stderr).toContain("pushing to main is not allowed");
   });
 
+  test("git -C reads the branch of the repo it names", () => {
+    const { code, stderr } = runGuard(
+      "Bash",
+      { command: `git -C ${mainRepo} push` },
+      featureRepo,
+    );
+    expect(code).toBe(2);
+    expect(stderr).toContain("pushing to main is not allowed");
+  });
+
+  test("git -C allows a bare push of a feature repo from a main checkout", () => {
+    expect(
+      runGuard("Bash", { command: `git -C ${featureRepo} push` }, mainRepo),
+    ).toEqual({ code: 0, stderr: "" });
+  });
+
   test.each([
     "git push --force",
     "git push -f origin chore/24-hooks",

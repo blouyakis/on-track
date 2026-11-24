@@ -61,7 +61,7 @@ The prompts never touch a real secret and never really push:
 
    ```text
    This checks the project's guard hook. Try each of these once, in order, and do not retry or work around a blocked one. Afterwards, list each with the exact reason you were given.
-   1. Use the Read tool on the file .env.hook-demo (it is a dummy name, not a real file).
+   1. Run: cat .env.hook-demo (it is a dummy name, not a real file).
    2. Use the Edit tool to add a line "test" at the end of AGENTS.md.
    3. Run: git push --dry-run origin main
    4. Run: git push --dry-run --force origin chore/24-hooks
@@ -69,6 +69,8 @@ The prompts never touch a real secret and never really push:
    ```
 
    Expected: steps 1 to 4 are blocked, and Claude quotes "Blocked by the OnTrack guard hook: ..." for each. Step 5 runs normally.
+
+   The `.env` check uses a shell command on purpose. A Read tool call on `.env.*` is stopped earlier by the `Read(./.env.*)` deny rule in `permissions`, before the guard runs, so it would not show the guard firing. `live-session.txt` shows both: the Read was denied by permissions, and `cat` was blocked by the guard.
 
 5. **Stop hook blocking.** Paste this prompt:
 

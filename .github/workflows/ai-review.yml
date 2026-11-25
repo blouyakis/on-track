@@ -57,9 +57,8 @@ jobs:
             --max-turns 30
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
           # Review framework: C.L.E.A.R. (Context, Logic, Evidence, Architecture,
-          # Risk), from the course's Week 11 lecture, with the CLAUDE.md rules
-          # filed under each letter. Comment labels: Conventional Comments
-          # (conventionalcomments.org).
+          # Risk), with the CLAUDE.md rules filed under each letter. Comment
+          # labels: Conventional Comments (conventionalcomments.org).
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
@@ -76,13 +75,11 @@ jobs:
             flags the rule change for human review.
 
             ## C.L.E.A.R. review
-            C.L.E.A.R. is the course's framework for reviewing AI-generated code
-            (Week 11 lecture, "Code Review for AI-Generated Code"). It has five
-            parts: Context, Logic, Evidence, Architecture and Risk. For each part
-            below, the definition, "What to check" and "AI-specific risk" lines
-            are quoted from the lecture, and the project rules are from CLAUDE.md
-            and docs/PRD.md. Review the change against every part and flag each
-            break.
+            C.L.E.A.R. is a framework for reviewing AI-generated code, in five
+            parts: Context, Logic, Evidence, Architecture and Risk. Each part
+            below gives its definition, what to check, the AI-specific risk,
+            and the project rules from CLAUDE.md and docs/PRD.md. Review the
+            change against every part and flag each break.
 
             ### C: Context
             Definition: Does this code fit the project's architecture and

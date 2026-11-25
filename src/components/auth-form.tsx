@@ -5,7 +5,7 @@ import { useActionState, useId } from "react";
 import { signIn, signUp } from "@/app/auth-actions";
 import { initialAuthFormState } from "@/app/auth-form-state";
 import { SIGN_IN_PATH, SIGN_UP_PATH } from "@/lib/auth-routes";
-import type { CredentialsMode } from "@/lib/credentials";
+import { PASSWORD_MIN_LENGTH, type CredentialsMode } from "@/lib/credentials";
 
 const fieldClass =
   "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
@@ -100,14 +100,14 @@ export function AuthForm({ mode }: { mode: CredentialsMode }) {
           name="password"
           required
           autoComplete={copy.passwordAutoComplete}
-          minLength={isSignUp ? 8 : undefined}
+          minLength={isSignUp ? PASSWORD_MIN_LENGTH : undefined}
           aria-invalid={fieldErrors.password ? true : undefined}
           aria-describedby={passwordDescribedBy}
           className={fieldClass}
         />
         {isSignUp && (
           <p id={passwordHintId} className={hintClass}>
-            At least 8 characters.
+            At least {PASSWORD_MIN_LENGTH} characters.
           </p>
         )}
         {fieldErrors.password && (

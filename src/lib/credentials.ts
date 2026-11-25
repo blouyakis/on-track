@@ -14,7 +14,7 @@ export type CredentialError = {
 
 // The longest address the mail standards allow.
 const EMAIL_MAX_LENGTH = 254;
-const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MIN_LENGTH = 8;
 // Supabase Auth hashes passwords with bcrypt, which reads at most 72 bytes.
 const PASSWORD_MAX_LENGTH = 72;
 

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { signUp } from "@/app/auth-actions";
+import { signIn, signOut, signUp } from "@/app/auth-actions";
 import { initialAuthFormState } from "@/app/auth-form-state";
 import { createClient } from "@/utils/supabase/server";
 
@@ -23,13 +23,24 @@ type FakeOptions = {
   // the email to be confirmed first.
   signUpSession?: { access_token: string } | null;
   signUpError?: AuthError;
+  signInError?: AuthError;
+  signOutError?: AuthError;
 };
 
 function fakeSupabase({
   signUpSession = { access_token: "token" },
   signUpError = null,
+  signInError = null,
+  signOutError = null,
 }: FakeOptions = {}) {
   const auth = {
+    signInWithPassword: vi.fn().mockResolvedValue({
+      data: signInError
+        ? { user: null, session: null }
+        : { user: { id: "user" }, session: { access_token: "token" } },
+      error: signInError,
+    }),
+    signOut: vi.fn().mockResolvedValue({ error: signOutError }),
     signUp: vi.fn().mockResolvedValue({
       data: {
         user: signUpError ? null : { id: "new-user" },
@@ -155,5 +166,99 @@ describe("signUp", () => {
 
     expect(state.email).toBe(EMAIL);
     expect(JSON.stringify(state)).not.toContain("short");
+  });
+});
+
+describe("signIn", () => {
+  test("signs the user in and sends them to the home page", async () => {
+    const auth = fakeSupabase();
+
+    await expect(
+      signIn(initialAuthFormState, form({ email: EMAIL, password: PASSWORD })),
+    ).rejects.toThrow(REDIRECT);
+
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(1);
+    expect(auth.signInWithPassword).toHaveBeenCalledWith({
+      email: EMAIL,
+      password: PASSWORD,
+    });
+    expect(redirect).toHaveBeenCalledWith("/");
+  });
+
+  test("trims the email but not the password", async () => {
+    const auth = fakeSupabase();
+
+    await expect(
+      signIn(
+        initialAuthFormState,
+        form({ email: ` ${EMAIL}  `, password: " kept " }),
+      ),
+    ).rejects.toThrow(REDIRECT);
+
+    expect(auth.signInWithPassword).toHaveBeenCalledWith({
+      email: EMAIL,
+      password: " kept ",
+    });
+  });
+
+  // An account made before the length rule, or outside this app, can still
+  // sign in.
+  test("does not apply the sign-up length rule to the password", async () => {
+    const auth = fakeSupabase();
+
+    await expect(
+      signIn(initialAuthFormState, form({ email: EMAIL, password: "short" })),
+    ).rejects.toThrow(REDIRECT);
+
+    expect(auth.signInWithPassword).toHaveBeenCalledTimes(1);
+  });
+
+  test("returns a field error and never calls Supabase for an invalid email", async () => {
+    const auth = fakeSupabase();
+
+    const state = await signIn(
+      initialAuthFormState,
+      form({ email: "not-an-email", password: PASSWORD }),
+    );
+
+    expect(state.status).toBe("error");
+    expect(state.fieldErrors.email).toBe("Enter a valid email address.");
+    expect(auth.signInWithPassword).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  test("returns a field error and never calls Supabase for an empty password", async () => {
+    const auth = fakeSupabase();
+
+    const state = await signIn(
+      initialAuthFormState,
+      form({ email: EMAIL, password: "" }),
+    );
+
+    expect(state.status).toBe("error");
+    expect(state.fieldErrors.password).toBe("Password is required.");
+    expect(state.email).toBe(EMAIL);
+    expect(auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  test("treats missing form fields as empty, not as a crash", async () => {
+    const auth = fakeSupabase();
+
+    const state = await signIn(initialAuthFormState, new FormData());
+
+    expect(state.fieldErrors.email).toBe("Email is required.");
+    expect(state.fieldErrors.password).toBe("Password is required.");
+    expect(auth.signInWithPassword).not.toHaveBeenCalled();
+  });
+});
+
+describe("signOut", () => {
+  test("ends the session and sends the user to the sign-in page", async () => {
+    const auth = fakeSupabase();
+
+    await expect(signOut()).rejects.toThrow(REDIRECT);
+
+    expect(auth.signOut).toHaveBeenCalledTimes(1);
+    expect(redirect).toHaveBeenCalledWith("/sign-in");
   });
 });

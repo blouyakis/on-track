@@ -76,13 +76,20 @@ jobs:
             flags the rule change for human review.
 
             ## C.L.E.A.R. review
-            Check the change under each of the five letters. Each letter lists
-            what to check, the risk typical of AI-written code, and the
-            CLAUDE.md rules that belong to it. Flag every break.
+            C.L.E.A.R. is the course's framework for reviewing AI-generated code
+            (Week 11 lecture, "Code Review for AI-Generated Code"). It has five
+            parts: Context, Logic, Evidence, Architecture and Risk. For each part
+            below, the definition, "What to check" and "AI-specific risk" lines
+            are quoted from the lecture, and the project rules are from CLAUDE.md
+            and docs/PRD.md. Review the change against every part and flag each
+            break.
 
             ### C: Context
-            Does the code fit the project's architecture and conventions?
-            AI risk: inventing its own conventions instead of the project's.
+            Definition: Does this code fit the project's architecture and
+            conventions?
+            What to check: Fits conventions? Uses right patterns?
+            AI-specific risk: AI may invent its own conventions.
+            Project rules:
             - TypeScript strict: no `any`. Named exports in src/lib/.
               Kebab-case file names, PascalCase components. Server
               Components unless state, effects, or browser APIs need
@@ -94,22 +101,30 @@ jobs:
               tool used, human review applied).
 
             ### L: Logic
-            Is the business logic correct? Are edge cases and errors handled?
-            AI risk: handling only the happy path.
+            Definition: Is the business logic correct? Are edge cases handled?
+            What to check: Edge cases? Error handling?
+            AI-specific risk: AI often handles happy path only.
+            Project rules:
             - Input is validated on the server with the src/lib/ functions,
               following the PRD's "Rules the logic must enforce", including
               the edge cases it names.
 
             ### E: Evidence
-            Are there tests, and do they actually verify the behavior?
-            AI risk: tests that pass but do not check the behavior.
+            Definition: Are there tests? Do they actually verify the behavior?
+            What to check: Tests exist? Tests are meaningful?
+            AI-specific risk: AI writes tests that pass but don't verify
+            behavior.
+            Project rules:
             - src/lib/ code has tests written first (a `test:` commit before
               the `feat:` commit), and no test was changed or deleted just to
               make it pass.
 
             ### A: Architecture
-            Does it follow established patterns? Any new dependencies?
-            AI risk: adding libraries the project does not need.
+            Definition: Does it follow established patterns? Any new
+            dependencies?
+            What to check: Follows patterns? No new deps?
+            AI-specific risk: AI adds unnecessary libraries.
+            Project rules:
             - Business rules in src/lib/ are pure functions with no React,
               Next.js, or Supabase imports, and they return result values
               for expected failures instead of throwing.
@@ -120,9 +135,11 @@ jobs:
             - Any new dependency is needed and explained in the PR.
 
             ### R: Risk
-            Security issues, performance concerns, or data exposure?
-            AI risk: more security issues than human-written code (SQL
-            injection, XSS, missing auth checks).
+            Definition: Security issues? Performance concerns? Data exposure?
+            What to check: SQL injection? XSS? Auth checks?
+            AI-specific risk: 1.57x more security issues (than human-written
+            code).
+            Project rules:
             - Role and project IDs from the client are not trusted;
               membership is looked up on the server.
             - Access is enforced in server code and in Row Level Security.

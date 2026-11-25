@@ -27,7 +27,3 @@ export const initialEntryFormState: EntryFormState = {
   fieldErrors: {},
   values: null,
 };
-
-export type DemoSignInState = { message: string | null };
-
-export const initialDemoSignInState: DemoSignInState = { message: null };

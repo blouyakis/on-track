@@ -1,6 +1,6 @@
 # Writer/reviewer pull requests
 
-Evidence for the writer/reviewer pattern: one Claude Code session writes a pull request, and a separate session reviews it with the C.L.E.A.R. framework. Issue #29 covers the Sprint 1 PR, and #38 will cover the Sprint 2 one.
+Evidence for the writer/reviewer pattern: one Claude Code session writes a pull request, and a separate session reviews it with the C.L.E.A.R. framework. Issue [#29](https://github.com/blouyakis/on-track/issues/29) covers the Sprint 1 PR, and [#38](https://github.com/blouyakis/on-track/issues/38) will cover the Sprint 2 one.
 
 ## C.L.E.A.R.
 
@@ -18,9 +18,9 @@ The pattern has four steps: write, review by a separate agent using C.L.E.A.R., 
 
 ## Sprint 1: PR #61 (issue #29)
 
-- **Writer:** Barbara's Claude Code session, through the `/add-feature` skill, wrote PR #61 (#20, sign up, sign in and sign out). Its AI disclosure is in the PR description.
+- **Writer:** Barbara's Claude Code session, through the `/add-feature` skill, wrote PR [#61](https://github.com/blouyakis/on-track/pull/61) ([#20](https://github.com/blouyakis/on-track/issues/20), sign up, sign in and sign out). Its AI disclosure is in the PR description.
 - **Reviewer:** Ziye ran a separate Claude Code session (Claude Opus 5.5). That session gave the review to an independent general-purpose sub-agent with the C.L.E.A.R. framework and the project rules, but none of its own conclusions. It then checked each finding against the code, kept four, and dropped two it could not confirm, with the reasons.
-- **Human review:** Ziye read every finding and asked for three revisions before posting: keep the sign-up enumeration point but soften it into a question about the hosted project (#28), shorten the review, and post one overall comment instead of inline comments.
+- **Human review:** Ziye read every finding and asked for three revisions before posting: keep the sign-up enumeration point but soften it into a question about the hosted project ([#28](https://github.com/blouyakis/on-track/issues/28)), shorten the review, and post one overall comment instead of inline comments.
 - **Posted review:** [approving review on #61](https://github.com/blouyakis/on-track/pull/61#pullrequestreview-6052903707), one comment with a heading per C.L.E.A.R. part. It raises three questions and one nit, all non-blocking.
 
 ### Files

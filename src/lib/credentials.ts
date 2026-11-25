@@ -16,7 +16,7 @@ export type CredentialError = {
 const EMAIL_MAX_LENGTH = 254;
 export const PASSWORD_MIN_LENGTH = 8;
 // Supabase Auth hashes passwords with bcrypt, which reads at most 72 bytes.
-const PASSWORD_MAX_LENGTH = 72;
+const PASSWORD_MAX_BYTES = 72;
 
 // One @, something on each side of it, and a dot in the domain. Whether the
 // address exists is for the auth provider to find out.
@@ -40,12 +40,14 @@ function passwordError(password: string, mode: CredentialsMode): string | null {
   if (password.length < PASSWORD_MIN_LENGTH) {
     return `Password must be at least ${PASSWORD_MIN_LENGTH} characters.`;
   }
-  if (password.length > PASSWORD_MAX_LENGTH) {
-    return `Password must be ${PASSWORD_MAX_LENGTH} characters or fewer.`;
+  // More characters than bytes allowed is always too long, and this message
+  // is the clearer one for the usual case of plain letters and digits.
+  if (password.length > PASSWORD_MAX_BYTES) {
+    return `Password must be ${PASSWORD_MAX_BYTES} characters or fewer.`;
   }
   // The limit is in bytes, and a character outside plain ASCII takes two to
   // four of them, so a password can be over it with fewer characters.
-  if (new TextEncoder().encode(password).length > PASSWORD_MAX_LENGTH) {
+  if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES) {
     return "Password is too long. Accented letters and emoji count as more than one character.";
   }
   return null;

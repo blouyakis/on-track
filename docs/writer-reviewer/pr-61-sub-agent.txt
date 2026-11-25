@@ -1,0 +1,283 @@
+=== Prompt given to the sub-agent ===
+
+You are an independent code reviewer for pull request #61 in the GitHub repo blouyakis/on-track (branch `feature/20-auth-sign-in`, "feat: sign up, sign in and sign out with Supabase Auth", closes issue #20). The local clone is at <repo> (currently on `main`; the PR branch is fetched as `origin/feature/20-auth-sign-in`).
+
+## Strict constraints
+- READ-ONLY. Do not edit files, do not check out branches, do not commit, push, or run anything that writes to GitHub (no `gh pr review`, `gh pr comment`, `gh api` with POST/PATCH etc.).
+- Read the PR with `gh pr view 61`, `gh pr diff 61`, and `git log --oneline main..origin/feature/20-auth-sign-in`. Read files in full context with `git show origin/feature/20-auth-sign-in:<path>`. Read main's versions with `git show main:<path>`.
+- Never read or print env files or secrets. A guard hook blocks any command that names a dotted env file; write "env files" in prose instead.
+- Bundled Next.js 16 docs are at node_modules/next/dist/docs/01-app/ (e.g. 02-guides/authentication-with-cache-components.md, authentication.md, the proxy file convention). Installed @supabase/ssr docs/types are in node_modules/@supabase/ssr. Use them to check whether APIs are used correctly for these versions — this Next.js version differs from older ones (middleware is now `proxy.ts`, cacheComponents is on).
+
+## Project rules (from CLAUDE.md and docs/PRD.md — read both files too)
+- Business rules are pure functions in src/lib/ (no React/Next/Supabase imports), developed with TDD: a failing `test:` commit, then `feat:` to pass, optional `refactor:`.
+- Roles are per project (membership records), never on the user.
+- Access enforced twice: server code checks before read/write, AND Postgres RLS.
+- All input validated on the server; client validation is UX only.
+- Server Components by default; "use client" only when needed.
+- TypeScript strict, no `any`. Named exports in src/lib/. Functions in src/lib/ return results for expected failures rather than throwing.
+- Don't trust role/project IDs from the client. No data (even a project name) to non-members.
+- Nothing from the PRD's out-of-scope list. No secrets in code. Conventional Commits. AI disclosure in PR body. Ask before adding dependencies.
+
+## Review framework: C.L.E.A.R. — review every part, even if a part has no findings
+- C, Context: Does the code fit the project's architecture and conventions (CLAUDE.md)? Right patterns? AI risk: inventing its own conventions.
+- L, Logic: Is the business logic correct? Edge cases, error handling? AI risk: only the happy path handled.
+- E, Evidence: Are there tests, and do they actually verify the behavior (not just pass)? TDD red/green commits for src/lib/? AI risk: tests that pass but verify nothing meaningful (over-mocking, asserting on mocks, tautologies).
+- A, Architecture: Follows established patterns? Any new dependencies (check package.json diff)? AI risk: unnecessary libraries.
+- R, Risk: Security, performance, data exposure. Specifically check: injection, XSS, auth checks, open redirects, secrets, user enumeration (sign-up/sign-in error messages and timing/response differences), data shown to signed-out users, cookie handling in the proxy, caching of auth-dependent responses, proxy matcher coverage.
+
+Read the FULL diff including all tests. Also check whether claims in the PR description match the code.
+
+## Output
+For each finding give: C.L.E.A.R. part; severity (blocking / non-blocking / nit / praise); file path and line number in the PR branch version of the file; what the issue is with a short code quote as evidence; why it matters; suggested change; and your confidence (high/medium/low). Say plainly when something cannot be verified from the code. Then, for each of C, L, E, A, R, one line on what you checked if there were no findings. Don't pad: only report findings you can point to in the code.
+
+=== Prompt given to the sub-agent ===
+
+<system-reminder>
+Your final report is delivered through SubagentHandback: when your work is complete, call SubagentHandback({message: <your full report>}). The call ends your run, so make it your last step. Only a SubagentHandback call reaches your caller as your result; plain text you write at the end is not delivered. Do not also send the report with SendMessage: your caller would get it twice.
+</system-reminder>
+
+⏺ Bash: $ gh pr view 61 && git log --oneline main..origin/feature/20-auth-sign-in && git diff --stat main...origin/feature/20-auth-sign-in
+  ⎿ title:	feat: sign up, sign in and sign out with Supabase Auth
+    state:	OPEN
+    author:	blouyakis (Bobbi Louyakis)
+    labels:	feature, priority: high
+    assignees:	blouyakis (Bobbi Louyakis)
+    reviewers:	github-actions (Commented), SeraphimHuang (Ziye Huang) (Requested)
+    projects:
+    milestone:	Sprint 1
+    number:	61
+    url:	https://github.com/blouyakis/on-track/pull/61
+    additions:	1818
+    deletions:	101
+    auto-merge:	disable … [15224 more chars]
+
+⏺ Bash: $ B=origin/feature/20-auth-sign-in; for f in src/lib/credentials.ts src/lib/auth-routes.ts src/app/auth-actions.ts src/app/auth-form-state.ts src/proxy.ts src/utils/supabase/proxy.ts src/utils/supabase/server.ts src/app/project-log.tsx src/app/sign-in/page.tsx src/app/sign-up/page.tsx src/components/auth-form.tsx src/components/auth-page.tsx src/components/sign-out-button.tsx; do echo "=== $f"; git show $B:$f | cat -n; done; git diff main...$B -- src/app/actions.ts src/app/entry-form-state.ts src/utils/supabase/server.ts README.md package.json
+  ⎿ <persisted-output>
+    Output too large (30.6KB). Full output saved to: <session>/tool-results/b8bx2p32a.txt
+
+    Preview (first 2KB):
+    === src/lib/credentials.ts
+         1	// Validation for the sign-up and sign-in forms. The server actions run it on
+         2	// every submission; the  … [1879 more chars]
+
+⏺ Read: <session>/tool-results/b8bx2p32a.txt
+  ⎿ 1	=== src/lib/credentials.ts
+    2	     1	// Validation for the sign-up and sign-in forms. The server actions run it on
+    3	     2	// every submission; the browser's own checks are for convenience only.
+    4	     3
+    5	     4	export type CredentialField = "email" | "password";
+    6	     5
+    7	     6	export type CredentialsInput = Record<CredentialField, string>;
+    8	     7
+    9	     8	export type CredentialsMode =  … [33951 more chars]
+
+⏺ Bash: $ git log --oneline origin/main..origin/feature/20-auth-sign-in | wc -l; git diff --stat origin/main...origin/feature/20-auth-sign-in | tail -3; git diff origin/main...origin/feature/20-auth-sign-in -- package.json | head; grep -n '"version"' node_modules/@supabase/ssr/package.json node_modules/@supabase/supabase-js/package.json; grep -rn "headers" node_modules/@supabase/ssr/dist/main/types.d.ts | head; grep -rn "getClaims" node_modules/@supabase/ssr/README.md | head
+  ⎿       33
+     src/utils/supabase/proxy.ts                        |  80 +++++
+     src/utils/supabase/server.ts                       |   3 +-
+     32 files changed, 2164 insertions(+), 101 deletions(-)
+    node_modules/@supabase/ssr/package.json:3:  "version": "0.12.7",
+    node_modules/@supabase/supabase-js/package.json:3:  "version": "2.119.1",
+    node_modules/@supabase/ssr/dist/main/types.d.ts:34: * For a server clie … [1122 more chars]
+
+⏺ Bash: $ sed -n 20,60p node_modules/@supabase/ssr/dist/main/types.d.ts; sed -n 100,175p node_modules/@supabase/ssr/README.md
+  ⎿     value: string;
+    }[] | null;
+    /** @category Types */
+    export type SetAllCookies = (cookies: {
+        name: string;
+        value: string;
+        options: CookieOptions;
+    }[],
+    /**
+     * Headers that must be set on the HTTP response alongside the cookies.
+     * Responses that set auth cookies must not be cached by CDNs or
+     * reverse proxies, otherwise one user's session token can be served
+     * to a different user.
+      … [2839 more chars]
+
+⏺ Bash: $ B=origin/feature/20-auth-sign-in; for f in src/__tests__/proxy.test.ts src/utils/supabase/__tests__/proxy.test.ts src/app/__tests__/auth-actions.test.ts src/app/__tests__/actions.test.ts; do echo "=== $f"; git show $B:$f | cat -n; done
+  ⎿ <persisted-output>
+    Output too large (33.3KB). Full output saved to: <session>/tool-results/bag3ydf20.txt
+
+    Preview (first 2KB):
+    === src/__tests__/proxy.test.ts
+         1	// @vitest-environment node
+         2	import { NextRequest, NextResponse } from "next/server";
+         3	import … [1863 more chars]
+
+⏺ Read: <session>/tool-results/bag3ydf20.txt
+  ⎿ 50	    49	    "/_next/static/css/app.css",
+    51	    50	    "/_next/image",
+    52	    51	    "/favicon.ico",
+    53	    52	    "/next.svg",
+    54	    53	    "/logo.png",
+    55	    54	    "/photo.jpg",
+    56	    55	  ])("skips the static file %s", (pathname) => {
+    57	    56	    expect(isMatched(pathname)).toBe(false);
+    58	    57	  });
+    59	    58	});
+    60	=== src/utils/supabase/__tests__/proxy.test.ts
+    61	     1	// @vitest- … [35059 more chars]
+
+⏺ Bash: $ B=origin/feature/20-auth-sign-in; for f in src/lib/__tests__/credentials.test.ts src/lib/__tests__/auth-routes.test.ts src/app/__tests__/project-log.test.tsx src/app/__tests__/auth-pages.test.tsx; do echo "=== $f"; git show $B:$f | cat -n; done
+  ⎿ === src/lib/__tests__/credentials.test.ts
+         1	import { describe, expect, test } from "vitest";
+         2	import { validateCredentials } from "@/lib/credentials";
+         3
+         4	const valid = { email: "bobbi@example.com", password: "long-enough-1" };
+         5
+         6	describe("validateCredentials", () => {
+         7	  test.each(["sign-up", "sign-in"] as const)(
+         8	    "returns no errors for a valid  … [15294 more chars]
+
+⏺ Bash: $ for c in a4c469d 16651db 3cca72a 7264103 b18817e db57421 fdbfd9a 9d76bf1 d464bc4; do git show --stat --format='--- %h %s' $c | grep -v '^$'; done; git show fdbfd9a | head -60; git show origin/feature/20-auth-sign-in:src/app/page.tsx
+  ⎿ --- a4c469d test: add failing test for sign-up and sign-in credential validation
+     src/lib/__tests__/credentials.test.ts | 132 ++++++++++++++++++++++++++++++++++
+     1 file changed, 132 insertions(+)
+    --- 16651db feat: validate sign-up and sign-in credentials
+     src/lib/credentials.ts | 63 ++++++++++++++++++++++++++++++++++++++++++++++++++
+     1 file changed, 63 insertions(+)
+    --- 3cca72a test: add failing t … [3921 more chars]
+
+⏺ Bash: $ f=$(find node_modules/next/dist/docs/01-app -name 'proxy.md' | head -1); echo $f; grep -n -i -E "export (async )?function proxy|export default|matcher|runtime|prefetch|Server Function|server action" $f | head -40; grep -n "async getClaims" -A40 node_modules/@supabase/auth-js/dist/main/GoTrueClient.js | grep -n -i -E "alg|HS256|getUser|jwks" | head
+  ⎿ node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md
+    34:export function proxy(request: NextRequest) {
+    39:  matcher: '/about/:path*',
+    47:export function proxy(request) {
+    52:  matcher: '/about/:path*',
+    64:export default function proxy(request) {
+    71:Optionally, a config object can be exported alongside the Proxy function. This object includes the [matcher](#matcher) to spe … [4056 more chars]
+
+⏺ Bash: $ sed -n 88,100p node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md; git show origin/feature/20-auth-sign-in:src/components/__tests__/auth-form.test.tsx | head -80; ls public 2>/dev/null
+  ⎿ ```
+
+    Additionally, the `matcher` option supports complex path specifications using regular expressions. For example, you can exclude certain paths with a regular expression matcher:
+
+    ```js filename="proxy.js"
+    export const config = {
+      matcher: [
+        // Exclude API routes, static files, image optimizations, and .png files
+        '/((?!api|_next/static|_next/image|.*\\.png$).*)',
+      ],
+    }
+    ```
+
+    import {
+      … [2560 more chars]
+
+⏺ Bash: $ git branch -r --contains 3dd5540; git branch -r --contains 6f87ea9; gh pr view 61 --json baseRefName,files --jq '.baseRefName, (.files|length)'; gh pr list --state all --json number,state,title --jq '.[]|select(.number==59 or .number==60)'
+  ⎿   origin/docs/19-log-entries-18-19
+      origin/feature/20-auth-sign-in
+      origin/docs/19-log-entries-18-19
+      origin/feature/20-auth-sign-in
+    main
+    27
+    {"number":60,"state":"MERGED","title":"chore: add /add-feature skill, v1"}
+    {"number":59,"state":"MERGED","title":"docs: add the Sprint 1 planning note"}
+
+=== Report the sub-agent handed back ===
+
+**Code review of PR #61 (`feature/20-auth-sign-in`, closes #20), using C.L.E.A.R.**
+
+I read the PR body, all source and test files on the branch (`src/lib/credentials.ts`, `src/lib/auth-routes.ts`, `src/app/auth-actions.ts`, `src/app/auth-form-state.ts`, `src/proxy.ts`, `src/utils/supabase/proxy.ts`, `src/utils/supabase/server.ts`, `src/app/project-log.tsx`, the pages and components, and the 8 test files), and the TDD commit contents. I checked the code against the bundled `proxy.md` and the installed `@supabase/ssr` 0.12.7 and auth-js `getClaims`.
+
+I did not run the tests, lint or build, because I stayed read-only and on `main`. The PR's "315 tests pass" and coverage numbers are not verified by me.
+
+The local `origin/main` ref is out of date. It doesn't yet contain the already-merged #59/#60, which is why a local diff shows 32 files. GitHub's view of the PR has 27, so this is not a finding.
+
+**Verdict: no blocking findings.** One non-blocking security point is worth a reply before merge: the sign-up enumeration claim (R1).
+
+---
+
+### Findings
+
+**R1. Risk, non-blocking: sign-up still reveals which emails have accounts when email confirmation is off. Confidence: medium-high.**
+- **Where:** `src/app/auth-actions.ts:61-79`
+- **Evidence:**
+  ```ts
+  if (error) { ... return failure("The account could not be created. ...", email); }
+  if (!data.session) { return { status: "success", message: "Check your email ..." } }
+  redirect(HOME_PATH);
+  ```
+- **Issue:** With confirmation off, which is the local stack the PR tested, a new address redirects to `/`. An existing address returns "User already registered", shown as the generic error. The two outcomes differ, so anyone can tell whether an address is registered. The PR itself says "The same address again gives the generic message".
+  - The PR body's claim that the generic message "cannot reveal which addresses have accounts" holds for sign-in, but not for sign-up.
+  - With confirmation on, Supabase returns an obfuscated user with no session and no error. A new and an existing address then both get "Check your email", which is safe.
+- **Why it matters:** issue #20 lists auth errors that don't leak information as an acceptance criterion.
+- **Suggested change:** ensure email confirmation is enabled on the hosted Supabase project, and say so in the README or PR. Or narrow the PR claim to sign-in and accept the sign-up leak, which most sites have.
+- **Not verified:** the hosted project's confirmation setting.
+
+**R2. Risk/performance, non-blocking: the proxy may call Supabase Auth over the network on every request. Confidence: low-medium.**
+- **Where:** `src/utils/supabase/proxy.ts:71` (`await supabase.auth.getClaims()`)
+- **Issue:** In the installed auth-js (`GoTrueClient.js` around line 5599), `getClaims` falls back to `getUser()`, a network call, when the JWT alg starts with `HS`, meaning a symmetric secret.
+  - The matcher covers every page, RSC prefetch and server-action POST.
+  - `ProjectLog` also calls `getUser()`.
+  - So a signed-in page load can make 2 or more round trips to Auth. Local verification only happens with asymmetric signing keys.
+- **Suggested change:** check whether the hosted project uses asymmetric JWT signing keys. If it doesn't, either turn them on or accept the cost knowingly.
+- **Not verified:** the project's signing-key setup.
+
+**R3. Risk, nit: the matcher only skips image extensions, so other public files get redirected. Confidence: medium.**
+- **Where:** `src/proxy.ts:13`
+- **Evidence:**
+  ```
+  "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"
+  ```
+- **Issue:** Any future public file such as `robots.txt`, `sitemap.xml`, `manifest.webmanifest` or fonts would 307 to `/sign-in` for signed-out visitors, and each pays a `getClaims` call. `public/` holds only `.svg` files today, so nothing breaks now.
+- **Suggested change:** add the extensions when such files are added. Optionally exclude `api` and return 401 there instead of an HTML redirect once route handlers exist.
+
+**R4. Risk, nit: the proxy's `setAll` rebuilds the response, which could drop cache headers if Supabase called it twice. Confidence: low.**
+- **Where:** `src/utils/supabase/proxy.ts:27-42`
+- **Evidence:** `response = NextResponse.next({ request });` on each call.
+- **Issue:** The installed `@supabase/ssr` types (`types.d.ts` line 34) say the cache headers come "only with the first cookie write … empty on later calls". A second call in one request would replace the response and lose `Cache-Control: no-store`.
+  - With a single `getClaims` per request this is very unlikely in practice.
+  - It is the same pattern as Supabase's own Next.js template.
+- **Suggested change (optional):** collect the headers across calls, for example an outer `pendingHeaders` with `Object.assign`, and apply them after rebuilding.
+
+**R5. Risk, nit: the server client ignores Supabase's cache headers. Confidence: low.**
+- **Where:** `src/utils/supabase/server.ts:15`
+- **Evidence:** `setAll(cookiesToSet)` drops the second `headers` argument.
+- **Issue:** When `signIn`, `signUp` or `signOut` set cookies in a server action, the no-store headers are not applied. Server-action POST responses are not normally cached by CDNs, so the practical risk is small.
+- **Suggested change:** mention it in a comment, or leave it as is.
+
+**L1. Logic, nit: `signOut` ends the session on every device. Confidence: high.**
+- **Where:** `src/app/auth-actions.ts:106`
+- **Evidence:** `supabase.auth.signOut()` with the default scope, which is `global`.
+- **Issue:** The PR already notes this. Signing out on a laptop also signs the user out on their phone, which users of a "Sign out" button may not expect.
+- **Suggested change:** use `signOut({ scope: "local" })` unless global sign-out is wanted. This is a product call; it is fine either way if it's intended.
+
+**Praise. Risk/Logic: the security-sensitive paths are handled well. Confidence: high.**
+- No open redirect. Every redirect goes to a constant (`HOME_PATH` or `SIGN_IN_PATH`), and the proxy clears `url.search` (`src/utils/supabase/proxy.ts:54`). There is a test with `?next=/evil`.
+- A failed session check counts as signed out (`src/utils/supabase/proxy.ts:67-80`).
+- Public paths match exactly, so any new page is protected by default (`src/lib/auth-routes.ts:23`). Tests cover `/sign-in-other`, `/SIGN-IN` and `/sign-in/extra`.
+- `ProjectLog` uses the verified `getUser()` and redirects before any `.from()` call (`src/app/project-log.tsx:24-30`), and a test asserts no table is read.
+- Passwords are never trimmed, never echoed back, and never logged, all with tests.
+- Sign-in errors map to a single generic message.
+- The demo server action is removed from the module's exports, not just hidden, and a test checks that.
+
+---
+
+### C.L.E.A.R. lines for the parts with no further findings
+
+- **C, Context:** Business rules are pure, framework-free named exports in `src/lib/` (`credentials.ts`, `auth-routes.ts`) and return results instead of throwing.
+  - Server Components are the default. Only `auth-form.tsx` is `"use client"`, and it needs `useActionState`.
+  - `sign-out-button.tsx` is a server-rendered form.
+  - No role is stored on the user, nothing out of scope was added, and the commits use Conventional Commit prefixes. The AI disclosure is present.
+- **L, Logic:**
+  - Validation runs on the server for every submission (`readCredentials`), and missing `FormData` fields become `""`.
+  - The 72-byte bcrypt limit is measured with `TextEncoder`, and there are boundary tests at 72 bytes for ASCII, accented letters and emoji.
+  - Sign-in skips the length rules, so existing accounts are never locked out.
+  - Both outcomes of email confirmation are handled.
+- **E, Evidence:**
+  - TDD order checks out for `src/lib/`. Red commits `a4c469d`, `3cca72a` and `b18817e` touch only tests. The following `feat`/`fix` commits touch only the implementation.
+  - Tests assert behaviour, not just mocks:
+    - The proxy tests use real `NextRequest`/`NextResponse` and check `x-middleware-request-cookie`, the cookie options and `Cache-Control`.
+    - The action tests check that Supabase is not called on invalid input.
+  - Supabase is mocked only at the client boundary. One limit, which the PR acknowledges: the matcher test treats the pattern as a plain RegExp, not as Next's own matcher.
+- **A, Architecture:** No `package.json` changes and no new dependencies.
+  - `@supabase/ssr` was already installed, and `setAll(cookiesToSet, headers)` matches its 0.12.7 signature.
+  - `src/proxy.ts` uses the Next 16 named `proxy` export and a literal `config.matcher`, as `proxy.md` describes.
+  - Each server function checks the session itself, as `proxy.md` lines 251-253 recommend, and RLS is unchanged.
+
+
+  ⎿ {"success":true,"message":"Report delivered to your caller."}
+

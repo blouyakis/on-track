@@ -197,3 +197,30 @@ Project information only. Leave out anything personal, such as schedules, availa
 - **Decisions made:** None; informational.
 - **Action items (owner):** Barbara: add the API key secret for PR #56; write `/add-feature` v1 (#15), then use it on authentication (#20).
 - **Notes:** Completed: Sprint 1 started on the board, with Barbara's Sprint 1 issues in Sprint ToDo and #19 open again after it closed by itself when PR #49 merged; PR #56, PR #57 and PR #58 reviewed, with #57 and #58 approved; PR #59 opened with the Sprint 1 planning note. The merge of PR #53 and PR #54 is already recorded in entry 14. Blockers: none.
+
+### 18 · 2026-11-24 · Standup
+
+- **Time (ET):** 20:46
+- **Format:** Async (Slack)
+- **Topics discussed:** Ziye's standup: PR #57 and PR #58 merged, PR #59 and PR #60 approved, the first AI review run, where C.L.E.A.R. is defined, and one more commit on PR #56 after Barbara's approval; next, #17, #25 and #14; her plan for the #20 / #25 risk from entry 16.
+- **Decisions made:** None; informational. Barbara's reply is in entry 19.
+- **Action items (owner):** Ziye: merge PR #56 once its checks pass (done, #56). Ziye: work on #17 (Playwright MCP), then #25 (E2E setup), then #14, the order of her Sprint 1 issues in PR #59.
+- **Notes:** Completed: PR #58 and PR #57 merged by Ziye, #57 with a merge commit as asked in entry 16, so the test-then-fix commit pairs are in the history of `main`; PR #59 and PR #60 (https://github.com/blouyakis/on-track/pull/60) approved by Ziye, with a few non-blocking comments on each; the AI review ran successfully for the first time, on PR #56 (https://github.com/blouyakis/on-track/actions/runs/45522440037), after Barbara added the API key, and posted its C.L.E.A.R. summary (https://github.com/blouyakis/on-track/pull/56#issuecomment-7149119122); Ziye found the C.L.E.A.R. definition in the Week 11 deck, not Week 12, and posted it on #27, and the AI review now uses it. Barbara approved PR #56; right after, Ziye pushed one more commit, `400c64e`, which only removes the lines in the code that say the framework comes from the course. PR #56 was merged by Ziye at 20:50, which closed #27. Ziye thanked Barbara for covering the $5 for the API key and offered to split the bill if the cost grows. Ziye proposed building #25 on the demo sign-in for now and adapting it if #20 merges first; see entry 19. No blockers reported.
+
+### 19 · 2026-11-24 · Planning
+
+- **Time (ET):** 22:02
+- **Format:** Async (Slack)
+- **Topics discussed:** Barbara's reply to Ziye's standup (entry 18): commit `400c64e` on PR #56; Ziye's review notes on PR #60 and PR #59; a CLAUDE.md exception for the red step; the #20 / #25 risk.
+- **Decisions made:** Ziye proposed building #25 on the demo sign-in for now and adapting it if #20 merges first, and Barbara agreed: whichever of #20 and #25 merges second adapts.
+- **Action items (owner):** Barbara: put both of Ziye's notes on PR #60 into v2 of `/add-feature`, with the reasons, along with the two from the AI review (one `--label` flag per label, and the red step). Barbara: add #20 under "Depends on" for #28 in her next docs PR. Ziye: say whether the CLAUDE.md exception is OK.
+- **Notes:** Completed: Barbara read commit `400c64e` and found it good. Still open, waiting on Ziye: the AI review pointed out that CLAUDE.md says to run all four checks before every commit, but a failing-test commit cannot pass `npm test`; Barbara proposed a one-line exception in CLAUDE.md for the red step. Ziye agreed in her review of PR #60 that the `/add-feature` session logs go in `docs/skills/add-feature/`.
+
+### 20 · 2026-11-24 · Standup
+
+- **Time (ET):** 22:02
+- **Format:** Async (Slack)
+- **Topics discussed:** Barbara's standup: the comment trigger for the AI review tested, PR #60 and PR #59 merged, and what the review runs have cost so far; next, the first `/add-feature` run, on #20.
+- **Decisions made:** None; informational.
+- **Action items (owner):** Barbara: run `/add-feature` for the first time, on authentication (#20), and save the session logs in `docs/skills/add-feature/`. Barbara: log Ziye's update and this reply with `/log`.
+- **Notes:** Completed: the comment trigger tested: Barbara commented `@claude review` on PR #60, and the review ran from `main`, posted a summary and three inline comments, and nothing was blocked with the hooks in place, so both triggers work; PR #60 and PR #59 merged by Barbara, both with merge commits; #15 and #27 closed and in Done. The three review runs so far cost about $0.31 together, so the credit will last a long time. The merge of PR #56 is already recorded in entry 18. No blockers reported.

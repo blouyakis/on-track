@@ -88,6 +88,27 @@ This repo runs Next.js 16.4 with `cacheComponents: true` and `partialPrefetching
 - **Coverage target:** 70% or higher overall, and close to 100% for `src/lib/`.
 - Run `npm test`, `npm run lint`, `npm run format:check`, and `npm run typecheck` before every commit.
 
+## Hooks
+
+`.claude/settings.json` registers three Claude Code hooks. Their scripts live in `.claude/hooks/`.
+
+- **PreToolUse, guard** (`pre-tool-use-guard.mjs`): before Read, Grep, Edit, Write, NotebookEdit or Bash runs, it blocks the actions this file forbids and tells Claude which rule fired. These are reading or printing `.env*` files (except `.env.example`), editing `AGENTS.md`, `package-lock.json` or `node_modules/`, pushing to `main` (including a bare `git push` while on `main`), and any force push. It also catches:
+
+  - globs and braces such as `.env*` or `{.env,x}`;
+  - absolute paths and file names in any letter case;
+  - `git -C <dir>`, `--all` and `--branches`;
+  - wrappers such as `env`, `time` or `xargs`;
+  - commands split with a trailing backslash.
+
+  If the guard itself errors, it blocks the call. It matches strings, so it misses obfuscated commands, variables, scripts that touch files themselves, and a `cd` earlier in the same command. Globs are only tested against known env names. The `deny` rules in `permissions` remain a second layer. Its tests are in `.claude/hooks/__tests__/` and run with `npm test`.
+
+  It also blocks some harmless commands. Any word that names an env file is blocked, even in a commit message or in `cp .env.example .env.local`. Quoted text containing `|` or `;` is still split into separate commands, so a commit message containing `| git push origin main` counts as a push. When the guard blocks a harmless command, rephrase it, or leave setup steps like that copy to a human.
+
+- **PostToolUse, format on edit** (`format-edited-file.sh`): after every Edit or Write, runs `prettier --write --ignore-unknown` on that one file. It skips files Prettier does not handle, files in `.prettierignore` (`AGENTS.md`, `package-lock.json`, `docs/`), and files outside the project. If Prettier fails, for example on a syntax error, Claude sees the error. It does not run `eslint --fix`, because autofixes can change behavior; `npm run lint` stays a pre-commit check.
+- **Stop, run the tests** (`run-tests-on-stop.sh`): when Claude finishes a turn, runs `vitest run` if anything outside `docs/` has changed. If tests fail, it blocks the stop once and feeds the failure back so Claude fixes it. When `stop_hook_active` is true, Claude is already continuing because of this hook, so the script lets it stop instead of looping. It only looks at uncommitted changes, so code committed during a turn is not re-tested; that is why the four checks run before every commit.
+
+Inspect them with `/hooks`. To turn them off for yourself, set `"disableAllHooks": true` in `.claude/settings.local.json`. Evidence of all three hooks firing is in `docs/hooks/`.
+
 ## Do
 
 - Read the relevant PRD rule before writing a test or a function for it.

@@ -1,0 +1,169 @@
+name: AI review
+
+# Claude reviews a pull request and posts its findings as PR comments.
+# - Runs automatically when a non-draft PR is opened, reopened, or marked
+#   ready for review. Pushes to an open PR do not start a new review.
+# - Runs again when a repo owner, member, or collaborator posts a PR comment
+#   that starts with "@claude review". Comment events always use the
+#   workflow file on the default branch, so this trigger works after merge.
+# - PRs from forks are not reviewed (the action skips them).
+# - The Anthropic API key comes only from the ANTHROPIC_API_KEY secret.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+jobs:
+  review:
+    if: >-
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.draft == false &&
+       github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       startsWith(github.event.comment.body, '@claude review') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+    # Fork PRs: the pull_request branch above checks the head repo. The
+    # issue_comment event carries no head repo, so the comment path relies on
+    # the action itself: with allow_fork_prs unset, it skips a PR whose branch
+    # is in another repository "for every event that names the pull request,
+    # including comments on the conversation" (docs/security.md, "Pull requests
+    # from forks", in the pinned version eb56b66).
+    # Job-level, not workflow-level: the job's `if` is checked first, so a
+    # comment that is not "@claude review" never cancels a running review.
+    concurrency:
+      group: ai-review-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@eb56b6666facdbd501035f4a0269d8caee2e7a8b # v1.0.289
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: >-
+            --model claude-sonnet-5-5
+            --max-turns 30
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+          # Review framework: C.L.E.A.R. (Context, Logic, Evidence, Architecture,
+          # Risk), with the CLAUDE.md rules filed under each letter. Comment
+          # labels: Conventional Comments (conventionalcomments.org).
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+
+            You are reviewing a pull request for OnTrack. Read CLAUDE.md and
+            docs/PRD.md first. The checked-out tree may be the base branch, so
+            get the changes with `gh pr diff` and the description with
+            `gh pr view`. Review only what this PR changes.
+            Before reviewing, read earlier review comments with
+            `gh pr view --comments`. Do not repeat a finding that is already
+            posted and still applies.
+            If the PR changes CLAUDE.md or docs/PRD.md, review against the
+            current versions and add a `question (non-blocking)` comment that
+            flags the rule change for human review.
+
+            ## C.L.E.A.R. review
+            C.L.E.A.R. is a framework for reviewing AI-generated code, in five
+            parts: Context, Logic, Evidence, Architecture and Risk. Each part
+            below gives its definition, what to check, the AI-specific risk,
+            and the project rules from CLAUDE.md and docs/PRD.md. Review the
+            change against every part and flag each break.
+
+            ### C: Context
+            Definition: Does this code fit the project's architecture and
+            conventions?
+            What to check: Fits conventions? Uses right patterns?
+            AI-specific risk: AI may invent its own conventions.
+            Project rules:
+            - TypeScript strict: no `any`. Named exports in src/lib/.
+              Kebab-case file names, PascalCase components. Server
+              Components unless state, effects, or browser APIs need
+              "use client".
+            - Entry types and role names match the PRD exactly.
+            - No hand edits to AGENTS.md, package-lock.json, or node_modules/.
+            - Commits use Conventional Commit prefixes, and the PR
+              description states the AI disclosure (percent AI-generated,
+              tool used, human review applied).
+
+            ### L: Logic
+            Definition: Is the business logic correct? Are edge cases handled?
+            What to check: Edge cases? Error handling?
+            AI-specific risk: AI often handles happy path only.
+            Project rules:
+            - Input is validated on the server with the src/lib/ functions,
+              following the PRD's "Rules the logic must enforce", including
+              the edge cases it names.
+
+            ### E: Evidence
+            Definition: Are there tests? Do they actually verify the behavior?
+            What to check: Tests exist? Tests are meaningful?
+            AI-specific risk: AI writes tests that pass but don't verify
+            behavior.
+            Project rules:
+            - src/lib/ code has tests written first (a `test:` commit before
+              the `feat:` commit), and no test was changed or deleted just to
+              make it pass.
+
+            ### A: Architecture
+            Definition: Does it follow established patterns? Any new
+            dependencies?
+            What to check: Follows patterns? No new deps?
+            AI-specific risk: AI adds unnecessary libraries.
+            Project rules:
+            - Business rules in src/lib/ are pure functions with no React,
+              Next.js, or Supabase imports, and they return result values
+              for expected failures instead of throwing.
+            - Roles are per project (`contributor`, `overseer`) and never
+              stored on the user.
+            - Nothing from the PRD's out-of-scope list (task lists, timers,
+              notifications, GitHub import, file uploads).
+            - Any new dependency is needed and explained in the PR.
+
+            ### R: Risk
+            Definition: Security issues? Performance concerns? Data exposure?
+            What to check: SQL injection? XSS? Auth checks?
+            AI-specific risk: 1.57x more security issues (than human-written
+            code).
+            Project rules:
+            - Role and project IDs from the client are not trusted;
+              membership is looked up on the server.
+            - Access is enforced in server code and in Row Level Security.
+              No data, including a project's name, reaches a user without a
+              membership in that project.
+            - No secrets, env files, or keys in the diff.
+
+            ## How to post
+            - Label every comment with Conventional Comments plus its
+              C.L.E.A.R. letter: start it with
+              `<label> (<blocking|non-blocking>, <Context|Logic|Evidence|Architecture|Risk>): <subject>`,
+              using one of `issue`, `suggestion`, `nitpick`, `question`, or
+              `praise`. Examples: `issue (blocking, Risk): ...`,
+              `nitpick (non-blocking, Context): ...`.
+              `nitpick` and `praise` are always non-blocking. Mark a comment
+              blocking only if it must be fixed before merge.
+            - Use the inline comment tool for findings tied to specific lines.
+              Each one says what is wrong, why it matters, and a fix.
+            - Then post one summary comment with `gh pr comment` that groups
+              the findings under C, L, E, A, and R, most severe (blocking)
+              first within each letter. Show every letter, and write "No
+              findings" under a letter with none. Keep each finding's label.
+              If earlier review comments exist, list which of their findings
+              this PR has now fixed.
+            - Report only real problems you can point to in the diff, plus
+              at most one `praise` when something is done well. If you find
+              no problems, say so plainly. Do not push commits or change files.
+            - Refer to environment files only as "env files". Never write a
+              dotted env file name in a comment or a command, because the
+              repo's command guard blocks any command that names one.

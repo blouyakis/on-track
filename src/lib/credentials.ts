@@ -43,6 +43,11 @@ function passwordError(password: string, mode: CredentialsMode): string | null {
   if (password.length > PASSWORD_MAX_LENGTH) {
     return `Password must be ${PASSWORD_MAX_LENGTH} characters or fewer.`;
   }
+  // The limit is in bytes, and a character outside plain ASCII takes two to
+  // four of them, so a password can be over it with fewer characters.
+  if (new TextEncoder().encode(password).length > PASSWORD_MAX_LENGTH) {
+    return "Password is too long. Accented letters and emoji count as more than one character.";
+  }
   return null;
 }
 

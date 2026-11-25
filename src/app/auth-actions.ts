@@ -11,6 +11,12 @@ function text(formData: FormData, name: string): string {
   return typeof value === "string" ? value : "";
 }
 
+// What the user sees when Supabase rejects a request. The reason stays in the
+// server log: shown to the user, it would say which addresses have accounts.
+function failure(message: string, email: string): AuthFormState {
+  return { status: "error", message, fieldErrors: {}, email };
+}
+
 type Submission =
   | { ok: true; email: string; password: string }
   | { ok: false; state: AuthFormState };
@@ -50,7 +56,15 @@ export async function signUp(
   const { email, password } = submission;
 
   const supabase = await createClient();
-  const { data } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    console.error("Sign-up failed:", error.message);
+    return failure(
+      "The account could not be created. Check the details and try again.",
+      email,
+    );
+  }
 
   // No session means the Supabase project confirms email addresses first.
   if (!data.session) {
@@ -74,14 +88,25 @@ export async function signIn(
   const { email, password } = submission;
 
   const supabase = await createClient();
-  await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    console.error("Sign-in failed:", error.message);
+    return failure(
+      "Could not sign in. Check your email and password and try again.",
+      email,
+    );
+  }
 
   redirect(HOME_PATH);
 }
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+
+  // The user asked to leave, so they go to the sign-in page either way.
+  if (error) console.error("Sign-out failed:", error.message);
 
   redirect(SIGN_IN_PATH);
 }

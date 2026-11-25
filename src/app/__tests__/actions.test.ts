@@ -57,6 +57,24 @@ const workEntry = {
   link: "",
 };
 
+// A server action can be called by anyone who can reach the app, whether or
+// not a button for it is on the page, so the demo sign-in has to be gone from
+// the module and not only from the screen.
+describe("the demo sign-in", () => {
+  test("is no longer a server action", async () => {
+    const actions = await import("@/app/actions");
+
+    expect(Object.keys(actions)).not.toContain("signInAsDemoContributor");
+    expect(Object.keys(actions).join(" ")).not.toMatch(/demo/i);
+  });
+
+  test("has no state left in the form-state module", async () => {
+    const formState = await import("@/app/entry-form-state");
+
+    expect(Object.keys(formState).join(" ")).not.toMatch(/demo/i);
+  });
+});
+
 describe("createEntry", () => {
   beforeEach(() => {
     vi.clearAllMocks();

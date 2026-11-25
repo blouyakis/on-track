@@ -107,6 +107,37 @@ describe("validateCredentials", () => {
     ]);
   });
 
+  // bcrypt reads 72 bytes, not 72 characters. An accented letter is two
+  // bytes and an emoji is four, so these are over the limit while looking
+  // well under it.
+  test.each([
+    ["37 accented letters (74 bytes)", "é".repeat(37)],
+    ["19 emoji (76 bytes)", "😀".repeat(19)],
+    ["70 letters and one emoji (74 bytes)", `${"a".repeat(70)}😀`],
+  ])("reports a password of %s on sign-up", (_label, password) => {
+    expect(password.length).toBeLessThanOrEqual(72);
+
+    const errors = validateCredentials({ ...valid, password }, "sign-up");
+
+    expect(errors).toEqual([
+      {
+        field: "password",
+        message:
+          "Password is too long. Accented letters and emoji count as more than one character.",
+      },
+    ]);
+  });
+
+  test.each([
+    ["36 accented letters (72 bytes)", "é".repeat(36)],
+    ["18 emoji (72 bytes)", "😀".repeat(18)],
+    ["68 letters and one emoji (72 bytes)", `${"a".repeat(68)}😀`],
+  ])("accepts a password of %s on sign-up", (_label, password) => {
+    const errors = validateCredentials({ ...valid, password }, "sign-up");
+
+    expect(errors).toEqual([]);
+  });
+
   // An existing account's password is whatever it already is. The length
   // rules apply when a password is chosen, not when it is checked.
   test("does not apply the length rules on sign-in", () => {

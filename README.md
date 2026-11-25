@@ -29,13 +29,14 @@ npm run dev            # http://localhost:3000
 
 Stop the local stack with `npx supabase stop`.
 
-### Demo sign-in (temporary)
+### Signing in
 
-Real sign-up and sign-in are not built yet. Until they are, the home page shows a **Continue as demo contributor** button when you are signed out. It signs in the demo user that `supabase/seed.sql` creates, a contributor on "Demo Project", so the form and the project log work under the real Row Level Security rules.
+Signed-out visitors are sent to `/sign-in`. From there you can:
 
-- The demo user exists only in a locally seeded database. If the button reports an error, run `npx supabase db reset`.
-- The button is off in production builds unless `ALLOW_DEMO_SIGN_IN=true` is set. Do not set it on a deployment that holds real data.
-- The session lasts about an hour, then the button appears again.
+- **Create an account** at `/sign-up` with an email and a password of at least 8 characters. A new account is not in a project yet, so its home page is empty until it joins one.
+- **Sign in as the seeded contributor** that `supabase/seed.sql` creates, a member of "Demo Project". Its email and password are in that file and exist only in a locally seeded database. If sign-in fails, run `npx supabase db reset`.
+
+The local Supabase stack signs a new account in straight away. A Supabase project that confirms email addresses shows "Check your email to confirm your account, then sign in." instead.
 
 ## Environment variables
 

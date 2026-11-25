@@ -50,9 +50,10 @@ jobs:
             --model claude-sonnet-5-5
             --max-turns 30
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
-          # Review dimensions: Google Engineering Practices, "What to look for in
-          # a code review" (google.github.io/eng-practices/review/reviewer/looking-for.html).
-          # Comment labels: Conventional Comments (conventionalcomments.org).
+          # Review framework: C.L.E.A.R. (Context, Logic, Evidence, Architecture,
+          # Risk), from the course's Week 11 lecture, with the CLAUDE.md rules
+          # filed under each letter. Comment labels: Conventional Comments
+          # (conventionalcomments.org).
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
@@ -68,67 +69,81 @@ jobs:
             current versions and add a `question (non-blocking)` comment that
             flags the rule change for human review.
 
-            ## Review dimensions (Google Engineering Practices)
-            Check the change for each of these:
-            - Design: the change makes sense as a whole, belongs here, and
-              fits the rest of the system.
-            - Functionality: it does what the author intends; look for edge
-              cases, race conditions, and bugs visible from reading the code.
-            - Complexity: no line, function, or component is harder to follow
-              than it needs to be; no over-engineering or features not needed now.
-            - Tests: the right unit, integration, or end-to-end tests exist,
-              are correct, and would fail if the code broke.
-            - Naming: names are clear and descriptive without being long.
-            - Comments: comments are clear and needed, and explain why rather
-              than what; stale comments and TODOs are cleaned up.
-            - Style: the code follows the project's conventions (CLAUDE.md,
-              ESLint, Prettier); personal preferences are only nitpicks.
-            - Documentation: README, CLAUDE.md, or other docs are updated when
-              the change alters how to build, test, run, or use the project.
+            ## C.L.E.A.R. review
+            Check the change under each of the five letters. Each letter lists
+            what to check, the risk typical of AI-written code, and the
+            CLAUDE.md rules that belong to it. Flag every break.
 
-            ## CLAUDE.md checklist
-            Check the change against these project rules and flag each break:
-            - Business rules in src/lib/ are pure functions with no React,
-              Next.js, or Supabase imports, and they return result values
-              for expected failures instead of throwing.
-            - src/lib/ code has tests written first (a `test:` commit before
-              the `feat:` commit), and no test was changed or deleted just to
-              make it pass.
-            - Roles are per project (`contributor`, `overseer`) and never
-              stored on the user. Role and project IDs from the client are
-              not trusted; membership is looked up on the server.
-            - Access is enforced in server code and in Row Level Security.
-              No data, including a project's name, reaches a user without a
-              membership in that project.
-            - Input is validated on the server with the src/lib/ functions,
-              following the PRD's "Rules the logic must enforce".
-            - Entry types and role names match the PRD exactly.
+            ### C: Context
+            Does the code fit the project's architecture and conventions?
+            AI risk: inventing its own conventions instead of the project's.
             - TypeScript strict: no `any`. Named exports in src/lib/.
               Kebab-case file names, PascalCase components. Server
               Components unless state, effects, or browser APIs need
               "use client".
-            - Nothing from the PRD's out-of-scope list (task lists, timers,
-              notifications, GitHub import, file uploads).
-            - No secrets, .env files, or keys in the diff. No hand edits to
-              AGENTS.md, package-lock.json, or node_modules/.
+            - Entry types and role names match the PRD exactly.
+            - No hand edits to AGENTS.md, package-lock.json, or node_modules/.
             - Commits use Conventional Commit prefixes, and the PR
               description states the AI disclosure (percent AI-generated,
               tool used, human review applied).
 
+            ### L: Logic
+            Is the business logic correct? Are edge cases and errors handled?
+            AI risk: handling only the happy path.
+            - Input is validated on the server with the src/lib/ functions,
+              following the PRD's "Rules the logic must enforce", including
+              the edge cases it names.
+
+            ### E: Evidence
+            Are there tests, and do they actually verify the behavior?
+            AI risk: tests that pass but do not check the behavior.
+            - src/lib/ code has tests written first (a `test:` commit before
+              the `feat:` commit), and no test was changed or deleted just to
+              make it pass.
+
+            ### A: Architecture
+            Does it follow established patterns? Any new dependencies?
+            AI risk: adding libraries the project does not need.
+            - Business rules in src/lib/ are pure functions with no React,
+              Next.js, or Supabase imports, and they return result values
+              for expected failures instead of throwing.
+            - Roles are per project (`contributor`, `overseer`) and never
+              stored on the user.
+            - Nothing from the PRD's out-of-scope list (task lists, timers,
+              notifications, GitHub import, file uploads).
+            - Any new dependency is needed and explained in the PR.
+
+            ### R: Risk
+            Security issues, performance concerns, or data exposure?
+            AI risk: more security issues than human-written code (SQL
+            injection, XSS, missing auth checks).
+            - Role and project IDs from the client are not trusted;
+              membership is looked up on the server.
+            - Access is enforced in server code and in Row Level Security.
+              No data, including a project's name, reaches a user without a
+              membership in that project.
+            - No secrets, env files, or keys in the diff.
+
             ## How to post
-            - Label every comment with Conventional Comments: start it with
-              `<label> (<blocking|non-blocking>): <subject>`, using one of
-              `issue`, `suggestion`, `nitpick`, `question`, or `praise`.
-              Examples: `issue (blocking): ...`, `nitpick (non-blocking): ...`.
+            - Label every comment with Conventional Comments plus its
+              C.L.E.A.R. letter: start it with
+              `<label> (<blocking|non-blocking>, <Context|Logic|Evidence|Architecture|Risk>): <subject>`,
+              using one of `issue`, `suggestion`, `nitpick`, `question`, or
+              `praise`. Examples: `issue (blocking, Risk): ...`,
+              `nitpick (non-blocking, Context): ...`.
               `nitpick` and `praise` are always non-blocking. Mark a comment
               blocking only if it must be fixed before merge.
             - Use the inline comment tool for findings tied to specific lines.
               Each one says what is wrong, why it matters, and a fix.
             - Then post one summary comment with `gh pr comment` that groups
-              the findings by the review dimensions above and the CLAUDE.md
-              checklist, blocking findings first. Keep each finding's label.
+              the findings under C, L, E, A, and R, most severe (blocking)
+              first within each letter. Show every letter, and write "No
+              findings" under a letter with none. Keep each finding's label.
               If earlier review comments exist, list which of their findings
               this PR has now fixed.
             - Report only real problems you can point to in the diff, plus
               at most one `praise` when something is done well. If you find
               no problems, say so plainly. Do not push commits or change files.
+            - Refer to environment files only as "env files". Never write a
+              dotted env file name in a comment or a command, because the
+              repo's command guard blocks any command that names one.

@@ -262,3 +262,103 @@ describe("signOut", () => {
     expect(redirect).toHaveBeenCalledWith("/sign-in");
   });
 });
+
+// Everything written to the server log during the test, as one string.
+function serverLog(): string {
+  return JSON.stringify(vi.mocked(console.error).mock.calls);
+}
+
+describe("auth errors", () => {
+  const SIGN_UP_FAILED =
+    "The account could not be created. Check the details and try again.";
+  const SIGN_IN_FAILED =
+    "Could not sign in. Check your email and password and try again.";
+
+  test("sign-up shows a generic message and logs the detail on the server", async () => {
+    fakeSupabase({ signUpError: { message: "User already registered" } });
+
+    const state = await signUp(
+      initialAuthFormState,
+      form({ email: EMAIL, password: PASSWORD }),
+    );
+
+    expect(state.status).toBe("error");
+    expect(state.message).toBe(SIGN_UP_FAILED);
+    expect(state.fieldErrors).toEqual({});
+    expect(state.email).toBe(EMAIL);
+    expect(serverLog()).toContain("User already registered");
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  test("sign-in shows a generic message and logs the detail on the server", async () => {
+    fakeSupabase({ signInError: { message: "Invalid login credentials" } });
+
+    const state = await signIn(
+      initialAuthFormState,
+      form({ email: EMAIL, password: PASSWORD }),
+    );
+
+    expect(state.status).toBe("error");
+    expect(state.message).toBe(SIGN_IN_FAILED);
+    expect(state.fieldErrors).toEqual({});
+    expect(state.email).toBe(EMAIL);
+    expect(serverLog()).toContain("Invalid login credentials");
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  // The same words whatever went wrong, so the message cannot be used to
+  // find out which email addresses have accounts.
+  test.each([
+    "Invalid login credentials",
+    "Email not confirmed",
+    "Request rate limit reached",
+    "fetch failed",
+  ])("sign-in gives the same message for %j", async (message) => {
+    fakeSupabase({ signInError: { message } });
+
+    const state = await signIn(
+      initialAuthFormState,
+      form({ email: EMAIL, password: PASSWORD }),
+    );
+
+    expect(state.message).toBe(SIGN_IN_FAILED);
+  });
+
+  test.each([
+    "User already registered",
+    "Password should contain at least one character of each",
+    "Signups not allowed for this instance",
+  ])("sign-up gives the same message for %j", async (message) => {
+    fakeSupabase({ signUpError: { message } });
+
+    const state = await signUp(
+      initialAuthFormState,
+      form({ email: EMAIL, password: PASSWORD }),
+    );
+
+    expect(state.message).toBe(SIGN_UP_FAILED);
+  });
+
+  test("the password is never written to the server log", async () => {
+    fakeSupabase({
+      signUpError: { message: "User already registered" },
+      signInError: { message: "Invalid login credentials" },
+    });
+    const credentials = { email: EMAIL, password: PASSWORD };
+
+    await signUp(initialAuthFormState, form(credentials));
+    await signIn(initialAuthFormState, form(credentials));
+
+    expect(console.error).toHaveBeenCalledTimes(2);
+    expect(serverLog()).not.toContain(PASSWORD);
+  });
+
+  test("a failed sign-out is logged and still sends the user to the sign-in page", async () => {
+    fakeSupabase({ signOutError: { message: "session_not_found" } });
+
+    await expect(signOut()).rejects.toThrow(REDIRECT);
+
+    expect(serverLog()).toContain("session_not_found");
+    expect(redirect).toHaveBeenCalledWith("/sign-in");
+  });
+});

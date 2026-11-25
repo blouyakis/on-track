@@ -27,6 +27,12 @@ jobs:
        github.event.issue.pull_request &&
        startsWith(github.event.comment.body, '@claude review') &&
        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+    # Fork PRs: the pull_request branch above checks the head repo. The
+    # issue_comment event carries no head repo, so the comment path relies on
+    # the action itself: with allow_fork_prs unset, it skips a PR whose branch
+    # is in another repository "for every event that names the pull request,
+    # including comments on the conversation" (docs/security.md, "Pull requests
+    # from forks", in the pinned version eb56b66).
     # Job-level, not workflow-level: the job's `if` is checked first, so a
     # comment that is not "@claude review" never cancels a running review.
     concurrency:

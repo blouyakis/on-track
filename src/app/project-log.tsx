@@ -1,11 +1,13 @@
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { isDemoSignInEnabled } from "@/app/demo-sign-in";
-import { DemoSignIn } from "@/components/demo-sign-in";
 import { EntryForm } from "@/components/entry-form";
 import { EntryList, type EntryRow } from "@/components/entry-list";
+import { SignOutButton } from "@/components/sign-out-button";
+import { SIGN_IN_PATH } from "@/lib/auth-routes";
 import { sortNewestFirst } from "@/lib/sort-entries";
 import { createClient } from "@/utils/supabase/server";
 
+type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 type MembershipRow = { project_id: string; role: string };
 type ProjectRow = { name: string };
 
@@ -23,21 +25,31 @@ export async function ProjectLog() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Signed out: nothing about any project is shown.
-  if (!user) {
-    return isDemoSignInEnabled() ? (
-      <DemoSignIn />
-    ) : (
-      <p className={mutedClass}>Sign-in is not available yet.</p>
-    );
-  }
+  // Signed out: nothing about any project is read or shown. The proxy has
+  // normally redirected already; this is the check next to the data.
+  if (!user) redirect(SIGN_IN_PATH);
 
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className={mutedClass}>
+          Signed in as <span className="font-medium">{user.email}</span>
+        </p>
+        <SignOutButton />
+      </div>
+
+      {await projectContent(supabase, user.id)}
+    </div>
+  );
+}
+
+async function projectContent(supabase: SupabaseClient, userId: string) {
   // The project comes from the signed-in user's membership, looked up here.
   // (One project per user for now.)
   const { data: membership } = await supabase
     .from("memberships")
     .select("project_id, role")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .limit(1)
     .maybeSingle()
     .overrideTypes<MembershipRow, { merge: false }>();
@@ -90,7 +102,7 @@ export async function ProjectLog() {
         <h3 id="project-log" className="text-lg font-medium">
           Project log
         </h3>
-        <EntryList entries={entries} currentUserId={user.id} />
+        <EntryList entries={entries} currentUserId={userId} />
       </section>
     </div>
   );

@@ -16,35 +16,42 @@ function text(formData: FormData, name: string): string {
   return typeof value === "string" ? value : "";
 }
 
+// An error about the whole submission. `value` is what the user typed, sent
+// back so the form is not emptied.
+function formError(value: string, message: string): ProjectFormState {
+  return { status: "error", message, fieldError: null, value };
+}
+
+// An error about the form's one field.
+function fieldError(value: string, message: string): ProjectFormState {
+  return { status: "error", message: null, fieldError: message, value };
+}
+
+// Who is asking? Every action checks for itself and never assumes the page
+// already did.
+async function signedInClient() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user ? supabase : null;
+}
+
 export async function createProject(
   _previous: ProjectFormState,
   formData: FormData,
 ): Promise<ProjectFormState> {
   const name = text(formData, "name");
 
-  const failure = (
-    message: string | null,
-    fieldError: string | null = null,
-  ): ProjectFormState => ({
-    status: "error",
-    message,
-    fieldError,
-    value: name,
-  });
+  const supabase = await signedInClient();
+  if (!supabase) return formError(name, "Sign in to create a project.");
 
-  // 1. Who is asking? Never assume the page already checked.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return failure("Sign in to create a project.");
-
-  // 2. The name is checked here on every submission.
+  // The name is checked here on every submission.
   const nameError = projectNameError(name);
-  if (nameError) return failure(null, nameError);
+  if (nameError) return fieldError(name, nameError);
 
-  // 3. Only the name is sent. The database function takes the user from the
-  //    session, makes them the overseer and makes the invite code.
+  // Only the name is sent. The database function takes the user from the
+  // session, makes them the overseer and makes the invite code.
   const { data, error } = await supabase.rpc("create_project", {
     p_name: name.trim(),
   });
@@ -56,7 +63,7 @@ export async function createProject(
       "Creating a project failed:",
       error?.message ?? "no project id was returned",
     );
-    return failure("The project could not be created. Try again.");
+    return formError(name, "The project could not be created. Try again.");
   }
 
   redirect(projectPath(projectId));
@@ -68,30 +75,16 @@ export async function joinProject(
 ): Promise<ProjectFormState> {
   const typed = text(formData, "invite_code");
 
-  const failure = (
-    message: string | null,
-    fieldError: string | null = null,
-  ): ProjectFormState => ({
-    status: "error",
-    message,
-    fieldError,
-    value: typed,
-  });
+  const supabase = await signedInClient();
+  if (!supabase) return formError(typed, "Sign in to join a project.");
 
-  // 1. Who is asking? Never assume the page already checked.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return failure("Sign in to join a project.");
-
-  // 2. A blank or impossibly long code is not looked up at all.
+  // A blank or impossibly long code is not looked up at all.
   const codeError = inviteCodeError(typed);
-  if (codeError) return failure(null, codeError);
+  if (codeError) return fieldError(typed, codeError);
 
-  // 3. Only the code is sent. The database function takes the user from the
-  //    session and makes them a contributor. It returns the project's id, or
-  //    null when no project has the code.
+  // Only the code is sent. The database function takes the user from the
+  // session and makes them a contributor. It returns the project's id, or
+  // null when no project has the code.
   const { data, error } = await supabase.rpc("join_project", {
     p_invite_code: normalizeInviteCode(typed),
   });
@@ -102,7 +95,7 @@ export async function joinProject(
   // One answer for every code that did not work, so it says nothing about
   // whether a project exists.
   if (error || typeof projectId !== "string") {
-    return failure(null, INVALID_INVITE_CODE_MESSAGE);
+    return fieldError(typed, INVALID_INVITE_CODE_MESSAGE);
   }
 
   redirect(projectPath(projectId));

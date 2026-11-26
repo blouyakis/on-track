@@ -12,5 +12,8 @@ docs/
 out/
 build/
 coverage/
+test-results/
+playwright-report/
+blob-report/
 public/
 next-env.d.ts

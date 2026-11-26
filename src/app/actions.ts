@@ -28,7 +28,11 @@ function textOrNull(value: string): string | null {
   return trimmed === "" ? null : trimmed;
 }
 
+// `projectId` is bound by the entry form and says which project the entry is
+// for. It comes from the client, so it is only a request: the membership
+// looked up below decides whether the user may add to that project.
 export async function createEntry(
+  projectId: string,
   _previous: EntryFormState,
   formData: FormData,
 ): Promise<EntryFormState> {
@@ -57,15 +61,14 @@ export async function createEntry(
     return failure("Sign in to add an entry.");
   }
 
-  // 2. The project and the role come from the user's membership, looked up
-  //    here. Nothing about either is read from the form. (One project per
-  //    user for now; choosing between projects comes with the projects
-  //    feature.)
+  // 2. The role comes from the user's membership in the requested project,
+  //    looked up here. Nothing about the project or the role is read from
+  //    the form. No membership, no entry.
   const { data } = await supabase
     .from("memberships")
     .select("project_id, role")
     .eq("user_id", user.id)
-    .eq("role", "contributor")
+    .eq("project_id", projectId)
     .limit(1)
     .maybeSingle();
   const membership = toMembership(data);

@@ -94,7 +94,7 @@ async function projectContent(supabase: SupabaseClient, userId: string) {
           <h3 id="add-entry" className="text-lg font-medium">
             Add an entry
           </h3>
-          <EntryForm />
+          <EntryForm projectId={membership.project_id} />
         </section>
       )}
 

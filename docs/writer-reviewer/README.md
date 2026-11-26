@@ -19,9 +19,10 @@ The pattern has four steps: write, review by a separate agent using C.L.E.A.R., 
 ## Sprint 1: PR #61 (issue #29)
 
 - **Writer:** Barbara's Claude Code session, through the `/add-feature` skill, wrote PR [#61](https://github.com/blouyakis/on-track/pull/61) ([#20](https://github.com/blouyakis/on-track/issues/20), sign up, sign in and sign out). Its AI disclosure is in the PR description.
-- **Reviewer:** Ziye ran a separate Claude Code session (Claude Opus 5.5). That session gave the review to an independent general-purpose sub-agent with the C.L.E.A.R. framework and the project rules, but none of its own conclusions. It then checked each finding against the code, kept four, and dropped two it could not confirm, with the reasons.
+- **Reviewer:** Ziye ran a separate Claude Code session (Claude Opus 5.5). That session gave the review to an independent general-purpose sub-agent with the C.L.E.A.R. framework and the project rules, but none of its own conclusions. It then checked each finding against the code, kept four, and dropped two as too speculative, with the reasons.
 - **Human review:** Ziye read every finding and asked for three revisions before posting: keep the sign-up enumeration point but soften it into a question about the hosted project ([#28](https://github.com/blouyakis/on-track/issues/28)), shorten the review, and post one overall comment instead of inline comments.
 - **Posted review:** [approving review on #61](https://github.com/blouyakis/on-track/pull/61#pullrequestreview-6052903707), one comment with a heading per C.L.E.A.R. part. It raises three questions and one nit, all non-blocking.
+- **Revision:** Barbara answered each point in [a reply on #61](https://github.com/blouyakis/on-track/pull/61#issuecomment-7178965054). Sign-out now ends only the current device's session (`scope: "local"`, commit [`b40a4f3`](https://github.com/blouyakis/on-track/commit/b40a4f3), with a test). The two hosted-project points, email confirmation for sign-up and a check of the project's signing keys for `getClaims()`, were added to [#28](https://github.com/blouyakis/on-track/issues/28). The matcher nit is deferred until other public files are added. PR #61 was then merged.
 
 ### Files
 

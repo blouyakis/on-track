@@ -30,7 +30,7 @@ Read the FULL diff including all tests. Also check whether claims in the PR desc
 ## Output
 For each finding give: C.L.E.A.R. part; severity (blocking / non-blocking / nit / praise); file path and line number in the PR branch version of the file; what the issue is with a short code quote as evidence; why it matters; suggested change; and your confidence (high/medium/low). Say plainly when something cannot be verified from the code. Then, for each of C, L, E, A, R, one line on what you checked if there were no findings. Don't pad: only report findings you can point to in the code.
 
-=== Prompt given to the sub-agent ===
+=== The sub-agent's run ===
 
 <system-reminder>
 Your final report is delivered through SubagentHandback: when your work is complete, call SubagentHandback({message: <your full report>}). The call ends your run, so make it your last step. Only a SubagentHandback call reaches your caller as your result; plain text you write at the end is not delivered. Do not also send the report with SendMessage: your caller would get it twice.

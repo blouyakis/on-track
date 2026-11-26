@@ -29,7 +29,7 @@ Two Sprint 1 issues were finished before the sprint's first day ended:
 | #21 | Projects: create, join by invite code, role per project | high | #20 |
 | #22 | Project log: enforce the visibility rules and add filters | high | #21 |
 | #23 | Entries: edit and delete your own entries | medium | none |
-| #28 | Deploy: Vercel preview per pull request and production on merge | high | hosted Supabase project |
+| #28 | Deploy: Vercel preview per pull request and production on merge | high | #20, hosted Supabase project |
 
 ### Tooling and tests (Ziye)
 

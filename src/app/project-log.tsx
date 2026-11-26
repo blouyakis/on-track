@@ -1,10 +1,16 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { EntryForm } from "@/components/entry-form";
 import { EntryList, type EntryRow } from "@/components/entry-list";
 import { SignOutButton } from "@/components/sign-out-button";
-import { SIGN_IN_PATH } from "@/lib/auth-routes";
+import { HOME_PATH, SIGN_IN_PATH } from "@/lib/auth-routes";
 import { sortNewestFirst } from "@/lib/sort-entries";
+import {
+  canReadProject,
+  canSeeInviteCode,
+  type Membership,
+} from "@/lib/visibility";
 import { createClient } from "@/utils/supabase/server";
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
@@ -13,9 +19,25 @@ type ProjectRow = { name: string };
 
 const mutedClass = "text-sm text-zinc-600 dark:text-zinc-400";
 
-// Reads the session cookie, so it must render inside <Suspense> and is never
-// cached: the data is per user and has to be fresh after each new entry.
-export async function ProjectLog() {
+// The membership row as the visibility rules in src/lib/ read it. A missing
+// row, or a role the app does not know, is no membership at all.
+function toMemberships(
+  userId: string,
+  row: MembershipRow | null,
+): Membership[] {
+  if (!row) return [];
+  if (row.role !== "contributor" && row.role !== "overseer") return [];
+  return [{ userId, projectId: row.project_id, role: row.role }];
+}
+
+// Reads the session cookie and the project in the URL, so it must render
+// inside <Suspense> and is never cached: the data is per user and has to be
+// fresh after each new entry.
+export async function ProjectLog({
+  params,
+}: {
+  params: Promise<{ projectId: string }>;
+}) {
   // Request time only: the Supabase client reads the clock to check whether
   // the session has expired, which must not run during a prerender.
   await connection();
@@ -29,6 +51,8 @@ export async function ProjectLog() {
   // normally redirected already; this is the check next to the data.
   if (!user) redirect(SIGN_IN_PATH);
 
+  const { projectId } = await params;
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -38,31 +62,57 @@ export async function ProjectLog() {
         <SignOutButton />
       </div>
 
-      {await projectContent(supabase, user.id)}
+      <p>
+        <Link href={HOME_PATH} className="text-sm font-medium underline">
+          Your projects
+        </Link>
+      </p>
+
+      {await projectContent(supabase, user.id, projectId)}
     </div>
   );
 }
 
-async function projectContent(supabase: SupabaseClient, userId: string) {
-  // The project comes from the signed-in user's membership, looked up here.
-  // (One project per user for now.)
-  const { data: membership } = await supabase
+async function projectContent(
+  supabase: SupabaseClient,
+  userId: string,
+  projectId: string,
+) {
+  // The project in the URL is only a request. What the user may see comes
+  // from their membership in it, looked up here.
+  const { data: membership, error: membershipError } = await supabase
     .from("memberships")
     .select("project_id, role")
     .eq("user_id", userId)
+    .eq("project_id", projectId)
     .limit(1)
     .maybeSingle()
     .overrideTypes<MembershipRow, { merge: false }>();
 
-  if (!membership) {
-    return <p className={mutedClass}>You are not a member of a project yet.</p>;
+  if (membershipError) {
+    console.error("Loading a membership failed:", membershipError.message);
   }
 
-  const [projectResult, entriesResult] = await Promise.all([
+  const memberships = toMemberships(userId, membership ?? null);
+
+  // No membership, no data: not the project's name, and nothing that tells a
+  // project the user is not in apart from one that does not exist.
+  if (!canReadProject(userId, projectId, memberships)) {
+    return (
+      <p className={mutedClass}>
+        This project does not exist, or you are not a member of it.
+      </p>
+    );
+  }
+
+  const isContributor = memberships[0].role === "contributor";
+  const showInviteCode = canSeeInviteCode(userId, projectId, memberships);
+
+  const [projectResult, entriesResult, inviteCode] = await Promise.all([
     supabase
       .from("projects")
       .select("name")
-      .eq("id", membership.project_id)
+      .eq("id", projectId)
       .maybeSingle()
       .overrideTypes<ProjectRow, { merge: false }>(),
     supabase
@@ -70,10 +120,13 @@ async function projectContent(supabase: SupabaseClient, userId: string) {
       .select(
         "id, author_id, entry_date, hours, type, details, link, attendees, decisions, action_items, created_at",
       )
-      .eq("project_id", membership.project_id)
+      .eq("project_id", projectId)
       .order("entry_date", { ascending: false })
       .order("created_at", { ascending: false })
       .overrideTypes<EntryRow[], { merge: false }>(),
+    // Asked for only when the rules say this user may see it. The database
+    // function checks the same thing again.
+    showInviteCode ? loadInviteCode(supabase, projectId) : null,
   ]);
 
   if (entriesResult.error) {
@@ -89,12 +142,34 @@ async function projectContent(supabase: SupabaseClient, userId: string) {
         {projectResult.data?.name ?? "Your project"}
       </h2>
 
-      {membership.role === "contributor" && (
+      {showInviteCode && (
+        <section aria-labelledby="invite-code" className="flex flex-col gap-2">
+          <h3 id="invite-code" className="text-lg font-medium">
+            Invite code
+          </h3>
+          {inviteCode ? (
+            <>
+              <p>
+                <code className="rounded-md bg-zinc-100 px-3 py-1.5 font-mono text-lg tracking-wider select-all dark:bg-zinc-800">
+                  {inviteCode}
+                </code>
+              </p>
+              <p className={mutedClass}>
+                Share this code with the people who should join as contributors.
+              </p>
+            </>
+          ) : (
+            <p className={mutedClass}>The invite code could not be loaded.</p>
+          )}
+        </section>
+      )}
+
+      {isContributor && (
         <section aria-labelledby="add-entry" className="flex flex-col gap-4">
           <h3 id="add-entry" className="text-lg font-medium">
             Add an entry
           </h3>
-          <EntryForm projectId={membership.project_id} />
+          <EntryForm projectId={projectId} />
         </section>
       )}
 
@@ -106,4 +181,17 @@ async function projectContent(supabase: SupabaseClient, userId: string) {
       </section>
     </div>
   );
+}
+
+async function loadInviteCode(
+  supabase: SupabaseClient,
+  projectId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc("project_invite_code", {
+    p_project_id: projectId,
+  });
+  const inviteCode: unknown = data;
+
+  if (error) console.error("Loading the invite code failed:", error.message);
+  return typeof inviteCode === "string" ? inviteCode : null;
 }

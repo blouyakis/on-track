@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ProjectLog } from "@/app/project-log";
+import { ProjectList } from "@/app/project-list";
 
 // The shell is static. Everything that depends on who is signed in streams in
 // through the Suspense boundary.
@@ -18,7 +18,7 @@ export default function Home() {
           <p className="text-sm text-zinc-600 dark:text-zinc-400">Loading…</p>
         }
       >
-        <ProjectLog />
+        <ProjectList />
       </Suspense>
     </main>
   );

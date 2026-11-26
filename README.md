@@ -6,7 +6,7 @@ The product spec is in [`docs/PRD.md`](docs/PRD.md). Conventions and the testing
 
 ## Tech stack
 
-Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Supabase (PostgreSQL and Auth), Vitest.
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Supabase (PostgreSQL and Auth), Vitest, Playwright.
 
 ## Prerequisites
 
@@ -64,6 +64,7 @@ Both are safe to expose to the browser. Access to data is controlled by Row Leve
 npm run dev          # development server
 npm run build        # production build
 npm test             # unit tests (Vitest)
+npm run test:e2e     # end-to-end tests (Playwright), see below
 npm run test:coverage # unit tests with a coverage report in coverage/
 npm run lint         # ESLint
 npm run format       # format the code with Prettier
@@ -71,12 +72,40 @@ npm run format:check # check formatting without changing files (CI runs this)
 npm run typecheck    # type check
 ```
 
+## End-to-end tests
+
+The end-to-end tests live in `e2e/` and run with [Playwright](https://playwright.dev/) against a production build, never `next dev`. Vitest does not pick them up. The first test covers the contributor path: the seeded contributor signs in, adds an entry to "Demo Project", and sees it in the project log.
+
+One-time setup:
+
+```bash
+npx playwright install chromium   # downloads the browser Playwright drives
+```
+
+Each run:
+
+1. Start the local Supabase stack and load the seed, as in [Getting started](#getting-started) (`npx supabase start`, then `npx supabase db reset` if the seeded contributor is missing).
+2. Set the two variables from [Environment variables](#environment-variables). The build reads them, so they must be set before it starts.
+3. Run the tests:
+
+```bash
+npm run test:e2e
+```
+
+CI starts the stack with Supabase CLI 3.4.0 (pinned in the `e2e` job of `.github/workflows/ci.yml`). `npx supabase` fetches the latest CLI, so if a local run behaves differently from CI, run that version with `npx supabase@3.4.0`.
+
+Playwright runs `npm run build`, then `npm start` on port 3100, so a dev server on port 3000 can keep running. If something is already listening on port 3100, Playwright reuses it instead of building, so stop any old `npm start -- -p 3100` first if you want a fresh build. When a test fails, Playwright prints the failing step and writes a snapshot of the page to `test-results/`. In CI it also uploads an HTML report as the `playwright-report` artifact.
+
+Each run adds one entry to "Demo Project" with details unique to that run, so entries build up in your local database. `npx supabase db reset` clears them.
+
 ## CI
 
 GitHub Actions runs two workflows.
 
-- **`ci.yml`** runs on every pull request and every push to `main`: lint and format check, type check, tests with coverage, build, and `npm audit`.
+- **`ci.yml`** runs on every pull request and every push to `main`: lint and format check, type check, tests with coverage, build, `npm audit`, and the end-to-end tests (the `e2e` job, which starts the local Supabase stack in the runner).
 - **`ai-review.yml`** has Claude review the pull request and post its findings as PR comments (inline comments plus one summary). It reviews with the C.L.E.A.R. framework (Context, Logic, Evidence, Architecture, Risk), with the `CLAUDE.md` conventions filed under each letter, and labels each comment with [Conventional Comments](https://conventionalcomments.org/) plus its C.L.E.A.R. letter (for example `issue (blocking, Risk):`). It runs when a pull request is opened, reopened, or marked ready for review; drafts are skipped. To review again after new pushes, post a comment on the pull request that starts with `@claude review`. Only the repo owner, members, and collaborators can trigger it, and a new run cancels one still in progress for the same pull request. The comment trigger only works once the workflow is on `main`. Pull requests from forks are not reviewed, even on an `@claude review` comment, so open them from a branch in this repo.
+
+The `e2e` job needs no secrets: it uses the local stack's default URL and publishable key. To block merging when it fails, the repo owner marks it as a required check (Settings → Branches or Rules, required status checks); a check can only be picked there after it has run once.
 
 The AI review needs an `ANTHROPIC_API_KEY` repository secret (Settings → Secrets and variables → Actions), which the repo owner adds. The key is never stored in the repo.
 

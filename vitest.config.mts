@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
@@ -8,6 +8,9 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // Playwright owns e2e/. Its specs use their own runner and would fail
+    // under Vitest.
+    exclude: [...configDefaults.exclude, "e2e/**"],
     coverage: {
       provider: "v8",
       // Count every source file, not only the ones a test imports, so

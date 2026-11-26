@@ -103,7 +103,9 @@ export async function signIn(
 
 export async function signOut(): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signOut();
+  // "local" ends the session on this device only. Supabase's default,
+  // "global", would sign the user out everywhere.
+  const { error } = await supabase.auth.signOut({ scope: "local" });
 
   // The user asked to leave, so they go to the sign-in page either way.
   if (error) console.error("Sign-out failed:", error.message);

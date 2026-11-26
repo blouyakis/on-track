@@ -261,6 +261,14 @@ describe("signOut", () => {
     expect(auth.signOut).toHaveBeenCalledTimes(1);
     expect(redirect).toHaveBeenCalledWith("/sign-in");
   });
+
+  test("ends the session on this device only", async () => {
+    const auth = fakeSupabase();
+
+    await expect(signOut()).rejects.toThrow(REDIRECT);
+
+    expect(auth.signOut).toHaveBeenCalledWith({ scope: "local" });
+  });
 });
 
 // Everything written to the server log during the test, as one string.

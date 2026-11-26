@@ -93,4 +93,17 @@ describe(".mcp.json", () => {
       expect(safe).not.toMatch(SECRET_PATTERN);
     }
   });
+
+  it("does not flag harmless arguments that merely contain a secret word", () => {
+    const safeArgs = [
+      "@scope/task-runner",
+      "--no-token-refresh",
+      "--secret-scanning",
+      "--password-store=basic",
+    ];
+
+    for (const safe of safeArgs) {
+      expect(safe).not.toMatch(SECRET_PATTERN);
+    }
+  });
 });

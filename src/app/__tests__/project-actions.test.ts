@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { createProject } from "@/app/project-actions";
+import { createProject, joinProject } from "@/app/project-actions";
 import { initialProjectFormState } from "@/app/project-form-state";
+import {
+  INVALID_INVITE_CODE_MESSAGE,
+  INVITE_CODE_MAX_LENGTH,
+} from "@/lib/invite-code";
 import { PROJECT_NAME_MAX_LENGTH } from "@/lib/project-name";
 import { createClient } from "@/utils/supabase/server";
 
@@ -171,5 +175,132 @@ describe("createProject", () => {
     expect(state.status).toBe("error");
     expect(state.message).toBe("The project could not be created. Try again.");
     expect(redirect).not.toHaveBeenCalled();
+  });
+});
+
+describe("joinProject", () => {
+  test("returns an error and joins nothing when nobody is signed in", async () => {
+    const { rpc } = fakeSupabase({ user: null });
+
+    const state = await joinProject(
+      initialProjectFormState,
+      form({ invite_code: "K7QXM-2RDTP" }),
+    );
+
+    expect(state.status).toBe("error");
+    expect(state.message).toBe("Sign in to join a project.");
+    expect(rpc).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  test.each(["", "   "])(
+    "returns a field error and asks the database nothing when the code is %j",
+    async (invite_code) => {
+      const { rpc } = fakeSupabase();
+
+      const state = await joinProject(
+        initialProjectFormState,
+        form({ invite_code }),
+      );
+
+      expect(state.status).toBe("error");
+      expect(state.fieldError).toBe("Invite code is required.");
+      expect(rpc).not.toHaveBeenCalled();
+    },
+  );
+
+  test("rejects a code too long to be real without asking the database", async () => {
+    const { rpc } = fakeSupabase();
+
+    const state = await joinProject(
+      initialProjectFormState,
+      form({ invite_code: "A".repeat(INVITE_CODE_MAX_LENGTH + 1) }),
+    );
+
+    expect(state.fieldError).toBe(INVALID_INVITE_CODE_MESSAGE);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  test("joins with the normalized code and opens the project", async () => {
+    const { rpc } = fakeSupabase();
+
+    await expect(
+      joinProject(
+        initialProjectFormState,
+        form({ invite_code: "  k7qxm-2rdtp " }),
+      ),
+    ).rejects.toThrow(REDIRECT);
+
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith("join_project", {
+      p_invite_code: "K7QXM-2RDTP",
+    });
+    expect(redirect).toHaveBeenCalledWith(`/projects/${PROJECT_ID}`);
+  });
+
+  // The database function makes the caller a contributor from the session.
+  // Nothing in the form can name a user, a role or a project.
+  test("sends only the code, whatever else the form contains", async () => {
+    const { rpc, from } = fakeSupabase();
+
+    await expect(
+      joinProject(
+        initialProjectFormState,
+        form({
+          invite_code: "K7QXM-2RDTP",
+          role: "overseer",
+          user_id: "someone-else",
+          project_id: "another-project",
+        }),
+      ),
+    ).rejects.toThrow(REDIRECT);
+
+    expect(rpc).toHaveBeenCalledWith("join_project", {
+      p_invite_code: "K7QXM-2RDTP",
+    });
+    // No table is read or written directly.
+    expect(from).not.toHaveBeenCalled();
+  });
+
+  // An invalid code shows an error and reveals nothing about any project.
+  test("returns only the fixed message for a code no project has", async () => {
+    fakeSupabase({ rpcData: null });
+
+    const state = await joinProject(
+      initialProjectFormState,
+      form({ invite_code: "WRONG-CODE9" }),
+    );
+
+    expect(state).toEqual({
+      status: "error",
+      message: null,
+      fieldError: INVALID_INVITE_CODE_MESSAGE,
+      value: "WRONG-CODE9",
+    });
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  // A failed lookup must look the same as an unknown code, so the answer
+  // never depends on what is in the database.
+  test("returns the same state when the database fails as for an unknown code", async () => {
+    fakeSupabase({ rpcData: null });
+    const unknown = await joinProject(
+      initialProjectFormState,
+      form({ invite_code: "WRONG-CODE9" }),
+    );
+
+    fakeSupabase({
+      rpcError: { message: 'relation "public.projects" is locked' },
+    });
+    const failed = await joinProject(
+      initialProjectFormState,
+      form({ invite_code: "WRONG-CODE9" }),
+    );
+
+    expect(failed).toEqual(unknown);
+    expect(JSON.stringify(failed)).not.toMatch(/projects|locked/);
+    expect(redirect).not.toHaveBeenCalled();
+    // The reason goes to the server log, not to the user.
+    expect(console.error).toHaveBeenCalled();
   });
 });

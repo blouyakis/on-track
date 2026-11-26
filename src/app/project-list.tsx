@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { ProjectForm } from "@/components/project-form";
-import { SignOutButton } from "@/components/sign-out-button";
+import { SignedInBar } from "@/components/signed-in-bar";
 import { SIGN_IN_PATH } from "@/lib/auth-routes";
 import { projectPath } from "@/lib/project-path";
 import { createClient } from "@/utils/supabase/server";
@@ -42,12 +42,7 @@ export async function ProjectList() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className={mutedClass}>
-          Signed in as <span className="font-medium">{user.email}</span>
-        </p>
-        <SignOutButton />
-      </div>
+      <SignedInBar email={user.email} />
 
       <section aria-labelledby="your-projects" className="flex flex-col gap-4">
         <h2 id="your-projects" className="text-xl font-semibold">

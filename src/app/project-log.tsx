@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { EntryForm } from "@/components/entry-form";
 import { EntryList, type EntryRow } from "@/components/entry-list";
-import { SignOutButton } from "@/components/sign-out-button";
+import { SignedInBar } from "@/components/signed-in-bar";
 import { HOME_PATH, SIGN_IN_PATH } from "@/lib/auth-routes";
 import { sortNewestFirst } from "@/lib/sort-entries";
 import {
@@ -55,12 +55,7 @@ export async function ProjectLog({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className={mutedClass}>
-          Signed in as <span className="font-medium">{user.email}</span>
-        </p>
-        <SignOutButton />
-      </div>
+      <SignedInBar email={user.email} />
 
       <p>
         <Link href={HOME_PATH} className="text-sm font-medium underline">

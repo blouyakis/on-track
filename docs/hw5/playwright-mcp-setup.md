@@ -72,9 +72,10 @@ claude mcp add --scope project playwright -- npx -y @playwright/mcp@0.0.86 --iso
 [`src/__tests__/mcp-config.test.ts`](../../src/__tests__/mcp-config.test.ts)
 fails `npm test` (and CI) if an env value or header is added, if a value
 matches a common secret format (for example `sk-`, `ghp_`, `sbp_`,
-`sb_secret_`, AWS `AKIA…`, a JWT, `Bearer …`, or words like `token`,
-`password` or `service_role`), or if the version is unpinned. It cannot catch
-every possible secret, so still review changes to `.mcp.json`.
+`sb_secret_`, AWS `AKIA…`, a JWT, `Bearer …`, or `--api-key=…`), if a key
+is named like a secret (`token`, `password`, `service_role`), or if the
+version is unpinned. Harmless arguments such as `--no-token-refresh` pass. It
+cannot catch every possible secret, so still review changes to `.mcp.json`.
 
 The server writes page snapshots, console logs and screenshots to
 `.playwright-mcp/` in the repo root. That folder is in `.gitignore`; copy

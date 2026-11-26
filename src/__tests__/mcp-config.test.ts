@@ -19,22 +19,48 @@ function readMcpConfig(): { mcpServers: Record<string, McpServer> } {
   return JSON.parse(raw) as { mcpServers: Record<string, McpServer> };
 }
 
-// Common credential formats: OpenAI/Anthropic, GitHub, Supabase access and
-// secret keys, AWS access key IDs, JWTs, bearer headers, and words that
-// usually name a secret.
-const SECRET_PATTERN =
-  /sk-|ghp_|github_pat_|sbp_|sb_secret_|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_-]{10,}|bearer\s|service[_-]?role|password|secret|token|api[_-]?key/i;
+// Checked against every string in the file (keys and values). Each prefix
+// must start a word and be followed by a key-like body, so `@scope/task-runner`
+// does not count as an `sk-` key. Covers OpenAI/Anthropic, GitHub, Supabase
+// access and secret keys, AWS access key IDs, JWTs, bearer headers, and a
+// secret word assigned a value (`--api-key=…`, `password=…`).
+const SECRET_PATTERN = new RegExp(
+  [
+    String.raw`\bsk-[A-Za-z0-9_-]{6,}`,
+    String.raw`\bghp_[A-Za-z0-9]{6,}`,
+    String.raw`\bgithub_pat_[A-Za-z0-9_]{6,}`,
+    String.raw`\bsbp_[A-Za-z0-9]{6,}`,
+    String.raw`\bsb_secret_[A-Za-z0-9_-]{6,}`,
+    String.raw`\bAKIA[0-9A-Z]{16}\b`,
+    String.raw`\beyJ[A-Za-z0-9_-]{10,}`,
+    String.raw`\bbearer\s+\S+`,
+    String.raw`(?:^|[^A-Za-z0-9])(?:api[_-]?key|password|secret|token|service[_-]?role(?:[_-]?key)?)=\S`,
+  ].join("|"),
+  "i",
+);
 
-function allStrings(value: unknown): string[] {
-  if (typeof value === "string") return [value];
-  if (Array.isArray(value)) return value.flatMap(allStrings);
-  if (value !== null && typeof value === "object") {
-    return Object.entries(value).flatMap(([key, inner]) => [
-      key,
-      ...allStrings(inner),
-    ]);
+// Checked against object keys and env names only. These words are normal in
+// argument values (`--no-token-refresh`), but a key named after one is meant
+// to hold a secret.
+const SECRET_NAME_PATTERN =
+  /password|secret|token|api[_-]?key|service[_-]?role/i;
+
+function collect(value: unknown): { keys: string[]; values: string[] } {
+  if (typeof value === "string") return { keys: [], values: [value] };
+  const entries: [string | null, unknown][] = Array.isArray(value)
+    ? value.map((inner) => [null, inner])
+    : value !== null && typeof value === "object"
+      ? Object.entries(value)
+      : [];
+  const keys: string[] = [];
+  const values: string[] = [];
+  for (const [key, inner] of entries) {
+    if (key !== null) keys.push(key);
+    const nested = collect(inner);
+    keys.push(...nested.keys);
+    values.push(...nested.values);
   }
-  return [];
+  return { keys, values };
 }
 
 describe(".mcp.json", () => {
@@ -64,8 +90,12 @@ describe(".mcp.json", () => {
       expect(server.env ?? {}).toEqual({});
       expect(server.headers).toBeUndefined();
     }
-    for (const text of allStrings(config)) {
+    const { keys, values } = collect(config);
+    for (const text of [...keys, ...values]) {
       expect(text).not.toMatch(SECRET_PATTERN);
+    }
+    for (const key of keys) {
+      expect(key).not.toMatch(SECRET_NAME_PATTERN);
     }
   });
 
@@ -79,15 +109,17 @@ describe(".mcp.json", () => {
       "AKIAABCDEFGHIJKLMNOP",
       "eyJhbGciOiJIUzI1NiJ9",
       "Authorization: Bearer abc.def",
-      "SUPABASE_SERVICE_ROLE_KEY",
-      "service_role",
       "--api-key=abc",
       "password=hunter2",
-      "access_token",
     ];
+    // Bare secret words count only as key or env names.
+    const names = ["SUPABASE_SERVICE_ROLE_KEY", "service_role", "access_token"];
 
     for (const sample of samples) {
       expect(sample).toMatch(SECRET_PATTERN);
+    }
+    for (const name of names) {
+      expect(name).toMatch(SECRET_NAME_PATTERN);
     }
     for (const safe of ["npx", "-y", "@playwright/mcp@0.0.86", "--isolated"]) {
       expect(safe).not.toMatch(SECRET_PATTERN);

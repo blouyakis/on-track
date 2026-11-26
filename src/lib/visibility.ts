@@ -39,6 +39,15 @@ export function canReadProject(
   return roleIn(userId, projectId, memberships) !== null;
 }
 
+// Sharing the invite code is the overseer's job, so only they see it.
+export function canSeeInviteCode(
+  userId: string,
+  projectId: string,
+  memberships: Membership[],
+): boolean {
+  return roleIn(userId, projectId, memberships) === "overseer";
+}
+
 export function canModifyEntry(
   userId: string,
   entry: Entry,

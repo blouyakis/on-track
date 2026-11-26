@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   canModifyEntry,
   canReadProject,
+  canSeeInviteCode,
   visibleEntries,
   visibleProject,
   type Entry,
@@ -159,5 +160,34 @@ describe("a user with different roles in different projects", () => {
     const p2Entry: Entry = { id: "e2", projectId: "p2", authorId: "dana" };
     expect(canModifyEntry("dana", p1Entry, dualRole)).toBe(true);
     expect(canModifyEntry("dana", p2Entry, dualRole)).toBe(false);
+  });
+
+  test("can see the invite code where they are the overseer, but not where they are a contributor", () => {
+    expect(canSeeInviteCode("dana", "p2", dualRole)).toBe(true);
+    expect(canSeeInviteCode("dana", "p1", dualRole)).toBe(false);
+  });
+});
+
+// Sharing the invite code is the overseer's job (PRD, Roles).
+describe("canSeeInviteCode", () => {
+  test("the overseer of the project can see its invite code", () => {
+    expect(canSeeInviteCode("olivia", "p1", memberships)).toBe(true);
+  });
+
+  test("a contributor of the project cannot see its invite code", () => {
+    expect(canSeeInviteCode("alice", "p1", memberships)).toBe(false);
+  });
+
+  test("the overseer of a different project cannot see it", () => {
+    const otherOverseer: Membership[] = [
+      ...memberships,
+      { userId: "oscar", projectId: "p2", role: "overseer" },
+    ];
+
+    expect(canSeeInviteCode("oscar", "p1", otherOverseer)).toBe(false);
+  });
+
+  test("a user with no memberships cannot see it", () => {
+    expect(canSeeInviteCode("stranger", "p1", memberships)).toBe(false);
   });
 });

@@ -84,7 +84,11 @@ describe("createEntry", () => {
   test("returns an error and saves nothing when nobody is signed in", async () => {
     const { insert } = fakeSupabase({ user: null });
 
-    const state = await createEntry(initialEntryFormState, form(workEntry));
+    const state = await createEntry(
+      PROJECT_ID,
+      initialEntryFormState,
+      form(workEntry),
+    );
 
     expect(state.status).toBe("error");
     expect(insert).not.toHaveBeenCalled();
@@ -93,7 +97,11 @@ describe("createEntry", () => {
   test("returns an error and saves nothing when the user has no membership", async () => {
     const { insert } = fakeSupabase({ membership: null });
 
-    const state = await createEntry(initialEntryFormState, form(workEntry));
+    const state = await createEntry(
+      PROJECT_ID,
+      initialEntryFormState,
+      form(workEntry),
+    );
 
     expect(state.status).toBe("error");
     expect(insert).not.toHaveBeenCalled();
@@ -104,7 +112,11 @@ describe("createEntry", () => {
       membership: { project_id: PROJECT_ID, role: "overseer" },
     });
 
-    const state = await createEntry(initialEntryFormState, form(workEntry));
+    const state = await createEntry(
+      PROJECT_ID,
+      initialEntryFormState,
+      form(workEntry),
+    );
 
     expect(state.status).toBe("error");
     expect(insert).not.toHaveBeenCalled();
@@ -114,6 +126,7 @@ describe("createEntry", () => {
     const { insert } = fakeSupabase();
 
     const state = await createEntry(
+      PROJECT_ID,
       initialEntryFormState,
       form({ ...workEntry, details: "   " }),
     );
@@ -127,6 +140,7 @@ describe("createEntry", () => {
     const { insert } = fakeSupabase();
 
     const state = await createEntry(
+      PROJECT_ID,
       initialEntryFormState,
       form({ ...workEntry, type: "task" }),
     );
@@ -140,6 +154,7 @@ describe("createEntry", () => {
     const { insert } = fakeSupabase();
 
     const state = await createEntry(
+      PROJECT_ID,
       initialEntryFormState,
       form({
         date: "2026-11-14",
@@ -173,6 +188,7 @@ describe("createEntry", () => {
     const { insert } = fakeSupabase();
 
     await createEntry(
+      PROJECT_ID,
       initialEntryFormState,
       form({
         ...workEntry,
@@ -200,6 +216,7 @@ describe("createEntry", () => {
     const { insert, membershipQuery } = fakeSupabase();
 
     await createEntry(
+      PROJECT_ID,
       initialEntryFormState,
       form({
         ...workEntry,
@@ -221,10 +238,90 @@ describe("createEntry", () => {
       },
     });
 
-    const state = await createEntry(initialEntryFormState, form(workEntry));
+    const state = await createEntry(
+      PROJECT_ID,
+      initialEntryFormState,
+      form(workEntry),
+    );
 
     expect(state.status).toBe("error");
     expect(state.message).toBeTruthy();
     expect(state.message).not.toContain("constraint");
+  });
+});
+
+// A user can be in several projects, with a different role in each. The
+// entry form says which project it is for; the server treats that as a
+// request and looks the membership up itself.
+describe("createEntry, in one of several projects", () => {
+  const OTHER_PROJECT_ID = "a-project-the-user-is-not-in";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  test("looks up the membership of the signed-in user in the requested project", async () => {
+    const { membershipQuery } = fakeSupabase();
+
+    await createEntry(PROJECT_ID, initialEntryFormState, form(workEntry));
+
+    expect(membershipQuery.eq).toHaveBeenCalledWith("user_id", USER_ID);
+    expect(membershipQuery.eq).toHaveBeenCalledWith("project_id", PROJECT_ID);
+  });
+
+  test("saves nothing in a project the user is not a member of", async () => {
+    const { insert, membershipQuery } = fakeSupabase({ membership: null });
+
+    const state = await createEntry(
+      OTHER_PROJECT_ID,
+      initialEntryFormState,
+      form(workEntry),
+    );
+
+    expect(membershipQuery.eq).toHaveBeenCalledWith(
+      "project_id",
+      OTHER_PROJECT_ID,
+    );
+    expect(state.status).toBe("error");
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  test("saves the entry in the project the membership is for", async () => {
+    const { insert } = fakeSupabase();
+
+    const state = await createEntry(
+      PROJECT_ID,
+      initialEntryFormState,
+      form(workEntry),
+    );
+
+    expect(state.status).toBe("success");
+    expect(insert.mock.calls[0][0].project_id).toBe(PROJECT_ID);
+  });
+
+  // The role is read from the membership, never from the client.
+  test("ignores a role sent in the form", async () => {
+    const { insert } = fakeSupabase({
+      membership: { project_id: PROJECT_ID, role: "overseer" },
+    });
+
+    const state = await createEntry(
+      PROJECT_ID,
+      initialEntryFormState,
+      form({ ...workEntry, role: "contributor" }),
+    );
+
+    expect(state.status).toBe("error");
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  test("saves nothing when no project is named", async () => {
+    const { insert } = fakeSupabase({ membership: null });
+
+    const state = await createEntry("", initialEntryFormState, form(workEntry));
+
+    expect(state.status).toBe("error");
+    expect(insert).not.toHaveBeenCalled();
   });
 });

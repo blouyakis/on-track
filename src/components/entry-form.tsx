@@ -18,13 +18,14 @@ const fieldClass =
 const labelClass = "flex flex-col gap-1 text-sm font-medium";
 const errorClass = "text-sm font-normal text-red-700 dark:text-red-400";
 
-export function EntryForm() {
+export function EntryForm({ projectId }: { projectId: string }) {
   const [type, setType] = useState("");
 
-  // The server action is passed straight through so the form still posts
-  // before JavaScript has loaded.
+  // The server action is passed through with only the project bound to it,
+  // so the form still posts before JavaScript has loaded. The action treats
+  // the project as a request and checks the membership itself.
   const [state, formAction, pending] = useActionState(
-    createEntry,
+    createEntry.bind(null, projectId),
     initialEntryFormState,
   );
 

@@ -64,8 +64,3 @@ database until the next `npx supabase db reset`.
   the project log after the valid entry.
 - [`screenshots/03-future-date-accepted.png`](screenshots/03-future-date-accepted.png):
   the page right after the future-dated entry was accepted.
-
-There is no `01-…` screenshot. The call to capture the filled-in form, made
-just before the submit click, used an element reference that was stale after
-the form re-rendered, so it failed ("Ref f2e72 not found"; see the log). The
-file names are kept as the session recorded them.

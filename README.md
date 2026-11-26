@@ -33,10 +33,19 @@ Stop the local stack with `npx supabase stop`.
 
 Signed-out visitors are sent to `/sign-in`. From there you can:
 
-- **Create an account** at `/sign-up` with an email and a password of at least 8 characters. A new account is not in a project yet, so its home page is empty until it joins one.
+- **Create an account** at `/sign-up` with an email and a password of at least 8 characters. A new account is not in a project yet, so its home page lists none until it creates or joins one.
 - **Sign in as the seeded contributor** that `supabase/seed.sql` creates, a member of "Demo Project". Its email and password are in that file and exist only in a locally seeded database. If sign-in fails, run `npx supabase db reset`.
 
 The local Supabase stack signs a new account in straight away. A Supabase project that confirms email addresses shows "Check your email to confirm your account, then sign in." instead.
+
+### Projects
+
+The home page lists the projects you belong to, with your role in each. Each project has its own page at `/projects/<id>`.
+
+- **Create a project** from the home page. You become its overseer, and its page shows an invite code to share.
+- **Join a project** by entering its invite code on the home page. You become a contributor.
+
+Only the overseer sees a project's invite code. A project you are not a member of looks the same as one that does not exist.
 
 ## Environment variables
 
@@ -73,7 +82,9 @@ The AI review needs an `ANTHROPIC_API_KEY` repository secret (Settings → Secre
 
 ## Database
 
-The schema lives in `supabase/migrations/`. Add a change with `npx supabase migration new <name>`, then run `npx supabase db reset` to rebuild the local database from all migrations.
+The schema lives in `supabase/migrations/`. Add a change with `npx supabase migration new <name>`, then run `npx supabase db reset` to rebuild the local database from all migrations. To apply a new migration without losing local data, run `npx supabase migration up`.
+
+Database tests live in `supabase/tests/database/` and cover the rules the database enforces itself, such as who can create or join a project. Run them against the local stack with `npx supabase test db`. They run in a transaction that is rolled back, and they are not part of CI yet.
 
 ## Known issues
 

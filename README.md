@@ -92,6 +92,8 @@ Each run:
 npm run test:e2e
 ```
 
+CI starts the stack with Supabase CLI 3.4.0 (pinned in the `e2e` job of `.github/workflows/ci.yml`). `npx supabase` fetches the latest CLI, so if a local run behaves differently from CI, run that version with `npx supabase@3.4.0`.
+
 Playwright runs `npm run build`, then `npm start` on port 3100, so a dev server on port 3000 can keep running. If something is already listening on port 3100, Playwright reuses it instead of building, so stop any old `npm start -- -p 3100` first if you want a fresh build. When a test fails, Playwright prints the failing step and writes a snapshot of the page to `test-results/`. In CI it also uploads an HTML report as the `playwright-report` artifact.
 
 Each run adds one entry to "Demo Project" with details unique to that run, so entries build up in your local database. `npx supabase db reset` clears them.

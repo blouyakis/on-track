@@ -19,7 +19,8 @@ export async function createClient() {
             );
           } catch {
             // Called from a Server Component, where cookies are read-only.
-            // Safe to ignore once the proxy refreshes sessions (auth feature).
+            // Safe to ignore: the proxy refreshes the session on every
+            // request (src/utils/supabase/proxy.ts).
           }
         },
       },

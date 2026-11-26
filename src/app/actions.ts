@@ -1,16 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
-import {
-  DEMO_CONTRIBUTOR_EMAIL,
-  DEMO_CONTRIBUTOR_PASSWORD,
-  isDemoSignInEnabled,
-} from "@/app/demo-sign-in";
-import type {
-  DemoSignInState,
-  EntryFormState,
-  EntryFormValues,
-} from "@/app/entry-form-state";
+import type { EntryFormState, EntryFormValues } from "@/app/entry-form-state";
 import { checkRequiredFields } from "@/lib/entry-required-fields";
 import { isEntryType, isMeetingStyleType } from "@/lib/entry-types";
 import { createClient } from "@/utils/supabase/server";
@@ -35,31 +26,6 @@ function text(formData: FormData, name: string): string {
 function textOrNull(value: string): string | null {
   const trimmed = value.trim();
   return trimmed === "" ? null : trimmed;
-}
-
-// TEMPORARY, until the authentication feature lands: signs in the seeded demo
-// contributor so the page has a real session and Row Level Security applies.
-export async function signInAsDemoContributor(): Promise<DemoSignInState> {
-  if (!isDemoSignInEnabled()) {
-    return { message: "Demo sign-in is turned off here." };
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: DEMO_CONTRIBUTOR_EMAIL,
-    password: DEMO_CONTRIBUTOR_PASSWORD,
-  });
-
-  if (error) {
-    console.error("Demo sign-in failed:", error.message);
-    return {
-      message:
-        "Could not sign in. Is the local database seeded? Run `npx supabase db reset`.",
-    };
-  }
-
-  refresh();
-  return { message: null };
 }
 
 export async function createEntry(

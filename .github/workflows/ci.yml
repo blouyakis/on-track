@@ -87,3 +87,39 @@ jobs:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm audit --audit-level=high
+
+  # End-to-end tests (Playwright) against a production build and the local
+  # Supabase stack, which `supabase start` builds from the migrations and
+  # supabase/seed.sql.
+  e2e:
+    needs: install
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 3.4.0
+      # Only the database, auth and the API gateway are needed; skipping the
+      # rest makes the stack start faster.
+      - run: supabase start -x realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      # The app reads these at build time. They are the local stack's default
+      # URL and publishable key, not secrets.
+      - name: Point the app at the local Supabase stack
+        run: |
+          status="$(supabase status -o json)"
+          echo "NEXT_PUBLIC_SUPABASE_URL=$(echo "$status" | jq -r .API_URL)" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(echo "$status" | jq -r .PUBLISHABLE_KEY)" >> "$GITHUB_ENV"
+      - run: npx playwright install --with-deps chromium
+      # Playwright builds the app and starts it (playwright.config.ts).
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v7
+        if: ${{ failure() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14

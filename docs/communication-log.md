@@ -224,3 +224,30 @@ Project information only. Leave out anything personal, such as schedules, availa
 - **Decisions made:** None; informational.
 - **Action items (owner):** Barbara: run `/add-feature` for the first time, on authentication (#20), and save the session logs in `docs/skills/add-feature/`. Barbara: log Ziye's update and this reply with `/log`.
 - **Notes:** Completed: the comment trigger tested: Barbara commented `@claude review` on PR #60, and the review ran from `main`, posted a summary and three inline comments, and nothing was blocked with the hooks in place, so both triggers work; PR #60 and PR #59 merged by Barbara, both with merge commits; #15 and #27 closed and in Done. The three review runs so far cost about $0.31 together, so the credit will last a long time. The merge of PR #56 is already recorded in entry 18. No blockers reported.
+
+### 21 · 2026-11-24 · Standup
+
+- **Time (ET):** 23:07
+- **Format:** Async (Slack)
+- **Topics discussed:** Barbara's standup: authentication (#20) ready for review in PR #61 after the first real `/add-feature` run; log entries 18 to 20 in PR #62; #16 started; next, the second `/add-feature` run, on #21, then v2; two questions for Ziye, on her 20:46 message and on lint warnings from the `coverage/` folder.
+- **Decisions made:** None; informational. Ziye's answers are in entry 22.
+- **Action items (owner):** Barbara: run `/add-feature` a second time, on projects (#21), after PR #61 is merged, then write v2 (#16). Ziye: review PR #61 and PR #62 (done; see entry 23). Ziye: say whether her 20:46 message was meant as a standup (done; see entry 22). Ziye's answer on the CLAUDE.md exception is already an action item in entry 19.
+- **Notes:** Completed: PR #61 opened for #20 (https://github.com/blouyakis/on-track/pull/61), from the first real run of `/add-feature`, the action item in entry 20: it read the issue, made a plan Barbara approved, and worked test first, with 28 commits, mostly red/green pairs, and 315 tests passing. A user can sign up, sign in and sign out, and signed-out visitors are sent to the sign-in page; Barbara went through the steps in a browser. The AI review ran on its own when the PR opened and found one non-blocking nitpick (the 72 limit on passwords was counted in characters, not bytes), already fixed on the branch. PR #62 opened (https://github.com/blouyakis/on-track/pull/62) with entries 18 to 20, the two standup files, the session log from the `/log` run, and the "Depends on" fix for #28 from entry 19. #16 started: the session logs for writing v1 and for the first run are saved in `docs/skills/add-feature/`. Heads-up for #25: PR #61 removes the demo sign-in; an E2E test now opens `/sign-in` and fills in the email and password, and the seeded contributor is still in the seed file. Barbara noticed that after `npm run test:coverage`, local `npm run lint` shows warnings from the `coverage/` folder, with CI not affected, and offered to open an issue to add `coverage/` to the ESLint ignores unless Ziye would rather take it, since it follows from #26. Barbara proposed posting the remaining standups on later days, since both of us already had two dated Nov 24; still open. No blockers reported.
+
+### 22 · 2026-11-25 · Planning
+
+- **Time (ET):** 01:02
+- **Format:** Async (Slack)
+- **Topics discussed:** Ziye's reply to Barbara's standup (entry 21): the CLAUDE.md exception for the red step; whether her 20:46 message on Nov 24 was a standup; the `coverage/` lint warnings; her plan to review PR #61 and PR #62; how the E2E tests in #25 sign in.
+- **Decisions made:** Barbara proposed a one-line exception in CLAUDE.md for the red step (entry 19), and Ziye agreed. Barbara offered to open the issue for the `coverage/` ESLint ignores or leave it to Ziye, and Ziye took it, since it comes from #26. Ziye confirmed that her 20:46 message (entry 18) was a standup, so it stays logged as one.
+- **Action items (owner):** Barbara: add the one-line exception to CLAUDE.md. Ziye: open a small issue and a PR that add `coverage/` to the ESLint ignores. Ziye: review PR #61 and PR #62 (done; see entry 23). Ziye: have the E2E tests in #25 sign in through `/sign-in` with the seeded contributor.
+- **Notes:** Ziye suggested that the same line also cover the type check, because a red test that imports a function that does not exist yet fails `npm run typecheck` too; still open.
+
+### 23 · 2026-11-25 · Review
+
+- **Time (ET):** 01:50
+- **Format:** Async (Slack)
+- **Topics discussed:** Ziye's reviews of PR #61 and PR #62; PR #61 as the Sprint 1 writer/reviewer PR for #29, reviewed with C.L.E.A.R.; PR #64 with the evidence for #29.
+- **Decisions made:** None; informational.
+- **Action items (owner):** Barbara: merge PR #61 when ready (done, #61). Barbara: review PR #64 (done, #64).
+- **Notes:** Completed: Ziye approved PR #61 and PR #62. Ziye used PR #61 for #29: a separate Claude Code session and a sub-agent reviewed it with C.L.E.A.R., and Ziye read and edited the result before posting, which is why the review has a heading for each part; it has three questions and one nit, all non-blocking. PR #64 opened by Ziye (https://github.com/blouyakis/on-track/pull/64), docs only, with the evidence for #29 in `docs/writer-reviewer/`: the exported reviewing session, the sub-agent's own run, and a short README with the C.L.E.A.R. definition. PR #62 and PR #61 were merged by Barbara on Nov 25 (19:38 and 19:39), which closed #20. Barbara approved PR #64 on Nov 25 (20:59); it was not yet merged when this entry was written.

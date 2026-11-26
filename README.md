@@ -80,6 +80,10 @@ GitHub Actions runs two workflows.
 
 The AI review needs an `ANTHROPIC_API_KEY` repository secret (Settings → Secrets and variables → Actions), which the repo owner adds. The key is never stored in the repo.
 
+## MCP server
+
+`.mcp.json` shares one MCP server with everyone who opens the repo in Claude Code: [Playwright MCP](https://github.com/microsoft/playwright-mcp), pinned to `@playwright/mcp@0.0.86`. It lets Claude drive a real browser against the running app (navigate, fill in forms, click, read the page, take screenshots, read console messages). Claude Code asks you to approve it the first time it starts in the repo; `/mcp` shows whether it is connected. It needs no keys. Setup, what it enables, and how to turn it off are in [`docs/hw5/playwright-mcp-setup.md`](docs/hw5/playwright-mcp-setup.md).
+
 ## Database
 
 The schema lives in `supabase/migrations/`. Add a change with `npx supabase migration new <name>`, then run `npx supabase db reset` to rebuild the local database from all migrations. To apply a new migration without losing local data, run `npx supabase migration up`.

@@ -1,0 +1,838 @@
+Playwright MCP session: drive the OnTrack entry form and check the project log
+Issue #17 (HW5 Part 2). Claude Code (claude-opus-5-5), 2026-11-25 (US Eastern) / 2026-11-26 UTC.
+
+Exported from the Claude Code session transcript. Kept: every mcp__playwright__*
+tool call with its input and result, and Claude's narration between them. Left
+out: the non-MCP tool calls made while waiting for the env file (git, npm,
+docs edits). Parallel calls show their results after the inputs. The seeded
+local password is replaced with a placeholder, and the local
+repo path is replaced with <repo>.
+
+The first navigate (04:29Z) hit a 500 because the worktree had no local env
+file yet; the run resumes at 04:32Z once the user added it.
+==============================================================================
+
+[2026-11-26 04:29:17Z] ● mcp__playwright__browser_navigate
+  input: {
+    "url": "http://localhost:3017/"
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.goto('http://localhost:3017/');
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/
+    - HTTP status: 500 Internal Server Error
+    - Console: 2 errors, 0 warnings
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-29-24-419Z.yml)
+    ### Events
+    - New console entries: .playwright-mcp/console-2026-11-26T04-29-22-560Z.log#L1-L31
+
+[2026-11-26 04:29:27Z] Claude: The page returned a 500 error. Checking the console log and the dev server output.
+
+[2026-11-26 04:29:37Z] Claude: No env file is present in the worktree (the directory listing shows none, and Next printed no "Environments:" line), so the Supabase client has no URL or key. Asking the coordinator.
+
+[2026-11-26 04:29:49Z] Claude: The Playwright MCP server is connected, but the task is blocked: the app can't start properly because the env file isn't in this worktree.
+
+- **What works:** the Playwright tools loaded after the restart, and opening `http://localhost:3017` through the MCP server reached the dev server.
+- **What fails:** the page returns a 500 error because the Supabase client has no URL or key (`src/utils/supabase/proxy.ts`). `ls -a` at the worktree root shows no env file, so the copy either didn't happen or went to another folder.
+- **What you need to do:** copy the local env file from your main checkout into `<repo>`, next to `package.json`. The dev server on port 3017 is still running and should pick the file up without a restart.
+- **Something else to decide:** the MCP server saves page snapshots and console logs into a `.playwright-mcp/` folder at the repo root. I've proposed adding that folder to `.gitignore` in a small `chore:` commit. The alternative is giving the server an output folder in `.mcp.json`. I'm waiting on the coordinator's answer to both before going on.
+
+[2026-11-26 04:31:35Z] Claude: While waiting for the env file, I'll write the setup guide, which doesn't depend on the task run.
+
+[2026-11-26 04:32:05Z] Claude: Commands in the guide check out. Committing the setup guide.
+
+[2026-11-26 04:32:35Z] Claude: I made the `.gitignore` commit and wrote the setup guide while waiting. The MCP task itself is still blocked: the env file isn't in the worktree yet, so the app on port 3017 still returns a 500.
+
+**Commits on `chore/17-playwright-mcp` so far:**
+- `aacf3f8` test: the `.mcp.json` check. It failed first for the expected reason, since the file didn't exist yet.
+- `832918d` chore: `.mcp.json`, created at project scope and pinned to `@playwright/mcp@0.0.86` with `--isolated`.
+- `0c9a356` chore: `.gitignore` now ignores the `.playwright-mcp/` folder the MCP server writes to.
+- `d06ccc4` docs: `docs/hw5/playwright-mcp-setup.md`. It covers what the server lets Claude do, how `.mcp.json` was made, and how to load, approve, use and remove it. I checked the `claude mcp` subcommands it mentions against `claude mcp --help`.
+
+Tests (397), lint, format check and typecheck all passed before each green commit.
+
+**What you need to do:** copy the local env file from your main checkout into `<repo>`, next to `package.json`. The coordinator is passing this on and will wake me when it's there.
+
+**What's left after that:**
+- Run the entry-form task through the Playwright tools.
+- Save the session log and screenshots to `docs/hw5/`.
+- Add the `docs/hw5/README.md` index and a short section in the main README.
+- Run `/code-review medium` and send the findings to the coordinator.
+
+[2026-11-26 04:32:44Z] Claude: Env loaded. Running the task through the MCP browser.
+
+[2026-11-26 04:32:45Z] ● mcp__playwright__browser_navigate
+  input: {
+    "url": "http://localhost:3017/"
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.goto('http://localhost:3017/');
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/sign-in
+    - Page Title: OnTrack
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-32-46-927Z.yml)
+    ### Events
+    - New console entries: .playwright-mcp/console-2026-11-26T04-32-45-789Z.log#L1-L2
+
+[2026-11-26 04:32:48Z] ● mcp__playwright__browser_snapshot
+  input: {}
+  ⎿ ### Page
+    - Page URL: http://localhost:3017/sign-in
+    - Page Title: OnTrack
+    ### Snapshot
+    ```yaml
+    - generic [active] [ref=f2e1]:
+      - main [ref=f2e2]:
+        - generic [ref=f2e3]:
+          - heading "OnTrack" [level=1] [ref=f2e4]
+          - paragraph [ref=f2e5]: A shared contribution log for teams.
+        - generic [ref=f2e6]:
+          - heading "Sign in" [level=2] [ref=f2e7]
+          - generic [ref=f2e8]:
+            - generic [ref=f2e9]:
+              - generic [ref=f2e10]: Email
+              - textbox "Email" [ref=f2e11]
+            - generic [ref=f2e12]:
+              - generic [ref=f2e13]: Password
+              - textbox "Password" [ref=f2e14]
+            - button "Sign in" [ref=f2e15]
+            - paragraph [ref=f2e16]:
+              - text: New here?
+              - link "Create an account" [ref=f2e17] [cursor=pointer]:
+                - /url: /sign-up
+      - button "Open Next.js Dev Tools" [ref=f2e23] [cursor=pointer]
+      - alert [ref=f2e27]
+    ```
+
+[2026-11-26 04:32:52Z] ● mcp__playwright__browser_fill_form
+  input: {
+    "fields": [
+      {
+        "target": "f2e11",
+        "name": "Email",
+        "type": "textbox",
+        "value": "demo.contributor@ontrack.local"
+      },
+      {
+        "target": "f2e14",
+        "name": "Password",
+        "type": "textbox",
+        "value": "<seed password from supabase/seed.sql>"
+      }
+    ]
+  }
+
+[2026-11-26 04:32:52Z] ● mcp__playwright__browser_click
+  input: {
+    "target": "f2e15",
+    "element": "Sign in button"
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByRole('textbox', { name: 'Email' }).fill('demo.contributor@ontrack.local');
+    await page.getByRole('textbox', { name: 'Password' }).fill('<seed password from supabase/seed.sql>');
+    ```
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/
+    - Page Title: OnTrack
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-33-00-983Z.yml)
+    ### Events
+    - New console entries: .playwright-mcp/console-2026-11-26T04-32-45-789Z.log#L3-L4
+
+[2026-11-26 04:33:02Z] ● mcp__playwright__browser_snapshot
+  input: {}
+  ⎿ ### Page
+    - Page URL: http://localhost:3017/
+    - Page Title: OnTrack
+    ### Snapshot
+    ```yaml
+    - generic [active] [ref=f2e1]:
+      - main [ref=f2e28]:
+        - generic [ref=f2e29]:
+          - heading "OnTrack" [level=1] [ref=f2e30]
+          - paragraph [ref=f2e31]: A shared contribution log for teams.
+        - generic [ref=f2e32]:
+          - generic [ref=f2e33]:
+            - paragraph [ref=f2e34]: Signed in as demo.contributor@ontrack.local
+            - button "Sign out" [ref=f2e36]
+          - region "Your projects" [ref=f2e37]:
+            - heading "Your projects" [level=2] [ref=f2e38]
+            - list "Your projects" [ref=f2e39]:
+              - listitem [ref=f2e40]:
+                - link "Demo Project" [ref=f2e41] [cursor=pointer]:
+                  - /url: /projects/22222222-2222-4222-8222-222222222222
+                - generic [ref=f2e42]: Contributor
+          - region "Create a project" [ref=f2e43]:
+            - heading "Create a project" [level=2] [ref=f2e44]
+            - paragraph [ref=f2e45]: You become its overseer and get an invite code to share.
+            - generic [ref=f2e46]:
+              - generic [ref=f2e47]:
+                - generic [ref=f2e48]: Project name
+                - textbox "Project name" [ref=f2e49]
+              - button "Create project" [ref=f2e50]
+          - region "Join a project" [ref=f2e51]:
+            - heading "Join a project" [level=2] [ref=f2e52]
+            - paragraph [ref=f2e53]: Enter the invite code from the project's overseer to join as a contributor.
+            - generic [ref=f2e54]:
+              - generic [ref=f2e55]:
+                - generic [ref=f2e56]: Invite code
+                - textbox "Invite code" [ref=f2e57]
+              - button "Join project" [ref=f2e58]
+      - button "Open Next.js Dev Tools" [ref=f2e23] [cursor=pointer]
+      - alert [ref=f2e27]
+    ```
+
+[2026-11-26 04:33:05Z] ● mcp__playwright__browser_click
+  input: {
+    "target": "f2e41",
+    "element": "Demo Project link"
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByRole('link', { name: 'Demo Project' }).click();
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-33-09-259Z.yml)
+    ### Events
+    - New console entries: .playwright-mcp/console-2026-11-26T04-32-45-789Z.log#L5-L6
+
+[2026-11-26 04:33:10Z] ● mcp__playwright__browser_snapshot
+  input: {}
+  ⎿ ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    ```yaml
+    - generic [active] [ref=f2e1]:
+      - main [ref=f2e59]:
+        - generic [ref=f2e60]:
+          - heading "OnTrack" [level=1] [ref=f2e61]
+          - paragraph [ref=f2e62]: A shared contribution log for teams.
+        - generic [ref=f2e63]:
+          - generic [ref=f2e64]:
+            - paragraph [ref=f2e65]: Signed in as demo.contributor@ontrack.local
+            - button "Sign out" [ref=f2e67]
+          - paragraph [ref=f2e68]:
+            - link "Your projects" [ref=f2e69] [cursor=pointer]:
+              - /url: /
+          - generic [ref=f2e70]:
+            - heading "Demo Project" [level=2] [ref=f2e71]
+            - region "Add an entry" [ref=f2e72]:
+              - heading "Add an entry" [level=3] [ref=f2e73]
+              - generic [ref=f2e74]:
+                - generic [ref=f2e75]:
+                  - generic [ref=f2e76]:
+                    - text: Date
+                    - textbox "Date" [ref=f2e77]
+                  - generic [ref=f2e78]:
+                    - text: Hours
+                    - spinbutton "Hours" [ref=f2e79]
+                  - generic [ref=f2e80]:
+                    - text: Type
+                    - combobox "Type" [ref=f2e81]:
+                      - option "Choose a type" [selected]
+                      - option "Work"
+                      - option "Admin"
+                      - option "Meeting"
+                      - option "Check-in"
+                      - option "Standup"
+                      - option "Async update"
+                      - option "Planning"
+                      - option "Sprint planning"
+                      - option "Review"
+                      - option "Retrospective"
+                      - option "Other"
+                - generic [ref=f2e82]:
+                  - text: Details
+                  - textbox "Details" [ref=f2e83]
+                - generic [ref=f2e84]:
+                  - text: Link (optional)
+                  - textbox "Link (optional)" [ref=f2e85]:
+                    - /placeholder: https://
+                - generic [ref=f2e86]:
+                  - button "Add entry" [ref=f2e87]
+                  - paragraph
+            - region "Project log" [ref=f2e88]:
+              - heading "Project log" [level=3] [ref=f2e89]
+              - list [ref=f2e90]:
+                - listitem [ref=f2e91]:
+                  - generic [ref=f2e92]:
+                    - time [ref=f2e93]: Nov 14, 2026
+                    - generic [ref=f2e94]: Admin
+                    - generic [ref=f2e95]: 0.5 h
+                    - generic [ref=f2e96]: You
+                  - paragraph [ref=f2e97]: Set up the project board.
+                - listitem [ref=f2e98]:
+                  - generic [ref=f2e99]:
+                    - time [ref=f2e100]: Nov 12, 2026
+                    - generic [ref=f2e101]: Work
+                    - generic [ref=f2e102]: 2.5 h
+                    - generic [ref=f2e103]: You
+                  - paragraph [ref=f2e104]: Wrote the initial schema migration.
+                  - link "https://github.com/blouyakis/on-track/pull/6" [ref=f2e105] [cursor=pointer]:
+                    - /url: https://github.com/blouyakis/on-track/pull/6
+                - listitem [ref=f2e106]:
+                  - generic [ref=f2e107]:
+                    - time [ref=f2e108]: Nov 10, 2026
+                    - generic [ref=f2e109]: Meeting
+                    - generic [ref=f2e110]: 1 h
+                    - generic [ref=f2e111]: You
+                  - paragraph [ref=f2e112]: Kickoff meeting to agree on scope.
+                  - generic [ref=f2e113]:
+                    - term [ref=f2e114]: Attendees
+                    - definition [ref=f2e115]: Demo Contributor, teammate
+                    - term [ref=f2e116]: Decisions made
+                    - definition [ref=f2e117]: Use Supabase for the database and auth.
+                    - term [ref=f2e118]: Action items
+                    - definition [ref=f2e119]: Draft the schema before Friday.
+      - button "Open Next.js Dev Tools" [ref=f2e23] [cursor=pointer]
+      - alert [ref=f2e27]
+    ```
+
+[2026-11-26 04:33:15Z] Claude: Signed in and on Demo Project. Next I'll choose Meeting so the meeting fields appear.
+
+[2026-11-26 04:33:16Z] ● mcp__playwright__browser_select_option
+  input: {
+    "target": "f2e81",
+    "element": "Type select",
+    "values": [
+      "Meeting"
+    ]
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByLabel('TypeChoose a').selectOption('Meeting');
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-33-16-961Z.yml)
+
+[2026-11-26 04:33:18Z] ● mcp__playwright__browser_snapshot
+  input: {
+    "target": "f2e74"
+  }
+  ⎿ ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    ```yaml
+    - generic [ref=f2e74]:
+      - generic [ref=f2e75]:
+        - generic [ref=f2e76]:
+          - text: Date
+          - textbox "Date" [ref=f2e77]
+        - generic [ref=f2e78]:
+          - text: Hours
+          - spinbutton "Hours" [ref=f2e79]
+        - generic [ref=f2e80]:
+          - text: Type
+          - combobox "Type" [ref=f2e81]:
+            - option "Choose a type"
+            - option "Work"
+            - option "Admin"
+            - option "Meeting" [selected]
+            - option "Check-in"
+            - option "Standup"
+            - option "Async update"
+            - option "Planning"
+            - option "Sprint planning"
+            - option "Review"
+            - option "Retrospective"
+            - option "Other"
+      - generic [ref=f2e82]:
+        - text: Details
+        - textbox "Details" [ref=f2e83]
+      - generic [ref=f2e84]:
+        - text: Link (optional)
+        - textbox "Link (optional)" [ref=f2e85]:
+          - /placeholder: https://
+      - generic [ref=f2e120]:
+        - text: Attendees
+        - textbox "Attendees" [ref=f2e121]
+      - generic [ref=f2e122]:
+        - text: Decisions made
+        - textbox "Decisions made" [ref=f2e123]
+      - generic [ref=f2e124]:
+        - text: Action items
+        - textbox "Action items" [ref=f2e125]
+      - generic [ref=f2e86]:
+        - button "Add entry" [ref=f2e87]
+        - paragraph
+    ```
+
+[2026-11-26 04:33:21Z] Claude: Meeting fields appeared. First I'll check the rejection case: a future date.
+
+[2026-11-26 04:33:24Z] ● mcp__playwright__browser_fill_form
+  input: {
+    "fields": [
+      {
+        "target": "f2e77",
+        "name": "Date",
+        "type": "textbox",
+        "value": "2026-12-31"
+      },
+      {
+        "target": "f2e79",
+        "name": "Hours",
+        "type": "textbox",
+        "value": "1.5"
+      },
+      {
+        "target": "f2e83",
+        "name": "Details",
+        "type": "textbox",
+        "value": "HW5 MCP demo: sprint check-in on the Playwright MCP setup."
+      },
+      {
+        "target": "f2e121",
+        "name": "Attendees",
+        "type": "textbox",
+        "value": "Ziye Huang, Barbara Louyakis"
+      },
+      {
+        "target": "f2e123",
+        "name": "Decisions made",
+        "type": "textbox",
+        "value": "Share the Playwright MCP server through .mcp.json."
+      },
+      {
+        "target": "f2e125",
+        "name": "Action items",
+        "type": "textbox",
+        "value": "Ziye writes the setup guide; Barbara reviews the PR."
+      }
+    ]
+  }
+
+[2026-11-26 04:33:24Z] ● mcp__playwright__browser_click
+  input: {
+    "target": "f2e87",
+    "element": "Add entry button"
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByRole('textbox', { name: 'Date' }).fill('2026-12-31');
+    await page.getByRole('spinbutton', { name: 'Hours' }).fill('1.5');
+    await page.getByRole('textbox', { name: 'Details' }).fill('HW5 MCP demo: sprint check-in on the Playwright MCP setup.');
+    await page.getByRole('textbox', { name: 'Attendees' }).fill('Ziye Huang, Barbara Louyakis');
+    await page.getByRole('textbox', { name: 'Decisions made' }).fill('Share the Playwright MCP server through .mcp.json.');
+    await page.getByRole('textbox', { name: 'Action items' }).fill('Ziye writes the setup guide; Barbara reviews the PR.');
+    ```
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByRole('button', { name: 'Add entry' }).click();
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-33-28-292Z.yml)
+
+[2026-11-26 04:33:30Z] ● mcp__playwright__browser_snapshot
+  input: {
+    "target": "f2e72"
+  }
+  ⎿ ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    ```yaml
+    - region "Add an entry" [ref=f2e72]:
+      - heading "Add an entry" [level=3] [ref=f2e73]
+      - generic [ref=f2e74]:
+        - generic [ref=f2e75]:
+          - generic [ref=f2e76]:
+            - text: Date
+            - textbox "Date" [ref=f2e77]
+          - generic [ref=f2e78]:
+            - text: Hours
+            - spinbutton "Hours" [ref=f2e79]
+          - generic [ref=f2e80]:
+            - text: Type
+            - combobox "Type" [ref=f2e81]:
+              - option "Choose a type" [selected]
+              - option "Work"
+              - option "Admin"
+              - option "Meeting"
+              - option "Check-in"
+              - option "Standup"
+              - option "Async update"
+              - option "Planning"
+              - option "Sprint planning"
+              - option "Review"
+              - option "Retrospective"
+              - option "Other"
+        - generic [ref=f2e82]:
+          - text: Details
+          - textbox "Details" [ref=f2e83]
+        - generic [ref=f2e84]:
+          - text: Link (optional)
+          - textbox "Link (optional)" [ref=f2e85]:
+            - /placeholder: https://
+        - generic [ref=f2e86]:
+          - button "Add entry" [ref=f2e87]
+          - paragraph [ref=f2e126]: Entry added.
+    ```
+
+[2026-11-26 04:33:34Z] Claude: The app accepted a future-dated entry ("Entry added."). That may be a real gap in the app, so I'm checking the log and the validation code.
+
+[2026-11-26 04:33:34Z] ● mcp__playwright__browser_take_screenshot
+  input: {
+    "scale": "css",
+    "fullPage": true,
+    "filename": "docs/hw5/screenshots/03-future-date-accepted.png"
+  }
+  ⎿ ### Result
+    - [Screenshot of full page](docs/hw5/screenshots/03-future-date-accepted.png)
+    ### Ran Playwright code
+    ```js
+    // Screenshot full page and save it as docs/hw5/screenshots/03-future-date-accepted.png
+    await page.screenshot({
+      fullPage: true,
+      path: 'docs/hw5/screenshots/03-future-date-accepted.png',
+      scale: 'css',
+      type: 'png'
+    });
+    ```
+
+[2026-11-26 04:33:44Z] Claude: The future-date check isn't implemented yet: it's open issue #32 (`src/lib/entry-required-fields.ts` says so), so it's out of scope here, but I'll report it. Now the valid entry for today:
+
+[2026-11-26 04:33:45Z] ● mcp__playwright__browser_select_option
+  input: {
+    "target": "f2e81",
+    "element": "Type select",
+    "values": [
+      "Meeting"
+    ]
+  }
+
+[2026-11-26 04:33:47Z] ● mcp__playwright__browser_fill_form
+  input: {
+    "fields": [
+      {
+        "target": "f2e77",
+        "name": "Date",
+        "type": "textbox",
+        "value": "2026-11-25"
+      },
+      {
+        "target": "f2e79",
+        "name": "Hours",
+        "type": "textbox",
+        "value": "1.5"
+      },
+      {
+        "target": "f2e83",
+        "name": "Details",
+        "type": "textbox",
+        "value": "HW5 MCP demo: check-in on the Playwright MCP setup."
+      },
+      {
+        "target": "f2e85",
+        "name": "Link (optional)",
+        "type": "textbox",
+        "value": "https://github.com/blouyakis/on-track/issues/17"
+      },
+      {
+        "target": "Attendees",
+        "name": "Attendees",
+        "type": "textbox",
+        "value": "Ziye Huang, Barbara Louyakis"
+      },
+      {
+        "target": "Decisions made",
+        "name": "Decisions made",
+        "type": "textbox",
+        "value": "Share the Playwright MCP server through .mcp.json."
+      },
+      {
+        "target": "Action items",
+        "name": "Action items",
+        "type": "textbox",
+        "value": "Ziye writes the setup guide; Barbara reviews the PR."
+      }
+    ]
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByLabel('TypeChoose a').selectOption('Meeting');
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-33-47-670Z.yml)
+    ### Events
+    - New console entries: .playwright-mcp/console-2026-11-26T04-32-45-789Z.log#L7-L8
+  ⎿ ### Error
+    Error: "Attendees" does not match any elements.
+
+[2026-11-26 04:33:49Z] ● mcp__playwright__browser_snapshot
+  input: {
+    "target": "f2e74"
+  }
+  ⎿ ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    ```yaml
+    - generic [ref=f2e74]:
+      - generic [ref=f2e75]:
+        - generic [ref=f2e76]:
+          - text: Date
+          - textbox "Date" [ref=f2e77]: 2026-11-25
+        - generic [ref=f2e78]:
+          - text: Hours
+          - spinbutton "Hours" [ref=f2e79]: "1.5"
+        - generic [ref=f2e80]:
+          - text: Type
+          - combobox "Type" [ref=f2e81]:
+            - option "Choose a type"
+            - option "Work"
+            - option "Admin"
+            - option "Meeting" [selected]
+            - option "Check-in"
+            - option "Standup"
+            - option "Async update"
+            - option "Planning"
+            - option "Sprint planning"
+            - option "Review"
+            - option "Retrospective"
+            - option "Other"
+      - generic [ref=f2e82]:
+        - text: Details
+        - textbox "Details" [ref=f2e83]: "HW5 MCP demo: check-in on the Playwright MCP setup."
+      - generic [ref=f2e84]:
+        - text: Link (optional)
+        - textbox "Link (optional)" [active] [ref=f2e85]:
+          - /placeholder: https://
+          - text: https://github.com/blouyakis/on-track/issues/17
+      - generic [ref=f2e141]:
+        - text: Attendees
+        - textbox "Attendees" [ref=f2e142]
+      - generic [ref=f2e143]:
+        - text: Decisions made
+        - textbox "Decisions made" [ref=f2e144]
+      - generic [ref=f2e145]:
+        - text: Action items
+        - textbox "Action items" [ref=f2e146]
+      - generic [ref=f2e86]:
+        - button "Add entry" [ref=f2e87]
+        - paragraph [ref=f2e126]: Entry added.
+    ```
+
+[2026-11-26 04:33:52Z] ● mcp__playwright__browser_fill_form
+  input: {
+    "fields": [
+      {
+        "target": "f2e142",
+        "name": "Attendees",
+        "type": "textbox",
+        "value": "Ziye Huang, Barbara Louyakis"
+      },
+      {
+        "target": "f2e144",
+        "name": "Decisions made",
+        "type": "textbox",
+        "value": "Share the Playwright MCP server through .mcp.json."
+      },
+      {
+        "target": "f2e146",
+        "name": "Action items",
+        "type": "textbox",
+        "value": "Ziye writes the setup guide; Barbara reviews the PR."
+      }
+    ]
+  }
+
+[2026-11-26 04:33:53Z] ● mcp__playwright__browser_take_screenshot
+  input: {
+    "scale": "css",
+    "target": "f2e72",
+    "element": "Add an entry form, filled in",
+    "filename": "docs/hw5/screenshots/01-meeting-entry-filled.png"
+  }
+
+[2026-11-26 04:33:54Z] ● mcp__playwright__browser_click
+  input: {
+    "target": "f2e87",
+    "element": "Add entry button"
+  }
+
+[2026-11-26 04:33:54Z] ● mcp__playwright__browser_snapshot
+  input: {
+    "target": "f2e88"
+  }
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByRole('textbox', { name: 'Attendees' }).fill('Ziye Huang, Barbara Louyakis');
+    await page.getByRole('textbox', { name: 'Decisions made' }).fill('Share the Playwright MCP server through .mcp.json.');
+    await page.getByRole('textbox', { name: 'Action items' }).fill('Ziye writes the setup guide; Barbara reviews the PR.');
+    ```
+  ⎿ ### Error
+    Error: Ref f2e72 not found in the current page snapshot. Try capturing new snapshot.
+  ⎿ ### Ran Playwright code
+    ```js
+    await page.getByRole('button', { name: 'Add entry' }).click();
+    ```
+    ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    - [Snapshot](.playwright-mcp/page-2026-11-26T04-33-58-506Z.yml)
+  ⎿ ### Page
+    - Page URL: http://localhost:3017/projects/22222222-2222-4222-8222-222222222222
+    - Page Title: OnTrack
+    ### Snapshot
+    ```yaml
+    - region "Project log" [ref=f2e88]:
+      - heading "Project log" [level=3] [ref=f2e89]
+      - list [ref=f2e90]:
+        - listitem [ref=f2e127]:
+          - generic [ref=f2e128]:
+            - time [ref=f2e129]: Dec 31, 2026
+            - generic [ref=f2e130]: Meeting
+            - generic [ref=f2e131]: 1.5 h
+            - generic [ref=f2e132]: You
+          - paragraph [ref=f2e133]: "HW5 MCP demo: sprint check-in on the Playwright MCP setup."
+          - generic [ref=f2e134]:
+            - term [ref=f2e135]: Attendees
+            - definition [ref=f2e136]: Ziye Huang, Barbara Louyakis
+            - term [ref=f2e137]: Decisions made
+            - definition [ref=f2e138]: Share the Playwright MCP server through .mcp.json.
+            - term [ref=f2e139]: Action items
+            - definition [ref=f2e140]: Ziye writes the setup guide; Barbara reviews the PR.
+        - listitem [ref=f2e147]:
+          - generic [ref=f2e148]:
+            - time [ref=f2e149]: Nov 25, 2026
+            - generic [ref=f2e150]: Meeting
+            - generic [ref=f2e151]: 1.5 h
+            - generic [ref=f2e152]: You
+          - paragraph [ref=f2e153]: "HW5 MCP demo: check-in on the Playwright MCP setup."
+          - link "https://github.com/blouyakis/on-track/issues/17" [ref=f2e154] [cursor=pointer]:
+            - /url: https://github.com/blouyakis/on-track/issues/17
+          - generic [ref=f2e155]:
+            - term [ref=f2e156]: Attendees
+            - definition [ref=f2e157]: Ziye Huang, Barbara Louyakis
+            - term [ref=f2e158]: Decisions made
+            - definition [ref=f2e159]: Share the Playwright MCP server through .mcp.json.
+            - term [ref=f2e160]: Action items
+            - definition [ref=f2e161]: Ziye writes the setup guide; Barbara reviews the PR.
+        - listitem [ref=f2e91]:
+          - generic [ref=f2e92]:
+            - time [ref=f2e93]: Nov 14, 2026
+            - generic [ref=f2e94]: Admin
+            - generic [ref=f2e95]: 0.5 h
+            - generic [ref=f2e96]: You
+          - paragraph [ref=f2e97]: Set up the project board.
+        - listitem [ref=f2e98]:
+          - generic [ref=f2e99]:
+            - time [ref=f2e100]: Nov 12, 2026
+            - generic [ref=f2e101]: Work
+            - generic [ref=f2e102]: 2.5 h
+            - generic [ref=f2e103]: You
+          - paragraph [ref=f2e104]: Wrote the initial schema migration.
+          - link "https://github.com/blouyakis/on-track/pull/6" [ref=f2e105] [cursor=pointer]:
+            - /url: https://github.com/blouyakis/on-track/pull/6
+        - listitem [ref=f2e106]:
+          - generic [ref=f2e107]:
+            - time [ref=f2e108]: Nov 10, 2026
+            - generic [ref=f2e109]: Meeting
+            - generic [ref=f2e110]: 1 h
+            - generic [ref=f2e111]: You
+          - paragraph [ref=f2e112]: Kickoff meeting to agree on scope.
+          - generic [ref=f2e113]:
+            - term [ref=f2e114]: Attendees
+            - definition [ref=f2e115]: Demo Contributor, teammate
+            - term [ref=f2e116]: Decisions made
+            - definition [ref=f2e117]: Use Supabase for the database and auth.
+            - term [ref=f2e118]: Action items
+            - definition [ref=f2e119]: Draft the schema before Friday.
+    ```
+
+[2026-11-26 04:34:02Z] Claude: The Nov 25 Meeting entry saved and appears in the log in date order, newest first. The Dec 31 entry is still above it because nothing rejected it. Taking the log screenshot:
+
+[2026-11-26 04:34:03Z] ● mcp__playwright__browser_take_screenshot
+  input: {
+    "scale": "css",
+    "fullPage": true,
+    "filename": "docs/hw5/screenshots/02-project-log-with-new-entry.png"
+  }
+
+[2026-11-26 04:34:03Z] ● mcp__playwright__browser_console_messages
+  input: {
+    "level": "error",
+    "all": true
+  }
+  ⎿ ### Result
+    Total messages: 19 (Errors: 2, Warnings: 0)
+    Returning 2 messages for level "error"
+    
+    [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3017/:1
+    Error: Your project's URL and Key are required to create a Supabase client!
+    
+    Check your Supabase project's API settings to find these values
+    
+    https://supabase.com/dashboard/project/_/settings/api
+        at <unknown> (https://supabase.com/dashboard/project/_/settings/api)
+        at createServerClient (file://<repo>/.next/dev/server/chunks/node_modules_1s70acsu-8g7k._.js:10708:15)
+        at updateSession (file://<repo>/.next/dev/server/chunks/[root-of-the-server]__0g6rd4t2ad37u._.js:172:218)
+        at proxy (file://<repo>/.next/dev/server/chunks/[root-of-the-server]__0g6rd4t2ad37u._.js:143:163)
+        at <unknown> (file://<repo>/.next/dev/server/chunks/node_modules_next_0cegv_nmb77eg._.js:5477:26)
+        at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:66:14)
+        at <unknown> (file://<repo>/.next/dev/server/chunks/node_modules_next_0cegv_nmb77eg._.js:12965:637)
+        at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:66:14)
+        at <unknown> (file://<repo>/.next/dev/server/chunks/node_modules_next_0cegv_nmb77eg._.js:12965:318)
+        at async adapter (file://<repo>/.next/dev/server/chunks/node_modules_next_0cegv_nmb77eg._.js:12888:16)
+        at async internalHandler (file://<repo>/.next/dev/server/chunks/node_modules_next_0cegv_nmb77eg._.js:5522:16)
+        at async DevServer.runMiddleware (file://<repo>/node_modules/next/dist/server/next-server.js:1223:26)
+        at async DevServer.runMiddleware (file://<repo>/node_modules/next/dist/server/dev/next-dev-server.js:271:28)
+        at async NextNodeServer.handleCatchallMiddlewareRequest (file://<repo>/node_modules/next/dist/server/next-server.js:394:26)
+        at async DevServer.handleRequestImpl (file://<repo>/node_modules/next/dist/server/base-server.js:1017:28)
+        at async (file://<repo>/node_modules/next/dist/server/dev/next-dev-server.js:387:20)
+        at async Span.traceAsyncFn (file://<repo>/node_modules/next/dist/trace/trace.js:168:20)
+        at async DevServer.handleRequest (file://<repo>/node_modules/next/dist/server/dev/next-dev-server.js:383:24)
+        at async handleRoute (file://<repo>/node_modules/next/dist/server/lib/router-utils/resolve-routes.js:371:33)
+        at async resolveRoutes (file://<repo>/node_modules/next/dist/server/lib/router-utils/resolve-routes.js:631:28)
+        at async handleRequest (file://<repo>/node_modules/next/dist/server/lib/router-server.js:407:96)
+        at async requestHandlerImpl (file://<repo>/node_modules/next/dist/server/lib/router-server.js:636:13)
+        at async Server.requestListener (file://<repo>/node_modules/next/dist/server/lib/start-server.js:210:13)
+  ⎿ ### Result
+    - [Screenshot of full page](docs/hw5/screenshots/02-project-log-with-new-entry.png)
+    ### Ran Playwright code
+    ```js
+    // Screenshot full page and save it as docs/hw5/screenshots/02-project-log-with-new-entry.png
+    await page.screenshot({
+      fullPage: true,
+      path: 'docs/hw5/screenshots/02-project-log-with-new-entry.png',
+      scale: 'css',
+      type: 'png'
+    });
+    ```
+
+[2026-11-26 04:34:08Z] Claude: Only the earlier env-file errors show; nothing new. Closing the browser and checking the screenshots.
+
+[2026-11-26 04:34:08Z] ● mcp__playwright__browser_close
+  input: {}
+  ⎿ ### Result
+    No open tabs. Navigate to a URL to create one.
+    ### Ran Playwright code
+    ```js
+    await browser.close();
+    ```

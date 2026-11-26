@@ -70,7 +70,11 @@ claude mcp add --scope project playwright -- npx -y @playwright/mcp@0.0.86 --iso
 
 **No secrets.** The file has no environment variables, headers or keys, and
 [`src/__tests__/mcp-config.test.ts`](../../src/__tests__/mcp-config.test.ts)
-fails `npm test` (and CI) if one is added or the version is unpinned.
+fails `npm test` (and CI) if an env value or header is added, if a value
+matches a common secret format (for example `sk-`, `ghp_`, `sbp_`,
+`sb_secret_`, AWS `AKIA…`, a JWT, `Bearer …`, or words like `token`,
+`password` or `service_role`), or if the version is unpinned. It cannot catch
+every possible secret, so still review changes to `.mcp.json`.
 
 The server writes page snapshots, console logs and screenshots to
 `.playwright-mcp/` in the repo root. That folder is in `.gitignore`; copy
@@ -82,8 +86,10 @@ anything you want to keep into `docs/` instead.
 
 - Node 26 and npm (see `.nvmrc`). `npx` comes with npm.
 - Google Chrome. The server uses the installed Chrome by default. Without it,
-  run `npx playwright install chrome` once, or add `--browser chromium` to
-  the args in your own copy.
+  run `npx playwright install chrome` once. Or use Chromium through a
+  local-scope server, which overrides the project one for you only and
+  leaves the shared `.mcp.json` untouched:
+  `claude mcp add --scope local playwright -- npx -y @playwright/mcp@0.0.86 --isolated --browser chromium`.
 - Claude Code.
 - For driving OnTrack itself: the app running locally, as in the
   [README](../../README.md#getting-started): Docker Desktop,

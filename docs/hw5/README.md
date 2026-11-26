@@ -11,8 +11,8 @@ to Claude Code at project scope, then used it to drive the running app.
   `claude mcp add --scope project playwright -- npx -y @playwright/mcp@0.0.86 --isolated`.
   It holds no secrets: no env values, headers or keys.
 - [`/src/__tests__/mcp-config.test.ts`](../../src/__tests__/mcp-config.test.ts):
-  fails `npm test` if the version is unpinned, `--isolated` is dropped, or a
-  secret-looking value is added. Written first and seen failing (ENOENT), then
+  fails `npm test` if the version is unpinned, `--isolated` is dropped, or a value
+  in a common secret format is added. Written first and seen failing (ENOENT), then
   made to pass by adding `.mcp.json`.
 - [`playwright-mcp-setup.md`](playwright-mcp-setup.md): setup someone else can
   follow, and what the server enables.
@@ -65,7 +65,7 @@ database until the next `npx supabase db reset`.
 - [`screenshots/03-future-date-accepted.png`](screenshots/03-future-date-accepted.png):
   the page right after the future-dated entry was accepted.
 
-There is no `01-…` screenshot. The call to capture the filled-in form used a
-stale element reference and failed ("Ref f2e72 not found"; see the log), and
-the form had already been submitted by then. The file names are kept as the
-session recorded them.
+There is no `01-…` screenshot. The call to capture the filled-in form, made
+just before the submit click, used an element reference that was stale after
+the form re-rendered, so it failed ("Ref f2e72 not found"; see the log). The
+file names are kept as the session recorded them.

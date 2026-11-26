@@ -22,9 +22,9 @@ test("a contributor signs in, adds an entry and sees it in the project log", asy
   await page.getByRole("button", { name: "Sign in" }).click();
 
   await expect(page).toHaveURL("/");
-  await page.getByRole("link", { name: PROJECT_NAME }).click();
+  await page.getByRole("link", { name: PROJECT_NAME, exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: PROJECT_NAME, level: 2 }),
+    page.getByRole("heading", { name: PROJECT_NAME, level: 2, exact: true }),
   ).toBeVisible();
 
   const form = page.getByRole("region", { name: "Add an entry" });

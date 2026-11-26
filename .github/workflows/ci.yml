@@ -118,7 +118,7 @@ jobs:
       # Playwright builds the app and starts it (playwright.config.ts).
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v7
-        if: ${{ failure() }}
+        if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: playwright-report/
